@@ -1,0 +1,128 @@
+{
+  "norma": "ISO/IEC 27701:2025",
+  "evidencias": [
+    {
+      "id": "EV-0001",
+      "controles": [
+        "5.2"
+      ],
+      "tipo": "politica",
+      "titulo": "Politica de privacidad v2.0",
+      "archivo": "archivos/EV-0001_politica_privacidad_v2.md",
+      "sha256": "e65ea362a68816a6e522b86a7596638fdd4e2ac03d40232ebb102ecfaa5a5e6c",
+      "tamano_bytes": 927,
+      "fecha_documento": "2026-02-10",
+      "fecha_registro": "2026-10-01T21:06:33-05:00",
+      "responsable": "Agente de Evidencia (demo)",
+      "fuente": "Gestor documental"
+    },
+    {
+      "id": "EV-0002",
+      "controles": [
+        "A.3.17",
+        "7.2"
+      ],
+      "tipo": "registro",
+      "titulo": "Registro de formacion en privacidad 2026",
+      "archivo": "archivos/EV-0002_registro_formacion_2026.csv",
+      "sha256": "600a0079cab891d306b5dbae99cda18356d5f7e7f4974bff72b0e80b579f5fc3",
+      "tamano_bytes": 611,
+      "fecha_documento": "2026-06-30",
+      "fecha_registro": "2026-10-01T21:06:33-05:00",
+      "responsable": "Agente de Evidencia (demo)",
+      "fuente": "LMS Moodle"
+    },
+    {
+      "id": "EV-0003",
+      "controles": [
+        "A.1.2.2",
+        "A.1.2.9"
+      ],
+      "tipo": "registro",
+      "titulo": "Registro de actividades de tratamiento 2026",
+      "archivo": "archivos/EV-0003_ropa_2026.csv",
+      "sha256": "1cdbfac56af0246971674cb234bb286092b3f22f0aedd5f0cc37d43c5a58ac2e",
+      "tamano_bytes": 555,
+      "fecha_documento": "2026-04-01",
+      "fecha_registro": "2026-10-01T21:06:33-05:00",
+      "responsable": "Agente de Evidencia (demo)",
+      "fuente": "PostgreSQL processing_activities"
+    },
+    {
+      "id": "EV-0004",
+      "controles": [
+        "A.1.2.6"
+      ],
+      "tipo": "informe",
+      "titulo": "DPIA del servicio de telemedicina",
+      "archivo": "archivos/EV-0004_dpia_telemedicina.md",
+      "sha256": "eef5a03674ae6a2af40583161a054d7077c184174362feb4bf3a8b82e332919e",
+      "tamano_bytes": 707,
+      "fecha_documento": "2026-05-20",
+      "fecha_registro": "2026-10-01T21:06:33-05:00",
+      "responsable": "Agente de Evidencia (demo)",
+      "fuente": "Oficial de Privacidad"
+    },
+    {
+      "id": "EV-0005",
+      "controles": [
+        "A.3.11"
+      ],
+      "tipo": "procedimiento",
+      "titulo": "PRO-SEG-004 Gestion de incidentes y brechas",
+      "archivo": "archivos/EV-0005_procedimiento_incidentes.md",
+      "sha256": "739f5a0baf5ca94c8801837fa2d3b59626e4294eaa0f4fb39f6ecef974e7582b",
+      "tamano_bytes": 552,
+      "fecha_documento": "2026-01-15",
+      "fecha_registro": "2026-10-01T21:06:33-05:00",
+      "responsable": "Agente de Evidencia (demo)",
+      "fuente": "Gestor documental"
+    },
+    {
+      "id": "EV-0006",
+      "controles": [
+        "9.2"
+      ],
+      "tipo": "informe",
+      "titulo": "Informe de auditoria interna 2024",
+      "archivo": "archivos/EV-0006_informe_auditoria_interna_2024.md",
+      "sha256": "3ab86ede9a78d6af56271a48f41465c1e5d2fab83105b0b4202c5eb07de1bf3e",
+      "tamano_bytes": 304,
+      "fecha_documento": "2024-11-20",
+      "fecha_registro": "2026-10-01T21:06:33-05:00",
+      "responsable": "Agente de Evidencia (demo)",
+      "fuente": "Archivo de auditoria"
+    },
+    {
+      "id": "EV-0007",
+      "controles": [
+        "9.3",
+        "5.1"
+      ],
+      "tipo": "acta",
+      "titulo": "Acta de revision por la direccion 01-2026",
+      "archivo": "archivos/EV-0007_acta_revision_direccion_2026.md",
+      "sha256": "d504442b60060cb08ab03e9d685b001f3a16b6a30c5f9ee1d448cc22ecc60c86",
+      "tamano_bytes": 590,
+      "fecha_documento": "2026-07-10",
+      "fecha_registro": "2026-10-01T21:06:33-05:00",
+      "responsable": "Agente de Evidencia (demo)",
+      "fuente": "Gerencia General"
+    },
+    {
+      "id": "EV-0008",
+      "controles": [
+        "A.3.14"
+      ],
+      "tipo": "log",
+      "titulo": "Log seudonimizado de accesos a PII, septiembre 2026",
+      "archivo": "archivos/EV-0008_log_accesos_pii_sept2026.csv",
+      "sha256": "29401d6e9620b767cbef0a6943479e414493b5e44562e4c3f30618eee98ab382",
+      "tamano_bytes": 344,
+      "fecha_documento": "2026-09-30",
+      "fecha_registro": "2026-10-01T21:06:33-05:00",
+      "responsable": "Agente de Evidencia (demo)",
+      "fuente": "PostgreSQL audit_query"
+    }
+  ]
+}

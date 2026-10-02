@@ -1,0 +1,8 @@
+id_colaborador,area,curso,fecha,nota,estado
+COL-001,Admisión,Protección de datos personales en salud,2026-06-12,18,Aprobado
+COL-002,Admisión,Protección de datos personales en salud,2026-06-12,16,Aprobado
+COL-003,TI,Protección de datos personales en salud,2026-06-13,19,Aprobado
+COL-004,TI,Protección de datos personales en salud,2026-06-13,15,Aprobado
+COL-005,Telemedicina,Protección de datos personales en salud,2026-06-20,17,Aprobado
+COL-006,Telemedicina,Protección de datos personales en salud,2026-06-20,11,Desaprobado
+COL-007,RR. HH.,Protección de datos personales en salud,2026-06-27,18,Aprobado

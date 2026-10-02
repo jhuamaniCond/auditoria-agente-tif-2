@@ -1,0 +1,5 @@
+actividad,finalidad,categorias_pii,base_legal,destinatarios,transferencia_internacional,dpia_requerida
+Historia clínica electrónica,Atención médica,"identificación; salud",Ley 26842 y Ley 29733 art. 14,Personal asistencial,No,Sí
+Telemedicina,Teleconsulta,"identificación; salud; imagen y voz",Consentimiento,Médicos y proveedor de videollamada,No,Sí
+Planillas,Gestión de personal,"identificación; económicos",Relación laboral,SUNAT; EsSalud,No,No
+Marketing,Envío de campañas,"identificación; contacto",Consentimiento,Área comercial,No,No

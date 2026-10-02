@@ -1,0 +1,53 @@
+== 1. Registro de evidencias ==
+
+$ python evidencia.py registrar --expediente expediente --archivo evidencias_entrada\politica_privacidad_v2.md --tipo politica --titulo Politica de privacidad v2.0 --responsable Agente de Evidencia (demo) --fuente Gestor documental --fecha-documento 2026-02-10 --control 5.2
+EV-0001 registrada  sha256=e65ea362a68816a6...  controles=5.2
+
+$ python evidencia.py registrar --expediente expediente --archivo evidencias_entrada\registro_formacion_2026.csv --tipo registro --titulo Registro de formacion en privacidad 2026 --responsable Agente de Evidencia (demo) --fuente LMS Moodle --fecha-documento 2026-06-30 --control A.3.17 --control 7.2
+EV-0002 registrada  sha256=600a0079cab891d3...  controles=A.3.17,7.2
+
+$ python evidencia.py registrar --expediente expediente --archivo evidencias_entrada\ropa_2026.csv --tipo registro --titulo Registro de actividades de tratamiento 2026 --responsable Agente de Evidencia (demo) --fuente PostgreSQL processing_activities --fecha-documento 2026-04-01 --control A.1.2.2 --control A.1.2.9
+EV-0003 registrada  sha256=1cdbfac56af02469...  controles=A.1.2.2,A.1.2.9
+
+$ python evidencia.py registrar --expediente expediente --archivo evidencias_entrada\dpia_telemedicina.md --tipo informe --titulo DPIA del servicio de telemedicina --responsable Agente de Evidencia (demo) --fuente Oficial de Privacidad --fecha-documento 2026-05-20 --control A.1.2.6
+EV-0004 registrada  sha256=eef5a03674ae6a2a...  controles=A.1.2.6
+
+$ python evidencia.py registrar --expediente expediente --archivo evidencias_entrada\procedimiento_incidentes.md --tipo procedimiento --titulo PRO-SEG-004 Gestion de incidentes y brechas --responsable Agente de Evidencia (demo) --fuente Gestor documental --fecha-documento 2026-01-15 --control A.3.11
+EV-0005 registrada  sha256=739f5a0baf5ca94c...  controles=A.3.11
+
+$ python evidencia.py registrar --expediente expediente --archivo evidencias_entrada\informe_auditoria_interna_2024.md --tipo informe --titulo Informe de auditoria interna 2024 --responsable Agente de Evidencia (demo) --fuente Archivo de auditoria --fecha-documento 2024-11-20 --control 9.2
+EV-0006 registrada  sha256=3ab86ede9a78d6af...  controles=9.2
+
+$ python evidencia.py registrar --expediente expediente --archivo evidencias_entrada\acta_revision_direccion_2026.md --tipo acta --titulo Acta de revision por la direccion 01-2026 --responsable Agente de Evidencia (demo) --fuente Gerencia General --fecha-documento 2026-07-10 --control 9.3 --control 5.1
+EV-0007 registrada  sha256=d504442b60060cb0...  controles=9.3,5.1
+
+$ python evidencia.py registrar --expediente expediente --archivo evidencias_entrada\log_accesos_pii_sept2026.csv --tipo log --titulo Log seudonimizado de accesos a PII, septiembre 2026 --responsable Agente de Evidencia (demo) --fuente PostgreSQL audit_query --fecha-documento 2026-09-30 --control A.3.14
+EV-0008 registrada  sha256=29401d6e9620b767...  controles=A.3.14
+
+$ python evidencia.py listar --expediente expediente
+EV-0001  politica      2026-02-10 5.2                    Politica de privacidad v2.0
+EV-0002  registro      2026-06-30 A.3.17,7.2             Registro de formacion en privacidad 2026
+EV-0003  registro      2026-04-01 A.1.2.2,A.1.2.9        Registro de actividades de tratamiento 2026
+EV-0004  informe       2026-05-20 A.1.2.6                DPIA del servicio de telemedicina
+EV-0005  procedimiento 2026-01-15 A.3.11                 PRO-SEG-004 Gestion de incidentes y brechas
+EV-0006  informe       2024-11-20 9.2                    Informe de auditoria interna 2024
+EV-0007  acta          2026-07-10 9.3,5.1                Acta de revision por la direccion 01-2026
+EV-0008  log           2026-09-30 A.3.14                 Log seudonimizado de accesos a PII, septiembre 2026
+
+== 2. Se altera EV-0007 (alguien edita el acta despues de archivarla) ==
+
+== 3. Verificacion de integridad ==
+
+$ python evidencia.py verificar --expediente expediente
+Evidencias verificadas: 8
+  OK          7  
+  ALTERADA    1  EV-0007
+  FALTANTE    0  
+Cadena de custodia: integra
+(codigo de salida 1)
+
+== 4. Matriz de cobertura (rol responsable, corte 2026-10-01) ==
+
+$ python evidencia.py cobertura --expediente expediente --rol responsable --vigencia-dias 365 --fecha-corte 2026-10-01 --salida salida\informe_cobertura.md
+Informe escrito en salida\informe_cobertura.md (y .json)
+Cobertura 27.6 % | Cubierto 8 | Parcial 0 | Desactualizada 1 | Comprometida 2 | Sin evidencia 18 | No aplica 1
