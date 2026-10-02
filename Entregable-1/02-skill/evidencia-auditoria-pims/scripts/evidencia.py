@@ -172,75 +172,110 @@ def _consola_utf8():
 
 
 # --------------------------------------------------------------------------
-# Subcomandos
+# API (la usan la linea de comandos y la aplicacion web)
 # --------------------------------------------------------------------------
-def cmd_registrar(args):
-    if not os.path.isfile(args.archivo):
-        sys.exit("No existe el archivo: %s" % args.archivo)
-    catalogo = {c["ref"] for c in leer_catalogo(args.catalogo)}
-    desconocidos = [c for c in args.control if c not in catalogo]
+class ErrorEvidencia(ValueError):
+    """Error de validacion al registrar una evidencia."""
+
+
+def registrar_evidencia(expediente, archivo, controles, tipo, titulo, responsable,
+                        fuente="", fecha_documento=None, catalogo=CATALOGO_POR_DEFECTO,
+                        nombre_original=None):
+    """Copia la evidencia al expediente, calcula su SHA-256 y la anota en el
+    indice y en la cadena de custodia. Devuelve el registro creado."""
+    if not os.path.isfile(archivo):
+        raise ErrorEvidencia("No existe el archivo: %s" % archivo)
+    if not controles:
+        raise ErrorEvidencia("Indica al menos un control")
+    if tipo not in TIPOS:
+        raise ErrorEvidencia("Tipo no valido: %s" % tipo)
+    validos = {c["ref"] for c in leer_catalogo(catalogo)}
+    desconocidos = [c for c in controles if c not in validos]
     if desconocidos:
-        sys.exit("Controles no presentes en el catalogo: %s" % ", ".join(desconocidos))
-    if args.fecha_documento:
-        dt.date.fromisoformat(args.fecha_documento)  # valida el formato
+        raise ErrorEvidencia("Controles no presentes en el catalogo: %s"
+                             % ", ".join(desconocidos))
+    if fecha_documento:
+        try:
+            dt.date.fromisoformat(fecha_documento)
+        except ValueError:
+            raise ErrorEvidencia("Fecha no valida (AAAA-MM-DD): %s" % fecha_documento)
 
-    os.makedirs(os.path.join(args.expediente, CARPETA_ARCHIVOS), exist_ok=True)
-    indice = leer_indice(args.expediente)
-    huella = sha256_archivo(args.archivo)
-
+    os.makedirs(os.path.join(expediente, CARPETA_ARCHIVOS), exist_ok=True)
+    indice = leer_indice(expediente)
+    huella = sha256_archivo(archivo)
     repetida = next((e for e in indice["evidencias"] if e["sha256"] == huella), None)
     if repetida:
-        sys.exit("Ese archivo ya esta registrado como %s" % repetida["id"])
+        raise ErrorEvidencia("Ese archivo ya esta registrado como %s" % repetida["id"])
 
     nuevo_id = "EV-%04d" % (len(indice["evidencias"]) + 1)
-    destino = os.path.join(CARPETA_ARCHIVOS,
-                           "%s_%s" % (nuevo_id, os.path.basename(args.archivo)))
-    shutil.copy2(args.archivo, os.path.join(args.expediente, destino))
+    nombre = os.path.basename(nombre_original or archivo)
+    destino = os.path.join(CARPETA_ARCHIVOS, "%s_%s" % (nuevo_id, nombre))
+    shutil.copy2(archivo, os.path.join(expediente, destino))
 
     evidencia = {
         "id": nuevo_id,
-        "controles": args.control,
-        "tipo": args.tipo,
-        "titulo": args.titulo,
+        "controles": list(controles),
+        "tipo": tipo,
+        "titulo": titulo,
         "archivo": destino.replace(os.sep, "/"),
         "sha256": huella,
-        "tamano_bytes": os.path.getsize(args.archivo),
-        "fecha_documento": args.fecha_documento or dt.date.today().isoformat(),
+        "tamano_bytes": os.path.getsize(archivo),
+        "fecha_documento": fecha_documento or dt.date.today().isoformat(),
         "fecha_registro": ahora(),
-        "responsable": args.responsable,
-        "fuente": args.fuente,
+        "responsable": responsable,
+        "fuente": fuente,
     }
     indice["evidencias"].append(evidencia)
-    guardar_indice(args.expediente, indice)
-    anotar_custodia(args.expediente, "REGISTRO", args.responsable,
-                    evidencia=nuevo_id, sha256=huella, controles=args.control)
-    print("%s registrada  sha256=%s  controles=%s"
-          % (nuevo_id, huella[:16] + "...", ",".join(args.control)))
+    guardar_indice(expediente, indice)
+    anotar_custodia(expediente, "REGISTRO", responsable,
+                    evidencia=nuevo_id, sha256=huella, controles=list(controles))
+    return evidencia
 
 
-def cmd_verificar(args):
-    indice = leer_indice(args.expediente)
+def verificar_expediente(expediente, responsable="agente-evidencia"):
+    """Recalcula hashes y comprueba la cadena; deja constancia en la cadena."""
+    indice = leer_indice(expediente)
     resultados = {"OK": [], "ALTERADA": [], "FALTANTE": []}
     for ev in indice["evidencias"]:
-        resultados[estado_integridad(args.expediente, ev)].append(ev["id"])
-    problemas_cadena = comprobar_cadena(args.expediente, indice)
-
-    print("Evidencias verificadas: %d" % len(indice["evidencias"]))
-    for estado in ("OK", "ALTERADA", "FALTANTE"):
-        ids = resultados[estado]
-        print("  %-9s %3d  %s" % (estado, len(ids), ", ".join(ids) if estado != "OK" else ""))
-    if problemas_cadena:
-        print("CADENA ROTA:")
-        for p in problemas_cadena:
-            print("  - " + p)
-    else:
-        print("Cadena de custodia: integra")
-
-    anotar_custodia(args.expediente, "VERIFICACION", args.responsable,
+        resultados[estado_integridad(expediente, ev)].append(ev["id"])
+    problemas_cadena = comprobar_cadena(expediente, indice)
+    anotar_custodia(expediente, "VERIFICACION", responsable,
                     ok=len(resultados["OK"]), alteradas=resultados["ALTERADA"],
                     faltantes=resultados["FALTANTE"],
                     cadena_integra=not problemas_cadena)
-    if resultados["ALTERADA"] or resultados["FALTANTE"] or problemas_cadena:
+    return {"total": len(indice["evidencias"]), "resultados": resultados,
+            "problemas_cadena": problemas_cadena,
+            "integro": not (resultados["ALTERADA"] or resultados["FALTANTE"]
+                            or problemas_cadena)}
+
+
+# --------------------------------------------------------------------------
+# Subcomandos
+# --------------------------------------------------------------------------
+def cmd_registrar(args):
+    try:
+        ev = registrar_evidencia(args.expediente, args.archivo, args.control, args.tipo,
+                                 args.titulo, args.responsable, args.fuente,
+                                 args.fecha_documento, args.catalogo)
+    except ErrorEvidencia as e:
+        sys.exit(str(e))
+    print("%s registrada  sha256=%s  controles=%s"
+          % (ev["id"], ev["sha256"][:16] + "...", ",".join(ev["controles"])))
+
+
+def cmd_verificar(args):
+    r = verificar_expediente(args.expediente, args.responsable)
+    print("Evidencias verificadas: %d" % r["total"])
+    for estado in ("OK", "ALTERADA", "FALTANTE"):
+        ids = r["resultados"][estado]
+        print("  %-9s %3d  %s" % (estado, len(ids), ", ".join(ids) if estado != "OK" else ""))
+    if r["problemas_cadena"]:
+        print("CADENA ROTA:")
+        for p in r["problemas_cadena"]:
+            print("  - " + p)
+    else:
+        print("Cadena de custodia: integra")
+    if not r["integro"]:
         sys.exit(1)
 
 

@@ -1,58 +1,70 @@
 # Conocimiento y despliegue de AUDITA-PIMS
 
-## 1. Base de conocimiento
+## 1. Base de conocimiento (RAG local)
 
-| Archivo | Ubicación | Para qué lo usa el asistente |
+El asistente no recibe la base de conocimiento completa en cada consulta. La
+aplicación la divide en fragmentos, los convierte en vectores con el modelo
+local de embeddings `nomic-embed-text` y los guarda en un índice **FAISS**
+(`04-aplicacion/datos/indice.faiss`). En cada pregunta recupera los 6
+fragmentos más parecidos por similitud coseno y se los entrega al modelo en el
+bloque CONTEXTO, junto con el estado del expediente calculado por `evidencia.py`.
+
+| Fuente indexada | Fragmentos | Para qué la usa el asistente |
 |---|---|---|
-| `SKILL.md` | `02-skill/evidencia-auditoria-pims/` | Procedimiento de 6 pasos y reglas duras |
-| `controles_27701.json` | `02-skill/.../references/` | Qué controles existen, qué evidencia espera cada uno y cuántas |
-| `criterios_evidencia.md` | `02-skill/.../references/` | Pertinencia, suficiencia, fiabilidad, vigencia; clasificación de hallazgos |
-| `plantilla_hallazgo.md` | `02-skill/.../assets/` | Formato obligatorio de cada hallazgo |
-| `glosario_pims.md` | `03-asistente/` | Vocabulario común con el usuario |
-| `evidencia.py` | `02-skill/.../scripts/` | Herramienta: registrar, verificar, cobertura, listar |
+| `controles_27701.json` | 1 por control (33) | Qué exige cada control, qué evidencia espera, cuántas |
+| `criterios_evidencia.md` | por sección | Pertinencia, suficiencia, vigencia; clasificación de hallazgos |
+| `plantilla_hallazgo.md` | 1 | Formato obligatorio del hallazgo |
+| `SKILL.md` | por sección | Reglas no negociables y pasos |
+| `glosario_pims.md` | por sección | Vocabulario: PII, SoA, RoPA, DPIA, ARCO, HITL |
+| Evidencias del expediente | por párrafos, con su ID | Leer qué dice cada evidencia al valorar o redactar |
 
-No se carga el texto de la norma ISO/IEC 27701:2025 porque es material con
-derechos de autor; el catálogo resume solo lo necesario para auditar. Si el
-grupo dispone de la norma licenciada, puede añadirse como conocimiento privado.
+El índice se reconstruye solo si cambia alguna fuente (se compara una huella
+SHA-256 de todo lo indexado); las evidencias nuevas se añaden al registrarlas.
 
-## 2. Opción A — Claude Code (skill + herramienta ejecutable) — recomendada
+No se indexa el texto de la norma ISO/IEC 27701:2025 por estar protegido por
+derechos de autor; el catálogo resume lo necesario para auditar.
 
-Es la única opción en la que el asistente ejecuta `evidencia.py` por sí mismo.
+## 2. Modelos locales (Ollama)
+
+| Modelo | Tamaño | Función | Por qué este |
+|---|---|---|---|
+| `nomic-embed-text` | 274 MB | Embeddings del RAG | Ligero, multilingüe, ventana de 2 048 tokens, distingue documento/consulta |
+| `qwen2.5:7b` (Q4_K_M) | 4,7 GB | Redactar respuestas, clasificar, hallazgos | Buen español, sigue instrucciones y produce JSON; cabe en una GPU de 8 GB |
+
+Probado en un portátil con RTX 4060 (8 GB) y 16 GB de RAM: unos 24 tokens/s;
+una respuesta del chat tarda entre 6 y 14 s y un hallazgo unos 12 s. Con menos
+memoria se puede usar `qwen2.5:3b` cambiando la variable `AUDITA_MODELO_CHAT`.
+
+## 3. Instalación
 
 ```bash
-# en la carpeta del proyecto donde se auditará
-mkdir -p .claude/skills
-cp -r "02-skill/evidencia-auditoria-pims" .claude/skills/
+# 1. Ollama (https://ollama.com) y los dos modelos
+winget install Ollama.Ollama          # o el instalador de la web
+ollama pull nomic-embed-text
+ollama pull qwen2.5:7b
+
+# 2. Dependencias de Python
+cd 04-aplicacion
+pip install -r requirements.txt       # flask, faiss-cpu, numpy
+
+# 3. (Opcional) cargar el caso de estudio ClinData S.A.C.
+python cargar_demo.py
+
+# 4. Arrancar
+python app.py                         # http://127.0.0.1:5000
 ```
 
-Claude Code lee la `description` del SKILL.md y activa la skill cuando el
-usuario pide algo como "prepara la auditoría interna del PIMS". La identidad se
-fija copiando `instrucciones_sistema.md` en el `CLAUDE.md` del proyecto.
+La primera vez construye el índice FAISS (unos segundos). El servidor escucha
+solo en `127.0.0.1`: no queda expuesto a la red.
 
-## 3. Opción B — Claude Project (claude.ai)
+## 4. Privacidad del despliegue
 
-1. Crear un proyecto "AUDITA-PIMS".
-2. Pegar `instrucciones_sistema.md` en *Project instructions*.
-3. Subir como *Project knowledge*: SKILL.md, controles_27701.json,
-   criterios_evidencia.md, plantilla_hallazgo.md, glosario_pims.md y evidencia.py.
-4. Si la cuenta tiene habilitadas las Skills, subir la carpeta
-   `evidencia-auditoria-pims` comprimida en *Settings → Capabilities → Skills*.
-   Si no, el asistente pide al usuario ejecutar el script y pegar la salida.
+Todo se ejecuta en la máquina del auditor: el servidor Flask, los dos modelos y
+el índice. Ninguna evidencia ni pregunta sale a un servicio externo, lo que es
+coherente con un sistema que gestiona datos personales.
 
-## 4. Opción C — Gem de Gemini / GPT personalizado
+## 5. Uso de la skill fuera de la aplicación
 
-Mismo contenido: instrucciones en el campo de instrucciones, los cinco archivos
-como conocimiento. Con intérprete de código activado puede ejecutar
-`evidencia.py` sobre archivos subidos a la conversación, pero el expediente no
-persiste entre conversaciones: hay que descargarlo al final de cada sesión.
-
-## 5. Requisitos
-
-- Python 3.8 o superior (solo biblioteca estándar).
-- El script no usa claves de API ni servicios externos: el expediente es una
-  carpeta local.
-- **Ojo:** en las opciones A, B y C el modelo corre en la nube. Lo que el
-  asistente lee (el contenido de las evidencias) se envía al proveedor del
-  modelo. Por eso conviene archivar evidencias seudonimizadas. Para que nada
-  salga de la organización hay que usar un modelo local (Ollama + Qwen/Llama)
-  conectado al script; eso es parte del Entregable 2.
+La carpeta `02-skill/evidencia-auditoria-pims` sigue el formato de Agent Skills
+(SKILL.md con encabezado YAML + scripts + referencias), así que también puede
+copiarse en `.claude/skills/` y usarse desde Claude Code con el mismo script.

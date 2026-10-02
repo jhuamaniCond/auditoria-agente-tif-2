@@ -107,7 +107,7 @@ def arquitectura():
 def flujo_skill():
     fig, ax = plt.subplots(figsize=(9, 11.5))
     ax.set_xlim(0, 12)
-    ax.set_ylim(0, 15.5)
+    ax.set_ylim(0.9, 15.5)
     ax.axis("off")
 
     pasos = [
@@ -149,17 +149,9 @@ def flujo_skill():
     ax.text(x + w + 1.6, y0 + h + 0.35, "Archivos que lee", fontsize=9, fontweight="bold",
             ha="center")
 
-    # saltos desde el paso 1 segun el tipo de encargo
-    xs_salto = x - 0.25
-    for destino, etiqueta in ((2, "registrar"), (4, "verificar / auditar"), (5, "hallazgos")):
-        yd = ys[destino - 1] + h * 0.8
-        ax.add_patch(FancyArrowPatch((x, ys[0] + 0.25), (x, yd),
-                                     connectionstyle="arc3,rad=0.45", arrowstyle="-|>",
-                                     mutation_scale=9, color=GRIS, linewidth=0.8,
-                                     linestyle=(0, (3, 2))))
-    ax.text(xs_salto - 0.05, ys[1] + 0.2, "según el\nencargo", fontsize=7.5, color=GRIS,
-            ha="right")
-    # pasos 3 -> 4 -> 5 tambien se encadenan para "preparar la auditoria"
+    # El paso 1 decide por donde se entra segun el tipo de encargo
+    ax.text(x + w / 2 + 0.25, ys[0] - 0.29, "entra en el paso 2, 3 o 5 según el encargo",
+            fontsize=8, color=GRIS, ha="left", va="center", style="italic")
 
     # rombo final
     cx, cy = x + w / 2, ys[-1] - 1.15
@@ -175,7 +167,127 @@ def flujo_skill():
     plt.close(fig)
 
 
+# --------------------------------------------------------------------------
+def arquitectura_app():
+    fig, ax = plt.subplots(figsize=(12.5, 7))
+    ax.set_xlim(0, 17)
+    ax.set_ylim(0, 9.6)
+    ax.axis("off")
+
+    # Limite de la maquina del auditor
+    ax.add_patch(Rectangle((0.15, 0.15), 16.7, 9.3, facecolor="none", edgecolor="black",
+                           linewidth=1.2, linestyle=(0, (5, 3))))
+    ax.text(0.35, 9.15, "Máquina del auditor (127.0.0.1) — ningún dato sale a internet",
+            fontsize=9.5, fontweight="bold", va="center")
+
+    def bloque(x, y, w, h, titulo, lineas, grueso=False):
+        caja(ax, x, y, w, h, "", grueso=grueso)
+        ax.text(x + 0.18, y + h - 0.32, titulo, fontsize=10, fontweight="bold", va="center")
+        ax.text(x + 0.18, y + h - 0.72, "\n".join(lineas), fontsize=8.3, va="top",
+                family="DejaVu Sans Mono", linespacing=1.45)
+
+    # Navegador
+    bloque(0.5, 3.4, 3.4, 3.6, "Navegador", ["index.html", "estilos.css", "app.js",
+                                            "(JavaScript puro)", "", "Expediente",
+                                            "Cobertura", "Asistente"])
+    # Flask
+    bloque(5.0, 2.2, 3.9, 6.0, "Backend Flask · app.py", [
+        "GET  /api/estado", "GET  /api/cobertura", "POST /api/verificar",
+        "POST /api/sugerir", "POST /api/registrar", "POST /api/chat",
+        "POST /api/hallazgo"], grueso=True)
+    flecha(ax, 3.9, 5.4, 5.0, 5.4, "HTTP / JSON", color="black", ancho=1.2, desp=(0, 0.25))
+    flecha(ax, 5.0, 4.9, 3.9, 4.9, color="black", ancho=1.2)
+
+    # Parte determinista
+    bloque(10.2, 6.6, 3.0, 1.9, "evidencia.py", ["SHA-256", "cadena de custodia",
+                                                 "cobertura"])
+    bloque(13.7, 6.6, 2.9, 1.9, "Expediente", ["registro_evidencias", ".json",
+                                               "cadena_custodia.log"])
+    ax.text(11.7, 8.75, "Skill (cálculo determinista)", fontsize=8.5, color=GRIS,
+            ha="center")
+    flecha(ax, 8.9, 7.5, 10.2, 7.5, color="black", ancho=1.1)
+    flecha(ax, 13.2, 7.55, 13.7, 7.55, color="black", ancho=1.1)
+    flecha(ax, 13.7, 7.25, 13.2, 7.25, color="black", ancho=1.1)
+
+    # RAG
+    bloque(10.2, 3.75, 3.0, 2.15, "rag.py · FAISS", ["IndexFlatIP", "similitud coseno",
+                                                     "59 fragmentos"])
+    bloque(13.7, 3.75, 2.9, 2.15, "Conocimiento", ["catálogo, criterios", "plantilla, SKILL",
+                                                   "glosario, evidencias"])
+    flecha(ax, 8.9, 4.9, 10.2, 4.9, color="black", ancho=1.1)
+    flecha(ax, 13.7, 4.8, 13.2, 4.8, color="black", ancho=1.1)
+
+    # Modelos locales
+    caja(ax, 10.2, 0.6, 6.4, 2.45, "", fondo=GRIS_CLARO)
+    ax.text(10.4, 2.75, "Ollama (localhost:11434)", fontsize=10, fontweight="bold",
+            va="center")
+    caja(ax, 10.45, 0.85, 2.75, 1.5, "qwen2.5:7b\nLLM (chat)", tam=8.5)
+    caja(ax, 13.6, 0.85, 2.75, 1.5, "nomic-embed-text\nembeddings", tam=8.5)
+    flecha(ax, 15.6, 2.35, 12.9, 3.75, "vectores", color="black", ancho=1.1, desp=(0.75, 0.15))
+    bloque(5.0, 0.6, 3.9, 1.25, "asistente.py", ["instrucciones + CONTEXTO"])
+    flecha(ax, 6.95, 2.2, 6.95, 1.85, color="black", ancho=1.1)
+    flecha(ax, 8.9, 1.25, 10.45, 1.25, "prompt", color="black", ancho=1.1, desp=(0, 0.22))
+
+    fig.savefig(os.path.join(AQUI, "arquitectura_app.png"), dpi=200, bbox_inches="tight",
+                facecolor="white")
+    plt.close(fig)
+
+
+# --------------------------------------------------------------------------
+# Ajustes de la revision de pertinencia (paso 4) documentados en
+# hallazgos_preliminares.md: A.1.2.6 y A.3.14 pasan de Cubierto a Parcial.
+AJUSTE_REVISION = {"Cubierto": -2, "Parcial": +2}
+
+
+def estados_cobertura():
+    import json
+    ruta = os.path.join(AQUI, "..", "..", "02-skill", "evidencia-auditoria-pims", "assets",
+                        "demo", "salida", "informe_cobertura.json")
+    with open(ruta, encoding="utf-8") as f:
+        demo = json.load(f)
+    estados = ["Cubierto", "Parcial", "Desactualizada", "Comprometida", "Sin evidencia"]
+    auto = [demo["conteo_estados"][e] for e in estados]
+    revisado = [a + AJUSTE_REVISION.get(e, 0) for a, e in zip(auto, estados)]
+    aplicables = demo["controles_aplicables"]
+
+    fig, ax = plt.subplots(figsize=(9, 4.6))
+    alto = 0.36
+    ys = list(range(len(estados)))[::-1]
+    for valores, desp, color, nombre in ((auto, alto / 2 + 0.02, "#b5b5b5", "Automático (script)"),
+                                         (revisado, -alto / 2 - 0.02, "#1a1a1a",
+                                          "Tras revisión manual de pertinencia")):
+        barras = ax.barh([y + desp for y in ys], valores, height=alto, color=color,
+                         label=nombre, edgecolor="white", linewidth=1)
+        for b, v in zip(barras, valores):
+            ax.text(b.get_width() + 0.25, b.get_y() + b.get_height() / 2, str(v),
+                    va="center", fontsize=9, color="#1a1a1a")
+    ax.set_yticks(ys)
+    ax.set_yticklabels(estados, fontsize=10)
+    ax.set_xlabel("Número de controles (rol responsable, %d aplicables)" % aplicables,
+                  fontsize=9.5)
+    ax.set_xlim(0, max(auto + revisado) + 2.5)
+    ax.xaxis.grid(True, color="#e3e3e3", linewidth=0.7)
+    ax.set_axisbelow(True)
+    for lado in ("top", "right", "left"):
+        ax.spines[lado].set_visible(False)
+    ax.spines["bottom"].set_color("#8a8a8a")
+    ax.tick_params(axis="y", length=0)
+    ax.legend(loc="upper right", frameon=False, fontsize=9.5)
+    from matplotlib.ticker import MaxNLocator
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+    cob_a = 100.0 * auto[0] / aplicables
+    cob_r = 100.0 * revisado[0] / aplicables
+    ax.set_title(("Cobertura: %.1f %% automática  →  %.1f %% validada" % (cob_a, cob_r))
+                 .replace(".", ","),
+                 fontsize=11, loc="left", fontweight="bold")
+    fig.savefig(os.path.join(AQUI, "estados_cobertura.png"), dpi=200, bbox_inches="tight",
+                facecolor="white")
+    plt.close(fig)
+
+
 if __name__ == "__main__":
     arquitectura()
     flujo_skill()
+    estados_cobertura()
+    arquitectura_app()
     print("Figuras escritas en %s" % AQUI)

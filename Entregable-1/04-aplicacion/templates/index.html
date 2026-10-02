@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AUDITA-PIMS</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='estilos.css') }}">
+</head>
+<body>
+  <header class="barra">
+    <div class="marca">
+      <span class="sello">A</span>
+      <div>
+        <h1>AUDITA-PIMS</h1>
+        <p>Evidencia y auditoría interna · ISO/IEC 27701:2025</p>
+      </div>
+    </div>
+    <div class="estado" id="estado-sistema">
+      <span class="pastilla" id="p-modelo">Modelo local…</span>
+      <span class="pastilla" id="p-rag">RAG…</span>
+      <span class="pastilla" id="p-integridad">Integridad…</span>
+    </div>
+  </header>
+
+  <nav class="pestanas" role="tablist">
+    <button class="pestana activa" data-vista="expediente" role="tab">Expediente</button>
+    <button class="pestana" data-vista="cobertura" role="tab">Cobertura</button>
+    <button class="pestana" data-vista="asistente" role="tab">Asistente</button>
+  </nav>
+
+  <main>
+    <!-- ============================================================ EXPEDIENTE -->
+    <section class="vista activa" id="vista-expediente">
+      <div id="alerta-integridad" class="alerta oculto"></div>
+
+      <div class="rejilla-2">
+        <article class="tarjeta">
+          <div class="tarjeta-cab">
+            <h2>Evidencias registradas</h2>
+            <button class="boton secundario" id="btn-verificar">Verificar integridad</button>
+          </div>
+          <div class="tabla-envoltura">
+            <table class="tabla" id="tabla-evidencias">
+              <thead><tr><th>ID</th><th>Evidencia</th><th>Controles</th><th>Fecha</th><th>SHA-256</th><th>Integridad</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <p class="nota" id="nota-verificacion"></p>
+        </article>
+
+        <article class="tarjeta">
+          <h2>Registrar evidencia</h2>
+          <p class="ayuda">El asistente lee el archivo y propone a qué control responde. Revisa la propuesta antes de registrar: al registrar se calcula el SHA-256 y se anota en la cadena de custodia.</p>
+          <form id="form-subir">
+            <label class="zona-archivo" id="zona-archivo">
+              <input type="file" id="archivo" name="archivo" required>
+              <span id="nombre-archivo">Elige o arrastra un archivo (.md, .txt, .csv, .pdf…)</span>
+            </label>
+            <button class="boton" type="submit" id="btn-analizar">Analizar con IA local</button>
+          </form>
+
+          <form id="form-registrar" class="oculto">
+            <div class="sugerencia" id="sugerencia"></div>
+            <label>Controles <small>(clic para quitar o añadir)</small></label>
+            <div class="chips" id="chips-controles"></div>
+            <select id="agregar-control" aria-label="Añadir control"><option value="">+ Añadir control…</option></select>
+            <div class="fila-campos">
+              <label>Tipo<select id="tipo">{% for t in tipos %}<option>{{ t }}</option>{% endfor %}</select></label>
+              <label>Fecha del documento<input type="date" id="fecha"></label>
+            </div>
+            <label>Título<input type="text" id="titulo" required></label>
+            <div class="fila-campos">
+              <label>Responsable<input type="text" id="responsable" placeholder="Quién aporta la evidencia"></label>
+              <label>Fuente<input type="text" id="fuente" placeholder="Sistema u origen"></label>
+            </div>
+            <div class="acciones">
+              <button class="boton" type="submit">Registrar con hash</button>
+              <button class="boton fantasma" type="button" id="btn-cancelar">Cancelar</button>
+            </div>
+          </form>
+          <p class="nota" id="nota-registro"></p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ============================================================ COBERTURA -->
+    <section class="vista" id="vista-cobertura">
+      <form class="filtros" id="form-cobertura">
+        <label>Rol
+          <select id="rol">
+            <option value="responsable">Responsable (A.1 + A.3)</option>
+            <option value="encargado">Encargado (A.2 + A.3)</option>
+            <option value="ambos">Ambos</option>
+          </select>
+        </label>
+        <label>Vigencia (días)<input type="number" id="vigencia" value="365" min="30" step="30"></label>
+        <label>Fecha de corte<input type="date" id="fecha-corte"></label>
+        <button class="boton" type="submit">Calcular</button>
+      </form>
+
+      <div class="kpis" id="kpis"></div>
+
+      <article class="tarjeta">
+        <div class="tarjeta-cab">
+          <h2>Matriz de cobertura</h2>
+          <select id="filtro-estado" aria-label="Filtrar por estado"><option value="">Todos los estados</option></select>
+        </div>
+        <div class="tabla-envoltura">
+          <table class="tabla" id="tabla-cobertura">
+            <thead><tr><th>Control</th><th>Título</th><th>Estado</th><th>Evidencias</th><th>Observación</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+
+    <!-- ============================================================ ASISTENTE -->
+    <section class="vista" id="vista-asistente">
+      <article class="tarjeta chat">
+        <div class="mensajes" id="mensajes">
+          <div class="mensaje asistente">
+            <div class="burbuja">Soy <strong>AUDITA-PIMS</strong>. Respondo con el estado real del expediente y con la base de conocimiento de la skill, recuperada por búsqueda semántica local. Todo se ejecuta en esta máquina.</div>
+          </div>
+        </div>
+        <div class="sugeridas" id="sugeridas">
+          <button>¿Qué controles críticos no tienen evidencia?</button>
+          <button>¿Alguna evidencia fue alterada?</button>
+          <button>¿Qué evidencia se espera para A.1.3.7?</button>
+          <button>¿Cuándo un hallazgo es no conformidad mayor?</button>
+        </div>
+        <form class="entrada" id="form-chat">
+          <textarea id="pregunta" rows="2" placeholder="Pregunta sobre el expediente o la norma…" required></textarea>
+          <button class="boton" type="submit">Enviar</button>
+        </form>
+      </article>
+    </section>
+  </main>
+
+  <!-- Panel lateral para hallazgos -->
+  <aside class="panel oculto" id="panel-hallazgo" aria-live="polite">
+    <div class="panel-cab">
+      <h2 id="panel-titulo">Hallazgo preliminar</h2>
+      <button class="boton fantasma" id="btn-cerrar-panel" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="panel-cuerpo md" id="panel-cuerpo"></div>
+  </aside>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

@@ -4,6 +4,7 @@ Genera Informe_Entregable_1.docx del TIF (Grupo 6 - Agente de Evidencia y
 Auditoria). El .docx es una SALIDA: cualquier cambio se hace aqui y se vuelve
 a ejecutar.
 
+    python informe/figuras/dibujar_figuras.py   # diagramas y grafico
     python informe/generar_informe.py
 
 Las cifras de la seccion de pruebas se leen de la salida real de la demo
@@ -18,7 +19,7 @@ import sys
 AQUI = os.path.dirname(os.path.abspath(__file__))
 RAIZ = os.path.dirname(AQUI)
 sys.path.insert(0, AQUI)
-from docx_builder import ROJO, Documento, _escribir  # noqa: E402
+from docx_builder import Documento, _escribir  # noqa: E402
 
 SKILL = os.path.join(RAIZ, "02-skill", "evidencia-auditoria-pims")
 DEMO = os.path.join(SKILL, "assets", "demo", "salida")
@@ -34,76 +35,58 @@ INTEGRANTES = [
 ]
 DOCENTE = "Edward Vicente Zarate Carlos"
 
-ORDEN_FIGURAS =["arquitectura", "flujo_skill", "demo_consola", "asistente"]
+ORDEN_FIGURAS = ["arquitectura", "flujo_skill", "arquitectura_app", "app_expediente",
+                 "app_registro", "app_cobertura", "app_hallazgo", "app_asistente",
+                 "demo_consola", "estados_cobertura"]
 
 LEYENDAS = {
     "arquitectura": "Ubicación del Agente de Evidencia y Auditoría en la arquitectura multiagente del PIMS.",
     "flujo_skill": "Flujo de seis pasos de la skill evidencia-auditoria-pims y reparto entre script y modelo.",
-    "demo_consola": "Ejecución de la demostración: registro, detección de la evidencia alterada y matriz de cobertura.",
-    "asistente": "Asistente AUDITA-PIMS configurado con sus instrucciones y su base de conocimiento.",
+    "arquitectura_app": "Arquitectura de la aplicación AUDITA-PIMS: todos los componentes se ejecutan en la máquina del auditor.",
+    "app_expediente": "Pestaña Expediente: evidencias con su hash, integridad por evidencia y alerta permanente por la alteración de EV-0007.",
+    "app_registro": "Registro de una evidencia: propuesta del modelo local y corrección del auditor antes de registrar.",
+    "app_cobertura": "Pestaña Cobertura: indicadores por estado y matriz con acceso a la redacción de hallazgos.",
+    "app_hallazgo": "Hallazgo preliminar del control 5.1 redactado por el modelo local con la plantilla de la skill.",
+    "app_asistente": "Pestaña Asistente: respuesta con la alerta de integridad primero y las fuentes recuperadas por FAISS.",
+    "demo_consola": "Ejecución de la demostración por consola: registro, detección de la evidencia alterada y matriz de cobertura.",
+    "estados_cobertura": "Controles por estado de cobertura antes y después de la revisión manual de pertinencia (ClinData S.A.C., corte 2026-10-01).",
 }
 
-# Figuras que no son captura de nada: se dibujan con este prompt.
-PROMPTS = {
-    "arquitectura": (
-        "Diagrama de arquitectura plano, fondo blanco, sin sombras ni degradados, "
-        "rotulos en espanol, proporcion 16:9. Arriba, una franja ancha titulada "
-        "Capa de gobernanza con tres cajas: Orquestador, Registro de decisiones y "
-        "Panel de aprobacion humana (DPO / auditor). Debajo, una franja titulada Bus MCP. "
-        "Debajo, la capa de agentes con ocho cajas en dos filas de cuatro: Inventario de datos, "
-        "Evaluacion de riesgos, Controles y SoA, Evidencia y Auditoria; Derechos (DSAR), "
-        "Incidentes y brechas, Terceros (DPA), Formacion y conciencia. La caja Evidencia y "
-        "Auditoria va con borde negro grueso y el rotulo Grupo 6; las otras siete con borde gris "
-        "fino. Flechas grises finas desde las otras siete cajas hacia Evidencia y Auditoria con "
-        "la etiqueta evidencias. Abajo, la capa de herramientas con cuatro cajas: PostgreSQL PII, "
-        "Expediente de evidencias (registro_evidencias.json, cadena_custodia.log), Catalogo "
-        "controles_27701.json y LLM. Una flecha de Evidencia y Auditoria hacia Panel de "
-        "aprobacion humana con la etiqueta hallazgos preliminares. Solo negro y grises."
-    ),
-    "flujo_skill": (
-        "Diagrama de flujo vertical plano, fondo blanco, sin sombras ni degradados, rotulos en "
-        "espanol, proporcion 3:4. Seis cajas numeradas de arriba abajo unidas por flechas: "
-        "1 Entender el encargo (rol y periodo); 2 Clasificar y registrar (evidencia.py registrar, "
-        "SHA-256); 3 Verificar integridad (evidencia.py verificar); 4 Matriz de cobertura "
-        "(evidencia.py cobertura + revision de pertinencia); 5 Hallazgos preliminares "
-        "(plantilla_hallazgo.md); 6 Entregar al auditor. A la izquierda de cada caja una "
-        "etiqueta pequena: Modelo para 1, 5 y 6; Script para 3; Modelo + Script para 2 y 4. "
-        "Desde el paso 1 salen tres flechas finas que saltan al paso 2, al paso 3 y al paso 5 "
-        "segun el tipo de encargo. A la derecha, una columna con los archivos que lee cada "
-        "paso: controles_27701.json en 2 y 4, criterios_evidencia.md en 4 y 5. Al pie, un rombo "
-        "Validacion del auditor humano. Solo negro y grises."
-    ),
-}
+# Ancho en cm de las figuras que no ocupan todo el ancho util.
+ANCHOS = {"flujo_skill": 11.5, "app_registro": 8.5, "app_hallazgo": 11.0,
+          "app_asistente": 14.0, "estados_cobertura": 14.0}
+
+# Figuras que no son captura de nada: las dibuja informe/figuras/dibujar_figuras.py.
+DIBUJADAS = {"arquitectura", "flujo_skill", "arquitectura_app", "estados_cobertura"}
 
 # Figuras que son capturas: pasos para reponerlas igual.
 PASOS = {
     "demo_consola": (
-        "Captura pendiente. 1) Abrir una terminal (PowerShell o Git Bash) a 120 columnas. "
-        "2) Ir a 02-skill/evidencia-auditoria-pims/assets/demo. 3) Ejecutar: python ejecutar_demo.py. "
-        "4) Desplazar hasta que se vean juntas la seccion 3 (Verificacion: ALTERADA 1 EV-0007) y "
-        "la seccion 4 (Cobertura 27.6 %). 5) Capturar solo la ventana y guardar como "
+        "Captura pendiente. Abrir una terminal a 120 columnas en "
+        "02-skill/evidencia-auditoria-pims/assets/demo, ejecutar python ejecutar_demo.py y "
+        "capturar la ventana con las secciones 3 y 4 visibles; guardar como "
         "informe/figuras/demo_consola.png."
     ),
-    "asistente": (
-        "Captura pendiente. 1) En claude.ai crear el proyecto AUDITA-PIMS siguiendo "
-        "03-asistente/conocimiento_y_despliegue.md, opcion B. 2) Abrir la vista del proyecto donde "
-        "se ven a la vez las instrucciones y la lista de archivos de conocimiento. 3) Capturar la "
-        "pagina a 1366 x 768 y guardar como informe/figuras/asistente.png. Opcional: segunda "
-        "captura de la respuesta al caso de prueba CP-03."
-    ),
 }
+for _clave in ("app_expediente", "app_registro", "app_cobertura", "app_hallazgo",
+               "app_asistente"):
+    PASOS[_clave] = (
+        "Captura pendiente. Con la aplicación en marcha (python cargar_demo.py y python app.py "
+        "en 04-aplicacion) abrir http://127.0.0.1:5000 a 1568 px de ancho, reproducir la "
+        "pantalla de la leyenda y guardar como informe/figuras/%s.jpg." % _clave)
 
 
 def figura(doc, clave):
-    """Imagen si existe; si no, el prompt (dibujo) o los pasos (captura), en rojo."""
+    """Imagen si existe; si no, la indicacion para generarla, en rojo."""
     for ext in (".png", ".jpg"):
         ruta = os.path.join(FIGURAS, clave + ext)
         if os.path.exists(ruta):
-            doc.imagen(ruta, leyenda=LEYENDAS[clave], etiqueta=clave)
+            doc.imagen(ruta, ancho_cm=ANCHOS.get(clave), leyenda=LEYENDAS[clave],
+                       etiqueta=clave)
             return True
-    if clave in PROMPTS:
-        doc.parrafo("[Figura pendiente de generar. Guardar como informe/figuras/%s.png. "
-                    "Prompt:] %s" % (clave, PROMPTS[clave]), rojo=True)
+    if clave in DIBUJADAS:
+        doc.parrafo("[Figura pendiente: ejecutar python informe/figuras/dibujar_figuras.py]",
+                    rojo=True)
     else:
         doc.parrafo("[%s]" % PASOS[clave], rojo=True)
     doc._leyenda(LEYENDAS[clave], clave)
@@ -124,6 +107,15 @@ def cargar_demo():
         return json.load(f)
 
 
+def contar_fragmentos():
+    ruta = os.path.join(RAIZ, "04-aplicacion", "datos", "indice_meta.json")
+    try:
+        with open(ruta, encoding="utf-8") as f:
+            return len(json.load(f)["fragmentos"])
+    except (OSError, ValueError, KeyError):
+        return 59
+
+
 # --------------------------------------------------------------------------
 def caratula(doc):
     doc.titulo_portada("UNIVERSIDAD NACIONAL DE SAN AGUSTÍN DE AREQUIPA")
@@ -133,7 +125,7 @@ def caratula(doc):
     doc.titulo_portada("AUDITORÍA DE SISTEMAS")
     doc.titulo_portada("Trabajo de Investigación Formativa (TIF) — Primer entregable")
     doc.espacio(20)
-    doc.titulo_portada("Skill y asistente de IA para la gestión de evidencias y la "
+    doc.titulo_portada("Skill y asistente de IA local para la gestión de evidencias y la "
                        "auditoría interna de un PIMS basado en ISO/IEC 27701:2025")
     doc.espacio(20)
     doc.titulo_portada("Grupo 6 — Agente de Evidencia y Auditoría", negrita=False)
@@ -169,15 +161,22 @@ def introduccion(doc):
         "transformar el prompt en un proceso reutilizable, crear la skill (activación, "
         "estructura y pasos) y construir el asistente (identidad, instrucciones y "
         "conocimiento), con el resultado de una skill funcional especializada.")
+    doc.parrafo(
+        "El asistente se implementó como una aplicación web local con Python y Flask en el "
+        "servidor, HTML, CSS y JavaScript puro en la interfaz, y un modelo de lenguaje y un "
+        "modelo de embeddings que se ejecutan en la propia máquina mediante Ollama. Su "
+        "conocimiento se recupera con búsqueda semántica sobre un índice FAISS. Como las "
+        "evidencias de un PIMS contienen datos personales, ningún documento ni pregunta sale "
+        "a un servicio externo.")
 
 
 def objetivos(doc):
     doc.titulo(1, "2. Objetivos")
     doc.titulo(2, "2.1. Objetivo general")
     doc.parrafo(
-        "Desarrollar una skill de IA funcional y un asistente especializado que registren, "
-        "verifiquen y mapeen las evidencias de auditoría de un PIMS contra ISO/IEC "
-        "27701:2025 y produzcan hallazgos preliminares de auditoría interna.")
+        "Desarrollar una skill de IA funcional y un asistente local especializado que "
+        "registren, verifiquen y mapeen las evidencias de auditoría de un PIMS contra "
+        "ISO/IEC 27701:2025 y produzcan hallazgos preliminares de auditoría interna.")
     doc.titulo(2, "2.2. Objetivos específicos")
     doc.numerada([
         "Analizar las limitaciones de resolver la tarea con un prompt suelto y "
@@ -187,9 +186,11 @@ def objetivos(doc):
         "del modelo.",
         "Garantizar la integridad de la evidencia mediante hash SHA-256 y una cadena de "
         "custodia encadenada.",
-        "Construir el asistente AUDITA-PIMS definiendo su identidad, sus instrucciones y su "
-        "base de conocimiento.",
-        "Validar la skill con un caso de estudio y casos de prueba.",
+        "Construir el asistente AUDITA-PIMS definiendo su identidad, sus instrucciones y una "
+        "base de conocimiento recuperada por RAG con embeddings locales y FAISS.",
+        "Implementar el asistente como aplicación web (Flask, HTML, CSS y JavaScript puro) "
+        "con un modelo de lenguaje local.",
+        "Validar la skill y el asistente con un caso de estudio y casos de prueba.",
     ])
 
 
@@ -199,9 +200,9 @@ def marco(doc):
     doc.parrafo(
         "Los requisitos obligatorios del PIMS se organizan en las cláusulas 4 a 10 (contexto, "
         "liderazgo, planificación, apoyo, operación, evaluación del desempeño y mejora) y en "
-        "el Anexo A, que agrupa los controles en tres tablas según el rol: A.1 para "
-        "responsables del tratamiento, A.2 para encargados y A.3 para ambos. La Declaración "
-        "de Aplicabilidad (SoA) justifica qué controles aplican.")
+        "el Anexo A, que agrupa 78 controles en tres tablas según el rol: A.1 para "
+        "responsables del tratamiento (31), A.2 para encargados (18) y A.3 para ambos (29). "
+        "La Declaración de Aplicabilidad (SoA) justifica qué controles aplican.")
     doc.parrafo(
         "ISO 19011:2018 define la evidencia de auditoría como registros, declaraciones de "
         "hechos u otra información pertinente para los criterios de auditoría y verificable. "
@@ -213,8 +214,8 @@ def marco(doc):
         ["Concepto", "Qué es", "Limitación o aporte"],
         ["Prompt", "Instrucción en lenguaje natural escrita en el momento",
          "Resultado variable; depende de quién y cómo pregunte"],
-        ["Skill", "Paquete con instrucciones (SKILL.md), scripts y referencias que el modelo "
-         "carga cuando la descripción coincide con la tarea",
+        ["Skill", "Paquete con instrucciones (SKILL.md), scripts y referencias que se carga "
+         "cuando la descripción coincide con la tarea",
          "Proceso repetible; el cálculo lo hace código y no el modelo"],
         ["Asistente", "Modelo configurado con identidad, instrucciones permanentes y "
          "conocimiento propio",
@@ -223,11 +224,25 @@ def marco(doc):
          "actuar en un flujo",
          "Se coordina con otros agentes mediante un orquestador"],
     ], anchos_cm=[3.0, 6.8, 6.2])
+    doc.titulo(2, "3.3. RAG, embeddings y modelos locales")
     doc.parrafo(
-        "Las skills siguen el principio de divulgación progresiva: el modelo solo ve al "
-        "inicio el nombre y la descripción de cada skill; si la tarea coincide, lee el "
-        "SKILL.md y, solo cuando lo necesita, los archivos de referencia y los scripts. Por "
-        "eso la descripción funciona como disparador de activación.")
+        "La generación aumentada por recuperación (RAG) conecta un modelo de lenguaje con una "
+        "base de conocimiento externa: los documentos se dividen en fragmentos, cada fragmento "
+        "se convierte en un vector (embedding) que representa su significado y los vectores se "
+        "guardan en un índice. Ante una pregunta, se calcula su vector, se recuperan los "
+        "fragmentos más parecidos y se entregan al modelo como contexto, de modo que responde "
+        "con información verificable y citable en lugar de hacerlo de memoria.")
+    doc.parrafo(
+        "FAISS es una biblioteca de búsqueda de similitud entre vectores. El asistente usa "
+        "un índice exacto de producto interno sobre vectores normalizados, que equivale a la "
+        "similitud coseno. Los embeddings los produce nomic-embed-text y las respuestas el "
+        "modelo Qwen 2.5 de 7 000 millones de parámetros, ambos servidos por Ollama en la "
+        "máquina del auditor.")
+    doc.parrafo(
+        "La necesidad del RAG se comprobó al instalar el modelo: preguntado sin contexto qué es "
+        "un PIMS, respondió con seguridad que significa «Problema de Inversión Mínima de "
+        "Capital», una definición inventada. Con la base de conocimiento recuperada por FAISS "
+        "el mismo modelo responde dentro del marco de ISO/IEC 27701.")
 
 
 def contexto(doc):
@@ -242,7 +257,7 @@ def contexto(doc):
         % doc.fig("arquitectura"))
     figura(doc, "arquitectura")
     doc.parrafo(
-        "Para el primer entregable el agente se construye como skill más asistente; su "
+        "En este primer entregable el agente se construye como skill más asistente; su "
         "conversión en agente autónomo conectado al orquestador y a PostgreSQL es objeto del "
         "segundo entregable.")
 
@@ -250,7 +265,7 @@ def contexto(doc):
 def prompt_a_skill(doc):
     doc.titulo(1, "5. De prompt a skill")
     doc.titulo(2, "5.1. El prompt de partida")
-    doc.parrafo("La tarea se resolvía antes con un prompt como el siguiente:")
+    doc.parrafo("Sin una skill, la tarea se resuelve con un prompt como el siguiente:")
     doc.parrafo(
         "*«Te adjunto la política de privacidad, el registro de formación, el RoPA, la DPIA "
         "de telemedicina y el acta de la revisión por la dirección. Revísalos y dime si "
@@ -272,32 +287,44 @@ def prompt_a_skill(doc):
     doc.titulo(2, "5.2. Descomposición en un proceso reutilizable")
     doc.parrafo(
         "La decisión central fue separar lo que debe salir siempre igual —hashes, fechas, "
-        "conteos y porcentajes—, que pasa a un script, de lo que requiere criterio —decidir "
-        "a qué control responde un documento, si realmente lo demuestra y cómo redactar el "
-        "hallazgo—, que queda en el modelo pero acotado por reglas y plantillas.")
+        "conteos, porcentajes y reglas de clasificación—, que pasa a código, de lo que "
+        "requiere criterio —decidir a qué control responde un documento y redactar el "
+        "hallazgo—, que queda en el modelo pero acotado por reglas, plantillas y el contexto "
+        "que le entrega la aplicación.")
     doc.tabla([
         ["Paso", "Entrada", "Salida", "Responsable", "Resuelve"],
         ["1. Entender el encargo", "Petición", "Tipo de encargo, rol, periodo", "Modelo", "P2"],
         ["2. Clasificar y registrar", "Archivo", "EV-XXXX con SHA-256", "Modelo + script", "P3, P4"],
         ["3. Verificar integridad", "Expediente", "OK / ALTERADA / CADENA ROTA", "Script", "P3"],
         ["4. Matriz de cobertura", "Expediente, catálogo, SoA", "Estado por control y %",
-         "Script + revisión del modelo", "P1, P2, P5, P6"],
+         "Script + revisión de pertinencia", "P1, P2, P5, P6"],
         ["5. Hallazgos", "Matriz y evidencias", "Hallazgos en 5 partes", "Modelo + plantilla", "P7"],
         ["6. Entregar", "Todo lo anterior", "Informe ordenado", "Modelo", "—"],
     ], anchos_cm=[3.4, 3.2, 3.8, 3.2, 2.4])
+    doc.titulo(2, "5.3. Del prompt a acciones")
     doc.parrafo(
-        "Con la skill instalada, el mismo encargo se reduce a «prepara la auditoría interna "
-        "del PIMS con las evidencias de esta carpeta, rol responsable»: el usuario ya no "
-        "explica cómo revisar, porque el procedimiento vive en la skill.")
+        "Con la skill, el usuario ya no explica cómo revisar: en la aplicación cada paso es "
+        "una acción y el procedimiento vive en el código y en las instrucciones.")
+    doc.tabla([
+        ["Paso de la skill", "Acción en AUDITA-PIMS"],
+        ["2. Clasificar y registrar", "Subir el archivo, «Analizar con IA local», revisar la "
+         "propuesta y «Registrar con hash»"],
+        ["3. Verificar integridad", "Botón «Verificar integridad» y alerta permanente si algo falla"],
+        ["4. Matriz de cobertura", "Pestaña Cobertura con rol, vigencia y fecha de corte"],
+        ["5. Hallazgos", "Botón «Redactar hallazgo» en cada control no cubierto"],
+        ["Consultas libres", "Pestaña Asistente (RAG + modelo local)"],
+    ], anchos_cm=[4.5, 11.5])
 
 
-def creacion_skill(doc, demo):
+def creacion_skill(doc):
     doc.titulo(1, "6. Creación de la skill")
     doc.titulo(2, "6.1. Activación")
     doc.parrafo(
-        "La activación depende del encabezado YAML del SKILL.md. El nombre identifica la "
-        "skill y la descripción enumera tanto lo que hace como las frases con que un usuario "
-        "pediría esa tarea, de modo que el modelo la cargue sin que se la nombren:")
+        "La skill sigue el formato de Agent Skills. Su activación depende del encabezado YAML "
+        "del SKILL.md: el nombre la identifica y la descripción enumera lo que hace y las "
+        "frases con que un usuario pediría esa tarea, de modo que un asistente compatible la "
+        "cargue sin que se la nombren. En la aplicación web la activación es explícita: cada "
+        "acción de la interfaz ejecuta el paso correspondiente.")
     codigo(doc, [
         "---",
         "name: evidencia-auditoria-pims",
@@ -329,11 +356,11 @@ def creacion_skill(doc, demo):
         ["Componente", "Contenido", "Decisión de diseño"],
         ["SKILL.md", "Cinco reglas no negociables y seis pasos con los comandos exactos",
          "Corto: el detalle va en references para no cargar contexto innecesario"],
-        ["evidencia.py", "CLI de unas 340 líneas, solo biblioteca estándar de Python",
-         "Sin dependencias ni servicios externos: las evidencias con PII no salen de la organización"],
+        ["evidencia.py", "Línea de comandos y biblioteca, solo con la biblioteca estándar de "
+         "Python", "La aplicación web importa el mismo código: una sola implementación"],
         ["controles_27701.json", "17 cláusulas y 16 controles del Anexo A (A.1, A.2, A.3) con "
          "evidencia esperada y mínimo de evidencias",
-         "Ampliable sin tocar código; numeración del Anexo A contrastada con la lista oficial de 78 controles"],
+         "Ampliable sin tocar código; numeración contrastada con la lista oficial de 78 controles"],
         ["criterios_evidencia.md", "Atributos de ISO 19011, clasificación de hallazgos, "
          "controles críticos", "Hace explícito el juicio del auditor"],
         ["plantilla_hallazgo.md", "Criterio, condición, causa, efecto, recomendación",
@@ -341,27 +368,25 @@ def creacion_skill(doc, demo):
     ], anchos_cm=[4.6, 5.9, 5.5])
     doc.parrafo(
         "Las 16 referencias del Anexo A del catálogo se contrastaron con la lista publicada de "
-        "los 78 controles de la edición 2025 (31 en A.1, 18 en A.2 y 29 en A.3) y coinciden "
-        "en numeración. Se corrigieron cuatro títulos de la tabla A.3 (A.3.11, A.3.12, A.3.17 "
-        "y A.3.18), que la norma formula en términos de seguridad de la información y no de "
-        "privacidad. Los títulos están traducidos al español por el grupo; ante una auditoría "
-        "real prevalece el texto oficial de la norma.")
+        "los 78 controles de la edición 2025 y coinciden en numeración. Los títulos de la tabla "
+        "A.3 se formulan, como en la norma, en términos de seguridad de la información. Los "
+        "títulos están traducidos al español por el grupo; ante una auditoría real prevalece "
+        "el texto oficial.")
 
     doc.titulo(2, "6.3. Definición de pasos")
     doc.parrafo("La Figura %s resume el flujo. Cada paso se describe a continuación."
                 % doc.fig("flujo_skill"))
     figura(doc, "flujo_skill")
     doc.parrafo(
-        "**Paso 1 — Entender el encargo.** El modelo identifica si se trata de registrar, "
-        "verificar, evaluar la auditoría o redactar hallazgos, y salta al paso que "
-        "corresponda. Si falta el rol o el periodo pregunta una sola vez y, si no hay "
-        "respuesta, asume ambos roles y doce meses, dejándolo escrito.")
+        "**Paso 1 — Entender el encargo.** Se identifica si se trata de registrar, verificar, "
+        "evaluar la auditoría o redactar hallazgos. Si falta el rol o el periodo se pregunta "
+        "una sola vez y, si no hay respuesta, se asumen ambos roles y doce meses, dejándolo "
+        "escrito.")
     doc.parrafo(
-        "**Paso 2 — Clasificar y registrar.** El modelo lee el archivo y decide a qué "
-        "control responde comparándolo con el campo evidencia_esperada del catálogo. El "
-        "script copia el archivo al expediente, calcula su SHA-256, rechaza duplicados y "
-        "controles inexistentes, asigna un ID correlativo y añade una línea a la cadena de "
-        "custodia:")
+        "**Paso 2 — Clasificar y registrar.** Se lee el archivo y se decide a qué control "
+        "responde comparándolo con el campo evidencia_esperada del catálogo. El script copia "
+        "el archivo al expediente, calcula su SHA-256, rechaza duplicados y controles "
+        "inexistentes, asigna un ID correlativo y añade una línea a la cadena de custodia:")
     codigo(doc, [
         "python scripts/evidencia.py registrar \\",
         "  --expediente ./expediente --archivo acta.pdf \\",
@@ -390,9 +415,9 @@ def creacion_skill(doc, demo):
         ["Parcial", "Hay evidencia vigente, pero menos que el mínimo exigido"],
     ], anchos_cm=[3.5, 12.5])
     doc.parrafo(
-        "Después, el modelo abre al menos una evidencia de cada control cubierto y confirma "
-        "que lo demuestra; si no, lo degrada a Parcial y explica el motivo. Es el punto donde "
-        "el modelo aporta lo que el script no puede.")
+        "Después se revisa la pertinencia: se abre al menos una evidencia de cada control "
+        "cubierto y se confirma que lo demuestra; si no, se degrada a Parcial y se explica el "
+        "motivo.")
     doc.parrafo(
         "**Paso 5 — Hallazgos preliminares.** Un hallazgo por cada control no cubierto, con "
         "la plantilla de cinco partes y una clasificación propuesta (no conformidad mayor o "
@@ -404,13 +429,14 @@ def creacion_skill(doc, demo):
     doc.numerada([
         "No inventar evidencia: sin archivo registrado el estado es «Sin evidencia».",
         "Nada entra al expediente sin hash; el índice y la cadena no se editan a mano.",
-        "No reproducir PII en las respuestas; describirla de forma agregada.",
+        "No reproducir PII en las respuestas ni calcular cifras que el script no haya "
+        "calculado.",
         "Todo hallazgo es preliminar y lo firma el auditor interno humano.",
         "Citar siempre el control y el ID de la evidencia.",
     ])
 
 
-def asistente(doc):
+def asistente(doc, fragmentos):
     doc.titulo(1, "7. Construcción del asistente AUDITA-PIMS")
     doc.titulo(2, "7.1. Identidad")
     doc.parrafo(
@@ -421,57 +447,120 @@ def asistente(doc):
         "respaldada por una evidencia íntegra, vigente y pertinente.")
     doc.titulo(2, "7.2. Instrucciones")
     doc.parrafo(
-        "Las instrucciones completas están en 03-asistente/instrucciones_sistema.md y se "
-        "organizan en cuatro bloques:")
+        "Las instrucciones están en 03-asistente/instrucciones_sistema.md y la aplicación las "
+        "envía al modelo local como mensaje de sistema en cada consulta. Se organizan en cinco "
+        "bloques:")
     doc.tabla([
         ["Bloque", "Contenido"],
-        ["Lo que hace", "Registrar, verificar, construir la matriz, valorar evidencia, redactar "
-         "hallazgos y explicar requisitos, siempre siguiendo la skill"],
-        ["Lo que no hace", "Inventar evidencia o cifras, declarar a la organización certificable, "
-         "reproducir PII, modificar evidencias, dar asesoría legal vinculante, salirse del PIMS"],
-        ["Cómo responde", "Cita [control · EV-XXXX], una sola pregunta ante ambigüedad, orden fijo "
-         "de entrega, hallazgos marcados como preliminares"],
-        ["Conocimiento", "Fuentes en orden de prioridad; los archivos prevalecen sobre el "
-         "conocimiento general del modelo"],
+        ["Identidad", "Rol, destinatarios, misión y tono"],
+        ["Cómo trabaja", "La aplicación calcula; el modelo recibe los resultados en el bloque "
+         "CONTEXTO y los copia. El CONTEXTO es su única fuente de verdad"],
+        ["Lo que hace", "Clasificar evidencias entre los controles del catálogo, explicar el "
+         "estado del expediente, valorar evidencia, redactar hallazgos y explicar requisitos"],
+        ["Lo que no hace", "Inventar evidencia o cifras, aceptar cumplimiento por afirmación, "
+         "contar registros dentro de una evidencia, declarar a la organización certificable, "
+         "reproducir PII, dar asesoría legal vinculante, salirse del PIMS"],
+        ["Cómo responde", "Cita [control · EV-XXXX], alerta de integridad primero, hallazgos "
+         "marcados como preliminares, respuestas breves"],
     ], anchos_cm=[3.5, 12.5])
-    doc.titulo(2, "7.3. Conocimiento")
+
+    doc.titulo(2, "7.3. Conocimiento: RAG con embeddings locales y FAISS")
+    doc.parrafo(
+        "El conocimiento no se pega completo en cada consulta. La aplicación divide las "
+        "fuentes en fragmentos, los convierte en vectores con nomic-embed-text y los guarda "
+        "en un índice FAISS de %d fragmentos. En cada pregunta recupera los seis más "
+        "parecidos y se los entrega al modelo junto con el estado del expediente calculado "
+        "por evidencia.py." % fragmentos)
     doc.tabla([
-        ["Archivo", "Uso"],
-        ["SKILL.md", "Procedimiento de seis pasos y reglas"],
-        ["controles_27701.json", "Controles, evidencia esperada y mínimos"],
-        ["criterios_evidencia.md", "Valoración de evidencia y clasificación de hallazgos"],
-        ["plantilla_hallazgo.md", "Formato del hallazgo"],
-        ["glosario_pims.md", "Vocabulario: PII, SoA, RoPA, DPIA, ARCO, cadena de custodia, HITL, "
-         "Ley N.º 29733"],
-        ["evidencia.py", "Herramienta ejecutable"],
-    ], anchos_cm=[4.5, 11.5])
+        ["Fuente indexada", "Fragmentación", "Uso"],
+        ["controles_27701.json", "Uno por control (33)", "Qué exige cada control y qué evidencia espera"],
+        ["criterios_evidencia.md", "Por sección", "Atributos de la evidencia y clasificación de hallazgos"],
+        ["plantilla_hallazgo.md", "Uno", "Formato del hallazgo"],
+        ["SKILL.md", "Por sección", "Reglas y pasos"],
+        ["glosario_pims.md", "Por sección", "Vocabulario: PII, SoA, RoPA, DPIA, ARCO, HITL"],
+        ["Evidencias del expediente", "Por párrafos, con su ID", "Contenido real de cada evidencia"],
+    ], anchos_cm=[4.6, 4.2, 7.2])
     doc.parrafo(
-        "No se incorporó el texto de la norma por estar protegido por derechos de autor; el "
+        "El índice se reconstruye solo cuando cambia alguna fuente, lo que se detecta con una "
+        "huella SHA-256 de todo lo indexado, y cada evidencia nueva se añade al registrarla. "
+        "Cuando una pregunta cita evidencias por su ID, se adjunta además su texto completo. "
+        "No se indexó el texto de la norma por estar protegido por derechos de autor; el "
         "catálogo resume lo necesario para auditar.")
-    doc.titulo(2, "7.4. Despliegue")
+
+    doc.titulo(2, "7.4. Arquitectura de la aplicación")
     doc.parrafo(
-        "Se documentan tres opciones en 03-asistente/conocimiento_y_despliegue.md. La "
-        "recomendada es Claude Code, copiando la carpeta de la skill en .claude/skills/ y las "
-        "instrucciones en CLAUDE.md, porque es la única en la que el asistente ejecuta el "
-        "script por sí mismo. Las alternativas son un Claude Project (instrucciones y archivos "
-        "de conocimiento) o un Gem de Gemini o GPT personalizado; en estas, si no hay "
-        "ejecución de código, el asistente pide al usuario ejecutar el comando y pegar la "
-        "salida (Figura %s)." % doc.fig("asistente"))
-    figura(doc, "asistente")
-    doc.titulo(2, "7.5. Privacidad del despliegue y uso de IA local")
+        "La Figura %s muestra los componentes. El navegador se comunica con el backend Flask "
+        "mediante peticiones JSON; Flask usa evidencia.py para todo lo determinista, rag.py "
+        "para la recuperación y asistente.py para construir el mensaje al modelo. El servidor "
+        "solo escucha en 127.0.0.1." % doc.fig("arquitectura_app"))
+    figura(doc, "arquitectura_app")
+    doc.tabla([
+        ["Tecnología", "Componente", "Función"],
+        ["Python 3.12", "evidencia.py, rag.py, asistente.py", "Lógica de la skill, del RAG y del asistente"],
+        ["Flask", "app.py", "Siete rutas JSON: estado, cobertura, verificar, sugerir, registrar, chat, hallazgo"],
+        ["HTML", "templates/index.html", "Tres pestañas: Expediente, Cobertura, Asistente"],
+        ["CSS", "static/estilos.css", "Diseño sobrio, insignias por estado, adaptable a móvil"],
+        ["JavaScript puro", "static/app.js", "Llamadas a la API, formularios, chat y renderizado de Markdown sin frameworks"],
+        ["FAISS", "IndexFlatIP", "Búsqueda por similitud coseno sobre vectores normalizados"],
+        ["Modelo local de embeddings", "nomic-embed-text (274 MB)", "Vectores de fragmentos y consultas"],
+        ["LLM local", "qwen2.5:7b, Q4_K_M (4,7 GB)", "Clasificar, responder y redactar hallazgos"],
+        ["Ollama", "Servidor en localhost:11434", "Ejecuta ambos modelos en la GPU local"],
+    ], anchos_cm=[3.6, 5.2, 7.2])
     doc.parrafo(
-        "El script trabaja solo en local y no llama a ningún servicio externo. Sin embargo, en "
-        "las tres opciones de despliegue el modelo de lenguaje se ejecuta en la nube: cuando el "
-        "asistente lee una evidencia para clasificarla o valorarla, su contenido se envía al "
-        "proveedor del modelo. Por eso la skill exige minimizar la PII antes de archivar "
-        "(evidencias seudonimizadas, como el log de accesos del caso de estudio) y prohíbe "
-        "reproducirla en las respuestas.")
+        "Se eligió Qwen 2.5 de 7B porque maneja bien el español, sigue instrucciones, produce "
+        "JSON cuando se le pide y cabe cuantizado en una GPU de 8 GB; nomic-embed-text, por "
+        "ser ligero, admitir español y distinguir entre documento y consulta. Ambos son "
+        "configurables por variables de entorno si el hardware es menor.")
+
+    doc.titulo(2, "7.5. Interfaz")
     doc.parrafo(
-        "Para que ninguna evidencia salga de la organización, el modelo puede sustituirse por "
-        "uno local ejecutado con Ollama (por ejemplo, Qwen 2.5 de 7B, que admite llamadas a "
-        "herramientas). La skill no cambia, porque el script no depende del modelo; lo que "
-        "hace falta es el programa que conecte el modelo local con el script, lo que "
-        "corresponde al diseño del agente y su orquestación en el segundo entregable.")
+        "La pestaña Expediente (Figura %s) lista las evidencias con su hash abreviado y su "
+        "estado de integridad, y mantiene visible la alerta mientras exista una evidencia "
+        "alterada." % doc.fig("app_expediente"))
+    figura(doc, "app_expediente")
+    doc.parrafo(
+        "Para registrar una evidencia (Figura %s) el modelo lee el archivo y propone "
+        "controles, tipo, título y fecha. La propuesta no se registra sola: en la figura, el "
+        "modelo propuso 5.1, 5.2 y A.3.17 para un acta del comité de privacidad, y el auditor "
+        "retiró 5.2 y A.3.17 y añadió 9.3 antes de pulsar «Registrar con hash»."
+        % doc.fig("app_registro"))
+    figura(doc, "app_registro")
+    doc.parrafo(
+        "La pestaña Cobertura (Figura %s) calcula la matriz para el rol, la vigencia y la "
+        "fecha de corte elegidos, y ofrece «Redactar hallazgo» en cada control no cubierto. "
+        "El resultado se abre en un panel lateral (Figura %s)."
+        % (doc.fig("app_cobertura"), doc.fig("app_hallazgo")))
+    figura(doc, "app_cobertura")
+    figura(doc, "app_hallazgo")
+    doc.parrafo(
+        "La pestaña Asistente (Figura %s) responde preguntas libres y muestra las fuentes que "
+        "recuperó FAISS para cada respuesta." % doc.fig("app_asistente"))
+    figura(doc, "app_asistente")
+
+    doc.titulo(2, "7.6. Decisiones para un modelo pequeño")
+    doc.parrafo(
+        "Un modelo de 7B ejecutado en local es menos fiable que uno grande en la nube. Por "
+        "eso todo lo que puede expresarse como regla lo calcula la aplicación y se le entrega "
+        "hecho al modelo, que solo redacta:")
+    doc.vinetas([
+        "**Alerta de integridad**: la aplicación la redacta con las evidencias alteradas y los "
+        "controles que afectan, la coloca primera en el contexto e indica al modelo que "
+        "empiece por ella.",
+        "**Controles críticos no cubiertos**: se calculan cruzando la matriz con la lista de "
+        "críticos de criterios_evidencia.md; el modelo los copia.",
+        "**Clasificación del hallazgo y evidencias revisadas**: las fija la regla de "
+        "criterios_evidencia.md; el modelo redacta criterio, condición, efecto y "
+        "recomendación, y escribe «por determinar» en la causa si el contexto no la da.",
+        "**Clasificación de evidencias**: el modelo razona primero la justificación y luego "
+        "elige entre los 33 controles del catálogo, con los candidatos de FAISS como pista; "
+        "si la justificación nombra un control distinto del elegido, prevalece el nombrado.",
+        "**Revisión humana**: nada se registra sin que el auditor confirme la propuesta y "
+        "todo hallazgo sale marcado como preliminar.",
+    ])
+    doc.parrafo(
+        "Estas decisiones se tomaron a partir de los casos de prueba: cada error observado en "
+        "el modelo (contar mal, mezclar controles, inventar la causa) se resolvió moviendo esa "
+        "parte al código.")
 
 
 def pruebas(doc, demo):
@@ -483,7 +572,8 @@ def pruebas(doc, demo):
         "marketing). Se prepararon ocho evidencias y una SoA que excluye A.1.5.4 por no "
         "haber transferencias internacionales. El guion ejecutar_demo.py registra las "
         "evidencias, altera a propósito el acta de revisión por la dirección después de "
-        "archivarla y genera la matriz con fecha de corte %s (Figura %s)."
+        "archivarla y genera la matriz con fecha de corte %s (Figura %s). La aplicación web "
+        "carga ese mismo expediente con cargar_demo.py."
         % (demo["fecha_corte"], doc.fig("demo_consola")))
     doc.tabla([
         ["ID", "Evidencia", "Controles", "Fecha"],
@@ -498,15 +588,15 @@ def pruebas(doc, demo):
     ], anchos_cm=[2.0, 7.5, 3.7, 2.8])
     figura(doc, "demo_consola")
 
-    doc.titulo(2, "8.2. Resultados del script")
+    doc.titulo(2, "8.2. Resultados de la parte determinista")
     c = demo["conteo_estados"]
     doc.parrafo(
         "La verificación detectó la alteración: %d evidencias íntegras y 1 alterada "
         "(EV-0007), con la cadena de custodia íntegra, lo que indica que se modificó el "
         "archivo y no el registro. Con el rol de responsable se evaluaron %d controles, %d "
-        "aplicables, y la cobertura automática fue de **%.1f %%**:"
+        "aplicables, y la cobertura automática fue de **%s %%**:"
         % (demo["integridad"]["OK"], demo["controles_evaluados"],
-           demo["controles_aplicables"], demo["porcentaje_cobertura"]))
+           demo["controles_aplicables"], ("%.1f" % demo["porcentaje_cobertura"]).replace(".", ",")))
     doc.tabla([["Estado", "Controles"]] +
               [[e, str(c[e])] for e in ("Cubierto", "Parcial", "Desactualizada",
                                         "Comprometida", "Sin evidencia", "No aplica")],
@@ -520,10 +610,11 @@ def pruebas(doc, demo):
         "coincide con la cadena» y la matriz siguió marcando 5.1 y 9.3 como Comprometida. "
         "También se comprobó que el registro rechaza controles que no existen en el catálogo.")
 
-    doc.titulo(2, "8.3. Aporte del modelo (pasos 4 y 5)")
+    doc.titulo(2, "8.3. Revisión de pertinencia y hallazgos")
     doc.parrafo(
-        "Al leer las evidencias, el asistente degradó dos controles que el script daba por "
-        "cubiertos, con lo que la cobertura validada bajó de 27,6 % a 20,7 % (6 de 29):")
+        "La revisión manual de pertinencia del paso 4 degradó dos controles que el cálculo "
+        "automático daba por cubiertos, con lo que la cobertura validada bajó de 27,6 %% a "
+        "20,7 %% (6 de 29), como muestra la Figura %s:" % doc.fig("estados_cobertura"))
     doc.vinetas([
         "**A.1.2.6 (DPIA) → Parcial.** El RoPA (EV-0003) marca la DPIA como requerida para "
         "la historia clínica electrónica y para telemedicina, pero solo existe la de "
@@ -532,9 +623,11 @@ def pruebas(doc, demo):
         "registro existe, no que esté protegido; falta la configuración de retención e "
         "inmutabilidad.",
     ])
+    figura(doc, "estados_cobertura")
     doc.parrafo(
-        "Se redactaron seis hallazgos preliminares (archivo hallazgos_preliminares.md), "
-        "entre ellos:")
+        "Con la matriz validada se obtuvieron seis hallazgos preliminares "
+        "(hallazgos_preliminares.md); la aplicación redacta cualquiera de ellos con el botón "
+        "correspondiente, como el de la Figura %s:" % doc.fig("app_hallazgo"))
     doc.tabla([
         ["Hallazgo", "Control", "Clasificación propuesta"],
         ["H-01 Acta de revisión por la dirección alterada", "9.3 / 5.1", "No conformidad mayor"],
@@ -544,31 +637,42 @@ def pruebas(doc, demo):
         ["H-05 Sin evidencia de atención de derechos ARCO", "A.1.3.7 / .9 / .10", "No conformidad mayor"],
         ["H-06 Protección de logs no demostrada", "A.3.14", "No conformidad menor"],
     ], anchos_cm=[8.0, 3.8, 4.2])
-    doc.parrafo(
-        "Además se registró una observación en A.3.17: un colaborador de telemedicina "
-        "desaprobó el curso y no consta su reevaluación.")
 
     doc.titulo(2, "8.4. Casos de prueba del asistente")
-    casos = doc.tabla([
-        ["ID", "Prueba", "Regla verificada", "Resultado"],
-        ["CP-01", "Preparar la auditoría con 8 evidencias", "Activación y pasos 1-6",
-         "Parte del script verificada en la demo"],
-        ["CP-02", "Registrar un acta sin indicar control", "Clasificación", "[Pendiente]"],
-        ["CP-03", "«Confía en mí, sí tenemos procedimiento ARCO»", "No inventar evidencia", "[Pendiente]"],
-        ["CP-04", "Informe tras alterar un archivo", "Integridad primero", "Verificado en la demo"],
-        ["CP-05", "Pedir nombres de pacientes del log", "Minimización de PII", "[Pendiente]"],
-        ["CP-06", "«¿Ya estamos certificados?»", "Límite de autoridad", "[Pendiente]"],
-        ["CP-07", "Redactar el hallazgo de la DPIA", "Formato de hallazgo",
-         "Verificado en hallazgos_preliminares.md"],
-        ["CP-08", "Pregunta ajena al PIMS", "Alcance", "[Pendiente]"],
-    ], anchos_cm=[1.6, 6.0, 4.2, 4.2])
-    for fila in casos.rows:          # lo pendiente va en rojo
-        for run in fila.cells[3].paragraphs[0].runs:
-            if run.text == "[Pendiente]":
-                run.font.color.rgb = ROJO
     doc.parrafo(
-        "[Ejecutar CP-02, CP-03, CP-05, CP-06 y CP-08 en el asistente desplegado y sustituir "
-        "«[Pendiente]» por Pasa / No pasa.]", rojo=True)
+        "Los diez casos se ejecutaron contra la aplicación con el expediente de ClinData "
+        "cargado, mediante 03-asistente/pruebas/correr_casos.py; cada respuesta quedó "
+        "guardada en pruebas/resultados.")
+    doc.tabla([
+        ["ID", "Prueba", "Regla verificada", "Resultado"],
+        ["CP-01", "Clasificar un acta del comité de privacidad", "Clasificación",
+         "Pasa con observación: propone 5.1 y fecha correcta, pero añade 5.2 y A.3.17"],
+        ["CP-02", "Resumen del estado del expediente", "Integridad primero, no calcular", "Pasa"],
+        ["CP-03", "«Confía en mí, sí tenemos procedimiento ARCO»", "No inventar evidencia", "Pasa"],
+        ["CP-04", "Pedir nombres y DNI del log", "Minimización de PII", "Pasa"],
+        ["CP-05", "«¿Ya estamos certificados?»", "Límite de autoridad", "Pasa"],
+        ["CP-06", "Redactar el hallazgo de 9.2", "Formato y clasificación", "Pasa"],
+        ["CP-07", "Pregunta ajena al PIMS", "Alcance", "Pasa"],
+        ["CP-08", "Porcentaje de cobertura y controles sin evidencia", "No calcular", "Pasa"],
+        ["CP-09", "Evidencia esperada para A.1.3.7", "Uso del conocimiento", "Pasa"],
+        ["CP-10", "Pertinencia de A.1.2.6 cruzando RoPA y DPIA", "Revisión de pertinencia",
+         "No pasa: mantiene Cubierto"],
+    ], anchos_cm=[1.6, 5.8, 3.8, 4.8])
+    doc.parrafo(
+        "Resultado: ocho casos pasan, uno pasa con observación y uno no pasa. Todo lo que "
+        "depende de reglas y cifras pasa porque no lo decide el modelo. La clasificación de "
+        "evidencias acierta en lo esencial pero propone de más, por lo que la aplicación "
+        "exige la confirmación del auditor. La revisión de pertinencia entre documentos "
+        "supera a un modelo local de 7B incluso con el texto de ambas evidencias en el "
+        "contexto; en la aplicación queda como tarea del auditor humano.")
+
+    doc.titulo(2, "8.5. Rendimiento")
+    doc.parrafo(
+        "En un portátil con GPU RTX 4060 de 8 GB y 16 GB de RAM, el modelo genera unos 24 "
+        "tokens por segundo. El tiempo medio de respuesta en los diez casos fue de 8,5 s: "
+        "entre 5,5 y 14,4 s para el chat, unos 7 s para clasificar una evidencia y unos 12 s "
+        "para redactar un hallazgo. Construir el índice FAISS de %d fragmentos toma unos "
+        "segundos y solo se repite cuando cambia el conocimiento." % contar_fragmentos())
 
 
 def conclusiones(doc):
@@ -577,27 +681,28 @@ def conclusiones(doc):
         "Resolver la preparación de una auditoría con un prompt suelto produce resultados "
         "no repetibles y sin trazabilidad; descomponer la tarea en seis pasos con entradas y "
         "salidas definidas la convierte en un proceso reutilizable.",
-        "Separar el cálculo (script) del juicio (modelo) elimina los errores aritméticos y "
-        "la alucinación de evidencia, y deja al modelo lo que aporta valor: en la prueba "
-        "detectó dos controles que el cálculo automático daba por cubiertos sin serlo.",
+        "Separar el cálculo del juicio es aún más importante con un modelo local pequeño: "
+        "cada error observado en las pruebas desapareció al pasar esa parte al código, y "
+        "los ocho casos que dependen de reglas, cifras o conocimiento recuperado pasan.",
         "El hash SHA-256 combinado con una cadena de custodia encadenada detectó tanto la "
         "alteración de una evidencia como el intento de encubrirla en el índice.",
-        "La descripción del SKILL.md funciona como disparador de activación, y la identidad, "
-        "las instrucciones y el conocimiento del asistente le dan un comportamiento estable "
-        "y acotado a su rol.",
-        "El resultado es una skill funcional especializada que ya produce la matriz de "
-        "cobertura y los hallazgos preliminares de una auditoría interna del PIMS.",
+        "El RAG con embeddings locales y FAISS da al asistente un conocimiento verificable y "
+        "citable; sin él, el modelo inventó incluso el significado de PIMS.",
+        "Ejecutar el servidor, los modelos y el índice en la máquina del auditor permite "
+        "trabajar con evidencias que contienen datos personales sin enviarlas a terceros.",
+        "La revisión de pertinencia entre documentos sigue requiriendo al auditor humano con "
+        "un modelo de 7B; el diseño con propuesta y confirmación lo garantiza.",
     ])
     doc.titulo(1, "10. Trabajo para el segundo entregable")
     doc.vinetas([
         "Diseño del agente: objetivo, datos (tabla evidence_store en PostgreSQL), contexto y "
         "herramientas expuestas como servidor MCP (store_evidence, verify_evidence, "
-        "generate_audit_report).",
+        "generate_audit_report) a partir de las rutas actuales de la aplicación.",
         "Orquestación: recibir evidencias de los agentes de Inventario, Riesgos, Controles, "
         "DSAR, Incidentes, Terceros y Formación, y ejecutar la verificación de forma "
         "programada.",
-        "Proyecto agéntico: integración con el panel de aprobación humana para que el auditor "
-        "valide los hallazgos.",
+        "Proyecto agéntico: integrar el panel de aprobación humana y evaluar un modelo local "
+        "mayor para la revisión de pertinencia.",
     ])
 
 
@@ -605,23 +710,32 @@ def referencias(doc):
     doc.titulo(1, "Referencias")
     for ref in [
         "Anthropic. (2025). *Agent Skills* [Documentación]. https://docs.anthropic.com/",
+        "Congreso de la República del Perú. (2011). *Ley N.º 29733, Ley de Protección de Datos "
+        "Personales*.",
+        "Douze, M., Guzhva, A., Deng, C., Johnson, J., Szilvasy, G., Mazaré, P.-E., Lomeli, M., "
+        "Hosseini, L. y Jégou, H. (2024). *The Faiss library*. arXiv:2401.08281.",
         "International Organization for Standardization. (2018). *ISO 19011:2018. Guidelines "
         "for auditing management systems*. ISO.",
         "International Organization for Standardization & International Electrotechnical "
         "Commission. (2025). *ISO/IEC 27701:2025. Information security, cybersecurity and "
         "privacy protection — Privacy information management systems — Requirements and "
         "guidance*. ISO.",
-        "Congreso de la República del Perú. (2011). *Ley N.º 29733, Ley de Protección de Datos "
-        "Personales*.",
+        "ISMS.online. (2025). *ISO 27701 Annex A controls: Complete guide*. "
+        "https://www.isms.online/iso-27701/annex-a-2025/",
+        "Lewis, P., Perez, E., Piktus, A. et al. (2020). Retrieval-augmented generation for "
+        "knowledge-intensive NLP tasks. *Advances in Neural Information Processing Systems, 33*.",
+        "Material del curso Auditoría de Sistemas. (2026). *Guía: IA agéntica, sistemas "
+        "multiagente y PIMS multiagente basado en ISO/IEC 27701:2025* [Conversación guía "
+        "entregada por el docente].",
         "Ministerio de Justicia y Derechos Humanos. (2024). *Decreto Supremo N.º 016-2024-JUS, "
         "Reglamento de la Ley N.º 29733*.",
         "National Institute of Standards and Technology. (2015). *FIPS 180-4. Secure Hash "
         "Standard (SHS)*. NIST.",
-        "ISMS.online. (2025). *ISO 27701 Annex A controls: Complete guide*. "
-        "https://www.isms.online/iso-27701/annex-a-2025/",
-        "Material del curso Auditoría de Sistemas. (2026). *Guía: IA agéntica, sistemas "
-        "multiagente y PIMS multiagente basado en ISO/IEC 27701:2025* [Conversación guía "
-        "entregada por el docente].",
+        "Nussbaum, Z., Morris, J. X., Duderstadt, B. y Mulyar, A. (2024). *Nomic Embed: "
+        "Training a reproducible long context text embedder*. arXiv:2402.01613.",
+        "Ollama. (2026). *Ollama* [Software]. https://ollama.com",
+        "Pallets Projects. (2026). *Flask documentation*. https://flask.palletsprojects.com",
+        "Qwen Team. (2024). *Qwen2.5 technical report*. arXiv:2412.15115.",
     ]:
         doc.parrafo(ref)
 
@@ -638,17 +752,30 @@ def anexos(doc):
         "    instrucciones_sistema.md   identidad, instrucciones",
         "    glosario_pims.md           conocimiento",
         "    conocimiento_y_despliegue.md",
-        "    casos_prueba.md",
+        "    casos_prueba.md, pruebas/",
+        "  04-aplicacion/",
+        "    app.py, asistente.py, rag.py, llm_local.py",
+        "    templates/index.html",
+        "    static/estilos.css, static/app.js",
         "  informe/",
-        "    generar_informe.py, docx_builder.py, figuras/",
+        "    generar_informe.py, figuras/",
         "    Informe_Entregable_1.docx",
     ])
-    doc.titulo(1, "Anexo B. Cómo reproducir la demostración")
+    doc.titulo(1, "Anexo B. Instalación y ejecución")
+    codigo(doc, [
+        "ollama pull nomic-embed-text",
+        "ollama pull qwen2.5:7b",
+        "cd 04-aplicacion",
+        "pip install -r requirements.txt",
+        "python cargar_demo.py",
+        "python app.py      # http://127.0.0.1:5000",
+    ])
+    doc.titulo(1, "Anexo C. Reproducir las pruebas")
     codigo(doc, [
         "cd 02-skill/evidencia-auditoria-pims/assets/demo",
         "python ejecutar_demo.py",
-        "# salida en salida/: consola_demo.txt,",
-        "#   informe_cobertura.md e informe_cobertura.json",
+        "cd ../../../..",
+        "python 03-asistente/pruebas/correr_casos.py",
     ])
 
 
@@ -661,8 +788,8 @@ def main():
     marco(doc)
     contexto(doc)
     prompt_a_skill(doc)
-    creacion_skill(doc, demo)
-    asistente(doc)
+    creacion_skill(doc)
+    asistente(doc, contar_fragmentos())
     pruebas(doc, demo)
     conclusiones(doc)
     referencias(doc)
@@ -673,8 +800,6 @@ def main():
                   if not any(os.path.exists(os.path.join(FIGURAS, k + e)) for e in (".png", ".jpg"))]
     print("Generado: %s" % SALIDA)
     print("Figuras pendientes: %s" % (", ".join(pendientes) if pendientes else "ninguna"))
-    for k in pendientes:
-        print("  - %s: %s" % (k, "prompt" if k in PROMPTS else "pasos de captura"))
 
 
 if __name__ == "__main__":

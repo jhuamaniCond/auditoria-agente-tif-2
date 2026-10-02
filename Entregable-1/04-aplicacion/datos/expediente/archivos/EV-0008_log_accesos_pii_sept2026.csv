@@ -1,0 +1,6 @@
+fecha_hora,usuario_seudonimo,sistema,operacion,registros,resultado
+2026-09-01T08:02:11,U-7f3a,HCE,consulta,1,permitido
+2026-09-01T08:15:40,U-11c9,HCE,consulta,1,permitido
+2026-09-03T22:47:05,U-90be,HCE,exportacion,350,denegado
+2026-09-15T10:30:00,U-7f3a,Telemedicina,consulta,1,permitido
+2026-09-30T17:59:59,U-11c9,HCE,modificacion,1,permitido

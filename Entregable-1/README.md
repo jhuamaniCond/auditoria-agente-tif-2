@@ -1,32 +1,50 @@
 # TIF Auditoría de Sistemas — Entregable 1 — Grupo 6: Agente de Evidencia y Auditoría
 
-Resultado: **skill funcional especializada** `evidencia-auditoria-pims` y el
-asistente **AUDITA-PIMS**, que da soporte al PIMS basado en ISO/IEC 27701:2025.
+Resultado: la **skill funcional especializada** `evidencia-auditoria-pims` y el
+asistente **AUDITA-PIMS**, una aplicación web local que da soporte al PIMS
+basado en ISO/IEC 27701:2025.
+
+**Tecnologías:** Python · Flask · HTML · CSS · JavaScript puro · FAISS ·
+modelo local de embeddings (`nomic-embed-text`) · LLM local (`qwen2.5:7b`)
+servidos con Ollama. Todo se ejecuta en la máquina del auditor.
 
 | Tarea del TIF | Dónde está |
 |---|---|
 | De Prompt a Skill — transformar la tarea en un proceso reutilizable | `01-de-prompt-a-skill/de_prompt_a_skill.md` |
 | Creación de Skill — activación, estructura y pasos | `02-skill/evidencia-auditoria-pims/` (empezar por `SKILL.md`) |
-| Construcción de Asistente — identidad, instrucciones y conocimiento | `03-asistente/` |
+| Construcción de Asistente — identidad, instrucciones y conocimiento | `03-asistente/` (identidad e instrucciones, glosario, RAG, casos de prueba) |
+| Asistente funcionando (aplicación web) | `04-aplicacion/` |
 | Informe | `informe/Informe_Entregable_1.docx` (se regenera con `python informe/generar_informe.py`) |
 
-## Probar la skill en 10 segundos
+## Puesta en marcha
 
 ```bash
-cd 02-skill/evidencia-auditoria-pims/assets/demo
-python ejecutar_demo.py
+# Modelos locales (una vez)
+ollama pull nomic-embed-text
+ollama pull qwen2.5:7b
+
+# Aplicación
+cd 04-aplicacion
+pip install -r requirements.txt
+python cargar_demo.py        # opcional: caso de estudio ClinData S.A.C.
+python app.py                # http://127.0.0.1:5000
 ```
 
-Registra 8 evidencias de una clínica ficticia, altera una a propósito, detecta
-la alteración y genera `salida/informe_cobertura.md`. Los hallazgos que redacta
-el asistente sobre ese resultado están en `salida/hallazgos_preliminares.md`.
+## Pruebas
 
-Requisito: Python 3.8+ (solo biblioteca estándar). Para el informe: `pip install python-docx`.
+```bash
+# Parte determinista de la skill (sin IA): registra 8 evidencias, altera una,
+# la detecta y genera la matriz de cobertura
+cd 02-skill/evidencia-auditoria-pims/assets/demo && python ejecutar_demo.py
 
-## Pendiente antes de entregar (marcado en rojo en el informe)
+# Casos de prueba del asistente (con la aplicación en marcha)
+python 03-asistente/pruebas/correr_casos.py
+```
 
-- Figuras 1 y 2: `python informe/figuras/dibujar_figuras.py` (requiere matplotlib).
-- Casos de prueba: `bash 03-asistente/pruebas/correr_casos.sh` (usa tu cuenta
-  de Claude); anotar Pasa / No pasa en `generar_informe.py`, sección 8.4.
-- Figura 4: captura del asistente desplegado (pasos junto a la figura).
-- Luego regenerar: `python informe/generar_informe.py`.
+## Regenerar el informe
+
+```bash
+pip install python-docx matplotlib pillow
+python informe/figuras/dibujar_figuras.py
+python informe/generar_informe.py
+```

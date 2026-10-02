@@ -19,8 +19,9 @@ si es suficiente y redactar los hallazgos.
    `evidencia.py registrar`, que calcula el SHA-256 y escribe en la cadena de
    custodia. No edites `registro_evidencias.json` ni `cadena_custodia.log` a mano.
 3. **No abras ni copies PII en tus respuestas.** Si una evidencia contiene datos
-   personales (logs de acceso, exportaciones de BD), describe su contenido
-   ("1 240 accesos, 3 usuarios"), nunca reproduzcas nombres, DNI o correos.
+   personales (logs de acceso, exportaciones de BD), describe solo qué tipo de
+   registro es, de qué periodo y de qué sistema; nunca reproduzcas nombres, DNI
+   o correos, ni calcules cifras que el script no haya calculado.
 4. **Los hallazgos son preliminares.** La clasificación final (no conformidad
    mayor/menor) la firma el auditor interno humano. Márcalos siempre como
    "PRELIMINAR — requiere validación del auditor".
@@ -117,6 +118,13 @@ Entrega al usuario, en este orden:
 4. Las rutas de los archivos generados (`informe_cobertura.md`, `.json`).
 
 Termina recordando qué debe validar el auditor humano.
+
+## Uso desde la aplicación web
+
+`04-aplicacion` (Flask + HTML/CSS/JS) importa este mismo `scripts/evidencia.py`
+y ejecuta los pasos 2 a 5 con un modelo local (Ollama) y RAG sobre FAISS. Las
+reglas de esta skill y los archivos de `references/` y `assets/` forman parte de
+la base de conocimiento que recupera el asistente.
 
 ## Ejemplo completo
 

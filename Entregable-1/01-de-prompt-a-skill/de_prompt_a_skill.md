@@ -44,10 +44,18 @@ siempre igual) y lo que **requiere juicio** (lo hace el modelo, con reglas):
 - **Parámetros** en lugar de texto libre: `--rol`, `--vigencia-dias`,
   `--fecha-corte`, `soa.csv`.
 
-## 4. El prompt equivalente después de la skill
+## 4. Después de la skill
 
-> "Prepara la auditoría interna del PIMS con las evidencias de `entrada/`, rol
-> responsable, últimos 12 meses."
+El usuario ya no escribe un prompt explicando cómo revisar. En la aplicación
+AUDITA-PIMS (`04-aplicacion`) cada paso es una acción:
 
-El usuario ya no explica cómo revisar: la skill se activa por su descripción y
-ejecuta siempre los mismos seis pasos.
+| Paso de la skill | En la aplicación |
+|---|---|
+| 2. Clasificar y registrar | Subir el archivo → "Analizar con IA local" → revisar la propuesta → "Registrar con hash" |
+| 3. Verificar integridad | Botón "Verificar integridad" y alerta permanente si algo falla |
+| 4. Matriz de cobertura | Pestaña Cobertura con rol, vigencia y fecha de corte |
+| 5. Hallazgos | Botón "Redactar hallazgo" en cada control no cubierto |
+| Preguntas libres | Pestaña Asistente (RAG + LLM local) |
+
+Y la misma skill, en formato Agent Skill, se activa en Claude Code con una
+frase como "prepara la auditoría interna del PIMS, rol responsable".
