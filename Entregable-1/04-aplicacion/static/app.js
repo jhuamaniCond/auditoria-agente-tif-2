@@ -2,7 +2,7 @@
 "use strict";
 
 const $ = (sel) => document.querySelector(sel);
-const estado = { catalogo: [], cobertura: null, historial: [], subida: null, controles: [] };
+const estado = { catalogo: [], cobertura: null, historial: [], subida: null, controles: [], evaluando: null };
 const ORDEN = ["Cubierto", "Parcial", "Desactualizada", "Comprometida", "Sin evidencia", "No aplica"];
 
 function clase(texto) {
@@ -56,11 +56,13 @@ function md(texto) {
 }
 
 /* ---------------------------------------------------------------- pestañas */
-document.querySelectorAll(".pestana").forEach((b) => b.addEventListener("click", () => {
-  document.querySelectorAll(".pestana").forEach((x) => x.classList.toggle("activa", x === b));
-  document.querySelectorAll(".vista").forEach((v) => v.classList.toggle("activa", v.id === "vista-" + b.dataset.vista));
-  if (b.dataset.vista === "cobertura" && !estado.cobertura) cargarCobertura();
-}));
+function irA(vista) {
+  document.querySelectorAll(".pestana").forEach((x) => x.classList.toggle("activa", x.dataset.vista === vista));
+  document.querySelectorAll(".vista").forEach((v) => v.classList.toggle("activa", v.id === "vista-" + vista));
+  // Al volver a Cobertura se recarga: la matriz pudo cambiar mientras estabas en otra pestaña.
+  if (vista === "cobertura") cargarCobertura().catch((err) => alertaSuave(err));
+}
+document.querySelectorAll(".pestana").forEach((b) => b.addEventListener("click", () => irA(b.dataset.vista)));
 
 /* ------------------------------------------------------------------ estado */
 async function cargarEstado() {
@@ -92,7 +94,7 @@ async function cargarEstado() {
   const tbody = $("#tabla-evidencias tbody");
   tbody.innerHTML = d.evidencias.length ? d.evidencias.map((ev) => `
     <tr>
-      <td class="ref">${esc(ev.id)}</td>
+      <td>${botonEvidencia(ev.id)}</td>
       <td>${esc(ev.titulo)}<br><small>${esc(ev.tipo)} · ${esc(ev.fuente || "sin fuente")}</small></td>
       <td class="mono">${ev.controles.map(esc).join(", ")}</td>
       <td class="mono sin-corte">${esc(ev.fecha_documento)}</td>
@@ -100,6 +102,10 @@ async function cargarEstado() {
       <td><span class="insignia i-${clase(ev.integridad)}">${esc(ev.integridad)}</span></td>
     </tr>`).join("") : `<tr><td colspan="6" class="nota">El expediente está vacío. Registra la primera evidencia.</td></tr>`;
 }
+
+$("#tabla-evidencias").addEventListener("click", (e) => {
+  if (e.target.dataset.evidencia) mostrarEvidencia(e.target.dataset.evidencia);
+});
 
 $("#btn-verificar").addEventListener("click", async (e) => {
   e.target.disabled = true;
@@ -202,18 +208,25 @@ async function cargarCobertura() {
       <div class="barra-cob"><span style="width:${c.porcentaje_cobertura}%"></span></div></div>` +
     ORDEN.map((e) => `<div class="kpi"><div class="cifra">${kp[e]}</div><div class="rotulo"><span class="insignia e-${clase(e)}">${e}</span></div></div>`).join("");
   const filtro = $("#filtro-estado");
-  if (filtro.options.length === 1) ORDEN.forEach((e) => filtro.add(new Option(e, e)));
+  if (filtro.options.length === 1) {
+    ORDEN.forEach((e) => filtro.add(new Option(e, e)));
+    filtro.add(new Option("Revisión IA por decidir", FILTRO_POR_DECIDIR));
+  }
   pintarCobertura();
 }
+const FILTRO_POR_DECIDIR = "__por_decidir";
+const porDecidir = (x) => evaluable(x) && x.revision && x.revision.vigente && !x.revision.decision;
 function pintarCobertura() {
   const f = $("#filtro-estado").value;
-  const filas = estado.cobertura.controles.filter((x) => !f || x.estado === f);
+  const filas = estado.cobertura.controles.filter((x) =>
+    !f || (f === FILTRO_POR_DECIDIR ? porDecidir(x) : x.estado === f));
+  pintarResumenRevision();
   $("#tabla-cobertura tbody").innerHTML = filas.map((x) => `
     <tr>
       <td><button class="ref enlace-norma" data-norma="${esc(x.ref)}" title="Ver el texto de ISO/IEC 27701:2025">${esc(x.ref)}</button></td>
       <td>${esc(x.titulo)}</td>
       <td><span class="insignia e-${clase(x.estado)}">${esc(x.estado)}</span></td>
-      <td class="mono">${x.evidencias.map(esc).join(", ") || "—"}</td>
+      <td class="mono">${x.evidencias.map(botonEvidencia).join(", ") || "—"}</td>
       <td><small>${esc(x.nota || "—")}</small></td>
       <td>${celdaRevision(x)}</td>
       <td>${["Cubierto", "No aplica"].includes(x.estado) ? "" : `<button class="boton secundario mini" data-hallazgo="${esc(x.ref)}">Redactar hallazgo</button>`}</td>
@@ -241,7 +254,7 @@ function mostrarRevision(ref) {
   $("#panel-titulo").textContent = `Revisión de pertinencia · ${ref}`;
   const control = estado.catalogo.find((c) => c.ref === ref);
   const citas = r.citas.length ? "<ul class=\"citas\">" + r.citas.map((c) => `
-      <li><span class="ref">${esc(c.evidencia)}</span> «${esc(c.texto)}»
+      <li>${botonEvidencia(c.evidencia, { cita: c.texto, volver: ref })} «${esc(c.texto)}»
         <small class="${c.verificada ? "ok" : "mal"}">${c.verificada ? "✓ cita encontrada en el documento" : "✕ no aparece literal en el documento"}</small></li>`).join("") + "</ul>"
     : "<p><small>El modelo no aportó citas.</small></p>";
   const truncadas = r.truncadas.length
@@ -287,22 +300,175 @@ async function evaluarYMostrar(ref) {
   } catch (err) { $("#panel-cuerpo").innerHTML = `<p>${esc(err.message)}</p>`; }
 }
 
-$("#btn-evaluar-todos").addEventListener("click", async (e) => {
-  if (!estado.cobertura) await cargarCobertura();
-  const pendientes = estado.cobertura.controles.filter((x) => evaluable(x) && !(x.revision && x.revision.vigente));
+/* Evaluación en lote: el progreso se ve en el botón, en la nota y en una pastilla
+   de la cabecera, para que se note desde cualquier pestaña. */
+function avisoEvaluacion(texto, tipo = "info") {
   const nota = $("#nota-evaluacion");
-  if (!pendientes.length) { nota.textContent = "Todos los controles con evidencia válida ya tienen revisión IA."; return; }
-  e.target.disabled = true;
-  let hechos = 0;
-  for (const x of pendientes) {
-    nota.textContent = `Evaluando ${x.ref} (${hechos + 1} de ${pendientes.length}) con el modelo local…`;
-    try { await evaluar(x.ref); hechos++; }
-    catch (err) { nota.textContent = `${x.ref}: ${err.message}`; break; }
-    await cargarCobertura();
+  nota.className = `nota-evaluacion ${tipo}` + (texto ? "" : " oculto");
+  nota.textContent = texto;
+}
+function pintarProgreso() {
+  const ev = estado.evaluando, boton = $("#btn-evaluar-todos"), pastilla = $("#p-evaluacion");
+  boton.disabled = !!ev;
+  boton.textContent = ev ? `Evaluando ${ev.hechos + 1} de ${ev.total}…` : "Evaluar pertinencia con IA";
+  pastilla.classList.toggle("oculto", !ev);
+  if (ev) {
+    pastilla.textContent = `IA evaluando ${ev.actual} (${ev.hechos + 1}/${ev.total})`;
+    avisoEvaluacion(`Evaluando ${ev.actual} (${ev.hechos + 1} de ${ev.total}) con el modelo local. ` +
+      "Tarda unos 10 s por control; puedes cambiar de pestaña, pero no recargues la página.", "trabajando");
   }
-  if (hechos === pendientes.length) nota.textContent = `${hechos} propuestas listas. Ábrelas en la columna «Revisión IA» para aceptarlas o rechazarlas.`;
-  e.target.disabled = false;
+}
+$("#p-evaluacion").addEventListener("click", () => irA("cobertura"));
+window.addEventListener("beforeunload", (e) => { if (estado.evaluando) e.preventDefault(); });
+
+$("#btn-evaluar-todos").addEventListener("click", async () => {
+  if (estado.evaluando) return;
+  try { await cargarCobertura(); } catch (err) { avisoEvaluacion(err.message, "error"); return; }
+  const pendientes = estado.cobertura.controles.filter((x) => evaluable(x) && !(x.revision && x.revision.vigente));
+  if (!pendientes.length) {
+    avisoEvaluacion("No hay nada nuevo que evaluar: todos los controles con evidencia válida ya tienen su revisión IA. " +
+      "Revisa abajo las propuestas que faltan por decidir.", "info");
+    $("#resumen-revision").scrollIntoView({ behavior: "smooth", block: "nearest" });
+    return;
+  }
+  estado.evaluando = { hechos: 0, total: pendientes.length, actual: pendientes[0].ref };
+  let fallo = null;
+  try {
+    for (const x of pendientes) {
+      estado.evaluando.actual = x.ref;
+      pintarProgreso();
+      try { await evaluar(x.ref); }
+      catch (err) { fallo = `${x.ref}: ${err.message}`; break; }
+      estado.evaluando.hechos++;
+      await cargarCobertura().catch(() => {});
+    }
+  } finally {
+    const hechos = estado.evaluando.hechos;
+    estado.evaluando = null;
+    pintarProgreso();
+    await cargarCobertura().catch(() => {});
+    if (fallo) avisoEvaluacion(`Se evaluaron ${hechos} de ${pendientes.length}. Se detuvo en ${fallo}. ` +
+      "Pulsa el botón otra vez para continuar con los que faltan.", "error");
+    else avisoEvaluacion(`Listo: ${hechos} propuestas nuevas. Decide cada una en el resumen de abajo.`, "ok");
+  }
 });
+
+/* Resumen de la revisión IA encima de la tabla, con acceso directo a cada propuesta. */
+function pintarResumenRevision() {
+  const caja = $("#resumen-revision");
+  const evaluables = estado.cobertura.controles.filter(evaluable);
+  const vigentes = evaluables.filter((x) => x.revision && x.revision.vigente);
+  if (!vigentes.length) { caja.classList.add("oculto"); return; }
+  const cuenta = (v) => vigentes.filter((x) => x.revision.veredicto === v).length;
+  const decidir = vigentes.filter((x) => !x.revision.decision);
+  const sinEvaluar = evaluables.length - vigentes.length;
+  caja.classList.remove("oculto");
+  caja.innerHTML = `
+    <div><strong>Revisión IA:</strong> ${vigentes.length} de ${evaluables.length} controles con evidencia evaluados ·
+      <span class="insignia v-cumple">${cuenta("cumple")} cumple</span>
+      <span class="insignia v-cumple_parcialmente">${cuenta("cumple_parcialmente")} cumple parcialmente</span>
+      <span class="insignia v-no_cumple">${cuenta("no_cumple")} no cumple</span>
+      ${sinEvaluar ? ` · <strong>${sinEvaluar} sin evaluar</strong>` : ""}</div>
+    ${decidir.length ? `<div class="por-decidir">Por decidir (${decidir.length}): ` +
+      decidir.map((x) => `<button class="insignia v-${x.revision.veredicto} enlace" data-revision="${esc(x.ref)}">${esc(x.ref)}</button>`).join(" ") +
+      ` <button class="enlace-norma" data-filtro="${FILTRO_POR_DECIDIR}">ver solo estas en la tabla</button></div>`
+      : `<div class="por-decidir">Todas las propuestas tienen decisión del auditor.</div>`}`;
+}
+$("#resumen-revision").addEventListener("click", (e) => {
+  if (e.target.dataset.revision) mostrarRevision(e.target.dataset.revision);
+  if (e.target.dataset.filtro) { $("#filtro-estado").value = e.target.dataset.filtro; pintarCobertura(); }
+});
+
+/* ------------------------------------------- visor de evidencias (solo lectura) */
+function botonEvidencia(id, { cita = "", volver = "" } = {}) {
+  return `<button class="ref enlace-norma" data-evidencia="${esc(id)}" data-cita="${esc(cita)}" ` +
+    `data-volver="${esc(volver)}" title="Ver el documento">${esc(id)}</button>`;
+}
+
+/* CSV sencillo (comas y comillas dobles) a filas de celdas. */
+function leerCsv(texto) {
+  const filas = [];
+  let fila = [], celda = "", comillas = false;
+  for (let i = 0; i < texto.length; i++) {
+    const c = texto[i];
+    if (comillas) {
+      if (c === '"' && texto[i + 1] === '"') { celda += '"'; i++; }
+      else if (c === '"') comillas = false;
+      else celda += c;
+    } else if (c === '"') comillas = true;
+    else if (c === ",") { fila.push(celda); celda = ""; }
+    else if (c === "\n") { fila.push(celda.replace(/\r$/, "")); filas.push(fila); fila = []; celda = ""; }
+    else celda += c;
+  }
+  if (celda || fila.length) { fila.push(celda); filas.push(fila); }
+  return filas;
+}
+function tablaCsv(texto) {
+  const filas = leerCsv(texto);
+  if (!filas.length) return "<p><small>Archivo vacío.</small></p>";
+  return `<div class="desplazable"><table><thead><tr>${filas[0].map((c) => `<th>${esc(c)}</th>`).join("")}</tr></thead><tbody>` +
+    filas.slice(1).map((f) => `<tr>${f.map((c) => `<td>${esc(c)}</td>`).join("")}</tr>`).join("") +
+    `</tbody></table></div><p><small>${filas.length - 1} filas</small></p>`;
+}
+
+function contenidoEvidencia(ev) {
+  const url = `/api/evidencia/${encodeURIComponent(ev.id)}/archivo`;
+  if (!ev.existe) return `<p class="aviso-panel">El archivo no está en el expediente (FALTANTE).</p>`;
+  if (ev.formato === "pdf") return `<iframe class="visor-archivo" src="${url}" title="${esc(ev.titulo)}"></iframe>`;
+  if (["png", "jpg", "jpeg"].includes(ev.formato)) return `<img class="visor-imagen" src="${url}" alt="${esc(ev.titulo)}">`;
+  if (!ev.texto) return `<p>Este formato (.${esc(ev.formato)}) no se puede mostrar como texto.</p>`;
+  if (ev.formato === "md") return `<div class="documento">${md(ev.texto)}</div>`;
+  if (ev.formato === "csv") return tablaCsv(ev.texto);
+  return `<pre class="documento">${esc(ev.texto)}</pre>`;
+}
+
+/* Resalta la primera aparición de la cita dentro del documento ya pintado. */
+function resaltar(contenedor, cita) {
+  const buscada = cita.trim().toLowerCase();
+  if (!buscada) return false;
+  const recorrido = document.createTreeWalker(contenedor, NodeFilter.SHOW_TEXT);
+  for (let n = recorrido.nextNode(); n; n = recorrido.nextNode()) {
+    const i = n.nodeValue.toLowerCase().indexOf(buscada);
+    if (i < 0) continue;
+    const marca = document.createElement("mark");
+    const resto = n.splitText(i);
+    resto.splitText(buscada.length);
+    resto.parentNode.replaceChild(marca, resto);
+    marca.appendChild(resto);
+    marca.scrollIntoView({ block: "center" });
+    return true;
+  }
+  return false;
+}
+
+async function mostrarEvidencia(id, { cita = "", volver = "" } = {}) {
+  $("#panel-cuerpo").dataset.ref = "";
+  $("#panel-titulo").textContent = `Evidencia · ${id}`;
+  $("#panel-cuerpo").innerHTML = `<p class="pensando">Abriendo ${esc(id)}…</p>`;
+  $("#panel-hallazgo").classList.remove("oculto");
+  try {
+    const ev = await api(`/api/evidencia/${encodeURIComponent(id)}`);
+    const url = `/api/evidencia/${encodeURIComponent(id)}/archivo`;
+    const alterada = ev.integridad !== "OK"
+      ? `<p class="aviso-panel">Integridad ${esc(ev.integridad)}: el archivo no coincide con el hash registrado. Lo que ves no es necesariamente lo que se archivó.</p>` : "";
+    $("#panel-cuerpo").innerHTML = `
+      ${volver ? `<button class="boton secundario mini" data-revision="${esc(volver)}">← Volver a la revisión de ${esc(volver)}</button>` : ""}
+      <h3>${esc(ev.titulo)}</h3>
+      <p><small>${esc(ev.tipo)} · fecha ${esc(ev.fecha_documento)} · controles ${ev.controles.map(esc).join(", ")} ·
+        ${esc(ev.fuente || "sin fuente")} · registrada ${esc(ev.fecha_registro.slice(0, 10))}</small><br>
+        <small class="mono" title="${esc(ev.sha256)}">SHA-256 ${esc(ev.sha256.slice(0, 16))}…</small>
+        <span class="insignia i-${clase(ev.integridad)}">${esc(ev.integridad)}</span>
+        · <a href="${url}?descargar=1">Descargar original</a></p>
+      ${alterada}
+      <p class="ayuda">Vista de solo lectura: abrir el documento no lo modifica ni se anota en la cadena de custodia.</p>
+      <hr>
+      <div id="visor-evidencia">${contenidoEvidencia(ev)}</div>
+      ${ev.truncado ? `<p class="aviso-panel">Documento largo: se muestra solo el inicio. Descarga el original para verlo completo.</p>` : ""}`;
+    if (cita && !resaltar($("#visor-evidencia"), cita)) {
+      $("#visor-evidencia").insertAdjacentHTML("beforebegin", `<p class="ayuda">No se pudo resaltar la cita «${esc(cita)}» en esta vista (puede abarcar varias celdas o líneas); búscala en el texto.</p>`);
+    }
+  } catch (err) { $("#panel-cuerpo").innerHTML = `<p>${esc(err.message)}</p>`; }
+}
 
 /* Texto de la norma (ISOS/texto): requisito del Anexo A o cláusula + guía del Anexo B. */
 async function mostrarNorma(ref) {
@@ -321,6 +487,8 @@ async function mostrarNorma(ref) {
 $("#panel-cuerpo").addEventListener("click", async (e) => {
   const ref = $("#panel-cuerpo").dataset.ref;
   if (e.target.dataset.norma) { mostrarNorma(e.target.dataset.norma); return; }
+  if (e.target.dataset.evidencia) { mostrarEvidencia(e.target.dataset.evidencia, e.target.dataset); return; }
+  if (e.target.dataset.revision) { mostrarRevision(e.target.dataset.revision); return; }
   if (e.target.dataset.evaluar) { evaluarYMostrar(e.target.dataset.evaluar); return; }
   const decision = e.target.dataset.decidir;
   if (!decision || !ref) return;
@@ -342,6 +510,7 @@ $("#tabla-cobertura").addEventListener("click", async (e) => {
   if (e.target.dataset.evaluar) { evaluarYMostrar(e.target.dataset.evaluar); return; }
   if (e.target.dataset.revision) { mostrarRevision(e.target.dataset.revision); return; }
   if (e.target.dataset.norma) { mostrarNorma(e.target.dataset.norma); return; }
+  if (e.target.dataset.evidencia) { mostrarEvidencia(e.target.dataset.evidencia); return; }
   const ref = e.target.dataset.hallazgo;
   if (!ref) return;
   $("#panel-cuerpo").dataset.ref = "";

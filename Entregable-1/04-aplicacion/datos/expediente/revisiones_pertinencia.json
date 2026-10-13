@@ -1,0 +1,204 @@
+{
+  "revisiones": {
+    "5.2": {
+      "veredicto": "cumple_parcialmente",
+      "justificacion": "Demuestra la aprobación, alcance y principios de la política, pero falta la comunicación interna y externa.",
+      "citas": [
+        {
+          "evidencia": "EV-0001",
+          "texto": "Versión 2.0 — Aprobada por Gerencia General el 10/02/2026 — Código POL-PRIV-001",
+          "verificada": true
+        },
+        {
+          "evidencia": "EV-0001",
+          "texto": "Alcance: todos los tratamientos de datos personales en los que ClinData actúa como responsable del tratamiento (historias clínicas electrónicas, telemedicina, RR. HH.).",
+          "verificada": true
+        },
+        {
+          "evidencia": "EV-0001",
+          "texto": "Principios: legalidad, consentimiento, finalidad, proporcionalidad, calidad, seguridad, disposición de recurso y nivel de protección adecuado.",
+          "verificada": true
+        }
+      ],
+      "falta": "Falta la evidencia de comunicación interna y externa de la política.",
+      "truncadas": [],
+      "ref": "5.2",
+      "huellas": {
+        "EV-0001": "e65ea362a68816a6e522b86a7596638fdd4e2ac03d40232ebb102ecfaa5a5e6c"
+      },
+      "modelo": "qwen2.5:7b",
+      "fecha_ia": "2026-10-12T19:06:19-05:00",
+      "decision": null
+    },
+    "7.2": {
+      "veredicto": "cumple_parcialmente",
+      "justificacion": "Demuestra la capacitación del personal, pero falta el perfil de puesto para evaluar la competencia necesaria.",
+      "citas": [
+        {
+          "evidencia": "EV-0002",
+          "texto": "Protección de datos personales en salud, 2026-06-12, 18, Aprobado",
+          "verificada": true
+        }
+      ],
+      "falta": "Perfiles de puesto y evaluación de competencia necesaria.",
+      "truncadas": [],
+      "ref": "7.2",
+      "huellas": {
+        "EV-0002": "600a0079cab891d306b5dbae99cda18356d5f7e7f4974bff72b0e80b579f5fc3"
+      },
+      "modelo": "qwen2.5:7b",
+      "fecha_ia": "2026-10-12T19:13:21-05:00",
+      "decision": null
+    },
+    "A.1.2.2": {
+      "veredicto": "no_cumple",
+      "justificacion": "El registro menciona finalidades pero no explica claramente el propósito del tratamiento de la PII.",
+      "citas": [
+        {
+          "evidencia": "EV-0003",
+          "texto": "actividad,finalidad,categorias_pii,base_legal,destinatarios,transferencia_internacional,dpia_requerida",
+          "verificada": true
+        },
+        {
+          "evidencia": "EV-0003",
+          "texto": "Historia clínica electrónica,Atención médica,",
+          "verificada": true
+        }
+      ],
+      "falta": "Falta una explicación clara y detallada del propósito del tratamiento de la PII.",
+      "truncadas": [],
+      "ref": "A.1.2.2",
+      "huellas": {
+        "EV-0003": "1cdbfac56af0246971674cb234bb286092b3f22f0aedd5f0cc37d43c5a58ac2e"
+      },
+      "modelo": "qwen2.5:7b",
+      "fecha_ia": "2026-10-12T19:13:28-05:00",
+      "decision": null
+    },
+    "A.1.2.6": {
+      "veredicto": "cumple_parcialmente",
+      "justificacion": "La DPIA demuestra la evaluación de riesgos y medidas de mitigación, pero falta la aprobación del DPO y el registro de la DPIA.",
+      "citas": [
+        {
+          "evidencia": "EV-0004",
+          "texto": "Descripción del tratamiento: videoconsultas con grabación opcional, almacenamiento de recetas y notas clínicas en la nube del proveedor de videollamada.",
+          "verificada": true
+        },
+        {
+          "evidencia": "EV-0004",
+          "texto": "Riesgos identificados (probabilidad x impacto, escala 1-5): - R1 Acceso no autorizado a grabaciones: 3 x 5 = 15 (alto) -> cifrado en reposo y MFA.",
+          "verificada": true
+        },
+        {
+          "evidencia": "EV-0004",
+          "texto": "Firma del DPO: [firmado]",
+          "verificada": true
+        }
+      ],
+      "falta": "Falta la aprobación del DPO y el registro de la DPIA.",
+      "truncadas": [],
+      "ref": "A.1.2.6",
+      "huellas": {
+        "EV-0004": "eef5a03674ae6a2af40583161a054d7077c184174362feb4bf3a8b82e332919e"
+      },
+      "modelo": "qwen2.5:7b",
+      "fecha_ia": "2026-10-12T19:13:38-05:00",
+      "decision": null
+    },
+    "A.1.2.9": {
+      "veredicto": "no_cumple",
+      "justificacion": "El RoPA menciona algunos aspectos del procesamiento de PII, pero falta información crucial como la descripción de las medidas de seguridad y el informe de impacto en privacidad.",
+      "citas": [
+        {
+          "evidencia": "EV-0003",
+          "texto": "actividad,finalidad,categorias_pii,base_legal,destinatarios,transferencia_internacional,dpia_requerida",
+          "verificada": true
+        },
+        {
+          "evidencia": "EV-0003",
+          "texto": "Historia clínica electrónica,Atención médica,\"identificación; salud\",Ley 26842 y Ley 29733 art. 14,Personal asistencial,No,Sí",
+          "verificada": true
+        }
+      ],
+      "falta": "Descripción de las medidas de seguridad y informe de impacto en privacidad.",
+      "truncadas": [],
+      "ref": "A.1.2.9",
+      "huellas": {
+        "EV-0003": "1cdbfac56af0246971674cb234bb286092b3f22f0aedd5f0cc37d43c5a58ac2e"
+      },
+      "modelo": "qwen2.5:7b",
+      "fecha_ia": "2026-10-12T19:13:45-05:00",
+      "decision": null
+    },
+    "A.3.11": {
+      "veredicto": "cumple_parcialmente",
+      "justificacion": "Demuestra la existencia y contenido del procedimiento, pero falta la aprobación del Oficial de Privacidad y la notificación a la Autoridad Nacional.",
+      "citas": [
+        {
+          "evidencia": "EV-0005",
+          "texto": "Notificación a la Autoridad Nacional de Protección de Datos Personales y a los titulares cuando corresponda, previa aprobación del Oficial de Privacidad.",
+          "verificada": true
+        },
+        {
+          "evidencia": "EV-0005",
+          "texto": "Cierre, lecciones aprendidas y registro en el libro de incidentes.",
+          "verificada": true
+        }
+      ],
+      "falta": "Falta la aprobación del Oficial de Privacidad y la notificación a la Autoridad Nacional de Protección de Datos Personales.",
+      "truncadas": [],
+      "ref": "A.3.11",
+      "huellas": {
+        "EV-0005": "739f5a0baf5ca94c8801837fa2d3b59626e4294eaa0f4fb39f6ecef974e7582b"
+      },
+      "modelo": "qwen2.5:7b",
+      "fecha_ia": "2026-10-12T19:13:54-05:00",
+      "decision": null
+    },
+    "A.3.14": {
+      "veredicto": "cumple_parcialmente",
+      "justificacion": "El log seudonimizado demuestra la configuración de retención y inmutabilidad, pero no especifica la política de retención formal ni la inmutabilidad de los registros.",
+      "citas": [
+        {
+          "evidencia": "EV-0008",
+          "texto": "2026-09-30T17:59:59,U-11c9,HCE,modificacion,1,permitido",
+          "verificada": true
+        }
+      ],
+      "falta": "Falta la política de retención formal y la inmutabilidad de los registros.",
+      "truncadas": [],
+      "ref": "A.3.14",
+      "huellas": {
+        "EV-0008": "29401d6e9620b767cbef0a6943479e414493b5e44562e4c3f30618eee98ab382"
+      },
+      "modelo": "qwen2.5:7b",
+      "fecha_ia": "2026-10-12T19:14:00-05:00",
+      "decision": null
+    },
+    "A.3.17": {
+      "veredicto": "no_cumple",
+      "justificacion": "El registro muestra formaciones en privacidad, pero no incluye un plan de formación ni registros de aprobación.",
+      "citas": [
+        {
+          "evidencia": "EV-0002",
+          "texto": "id_colaborador,area,curso,fecha,nota,estado",
+          "verificada": true
+        },
+        {
+          "evidencia": "EV-0002",
+          "texto": "COL-001,Admisión,Protección de datos personales en salud,2026-06-12,18,Aprobado",
+          "verificada": true
+        }
+      ],
+      "falta": "Falta un plan de formación y registros de aprobación.",
+      "truncadas": [],
+      "ref": "A.3.17",
+      "huellas": {
+        "EV-0002": "600a0079cab891d306b5dbae99cda18356d5f7e7f4974bff72b0e80b579f5fc3"
+      },
+      "modelo": "qwen2.5:7b",
+      "fecha_ia": "2026-10-12T19:14:07-05:00",
+      "decision": null
+    }
+  }
+}

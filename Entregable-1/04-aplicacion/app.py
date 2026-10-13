@@ -15,7 +15,7 @@ import tempfile
 import threading
 import uuid
 
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, send_file
 
 import asistente
 import llm_local
@@ -38,6 +38,7 @@ CONOCIMIENTO = [
     os.path.join(SKILL, "SKILL.md"),
     os.path.join(RAIZ, "03-asistente", "glosario_pims.md"),
 ]
+LIMITE_VISOR = 300000               # caracteres que muestra el visor de evidencias
 EXTENSIONES = {".md", ".txt", ".csv", ".json", ".log", ".pdf", ".docx", ".xlsx", ".png", ".jpg"}
 
 os.makedirs(EXPEDIENTE, exist_ok=True)
@@ -106,6 +107,41 @@ def api_estado():
 @app.route("/api/catalogo")
 def api_catalogo():
     return jsonify(CATALOGO)
+
+
+def _evidencia(ev_id):
+    """Registro de una evidencia y la ruta de su archivo dentro del expediente."""
+    ev = next((e for e in leer_indice(EXPEDIENTE)["evidencias"] if e["id"] == ev_id), None)
+    if not ev:
+        return None, None
+    ruta = os.path.realpath(os.path.join(EXPEDIENTE, ev["archivo"]))
+    if not ruta.startswith(os.path.realpath(EXPEDIENTE) + os.sep):
+        return None, None
+    return ev, ruta
+
+
+@app.route("/api/evidencia/<ev_id>")
+def api_evidencia(ev_id):
+    """Contenido de una evidencia archivada, en solo lectura (no toca la cadena)."""
+    ev, ruta = _evidencia(ev_id)
+    if not ev:
+        return _error("Evidencia no encontrada", 404)
+    existe = os.path.exists(ruta)
+    texto = leer_texto(ruta, limite=LIMITE_VISOR + 1) if existe else ""
+    return jsonify(dict(ev, integridad=estado_integridad(EXPEDIENTE, ev),
+                        formato=os.path.splitext(ruta)[1].lower().lstrip("."),
+                        texto=texto[:LIMITE_VISOR], truncado=len(texto) > LIMITE_VISOR,
+                        existe=existe))
+
+
+@app.route("/api/evidencia/<ev_id>/archivo")
+def api_evidencia_archivo(ev_id):
+    """El archivo original (PDF, imagen...) para verlo o descargarlo."""
+    ev, ruta = _evidencia(ev_id)
+    if not ev or not os.path.exists(ruta):
+        return _error("Archivo no encontrado", 404)
+    return send_file(ruta, download_name=os.path.basename(ruta),
+                     as_attachment=request.args.get("descargar") == "1")
 
 
 @app.route("/api/norma/<ref>")
