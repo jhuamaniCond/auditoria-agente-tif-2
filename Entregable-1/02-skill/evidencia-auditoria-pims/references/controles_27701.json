@@ -1,6 +1,6 @@
 {
   "norma": "ISO/IEC 27701:2025",
-  "nota": "Catalogo de trabajo del Grupo 6. Referencias y titulos del Anexo A contrastados el 2026-10-01 con la lista publicada de los 78 controles de ISO/IEC 27701:2025 (A.1 responsable 31, A.2 encargado 18, A.3 ambos 29; fuente: ISMS.online, Annex A Controls 2025). Los titulos estan traducidos al espanol por el grupo. Se puede ampliar anadiendo objetos a la lista.",
+  "nota": "Catalogo de trabajo del Grupo 6. Referencias y titulos del Anexo A contrastados el 2026-10-01 con la lista publicada de los 78 controles de ISO/IEC 27701:2025 (A.1 responsable 31, A.2 encargado 18, A.3 ambos 29; fuente: ISMS.online, Annex A Controls 2025) y verificados el 2026-10-12 contra el texto oficial de ISOS/ (las 33 referencias existen en la norma). Los titulos estan traducidos al espanol por el grupo. Se puede ampliar anadiendo objetos a la lista.",
   "controles": [
     {"ref": "4.1", "grupo": "clausula", "titulo": "Comprension de la organizacion y de su contexto", "evidencia_esperada": "Analisis de contexto (FODA/PESTEL) con cuestiones internas y externas de privacidad, incluida la evaluacion de relevancia del cambio climatico", "minimo": 1},
     {"ref": "4.2", "grupo": "clausula", "titulo": "Necesidades y expectativas de las partes interesadas", "evidencia_esperada": "Matriz de partes interesadas y requisitos legales aplicables (p. ej. Ley 29733 y su reglamento)", "minimo": 1},

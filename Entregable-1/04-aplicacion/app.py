@@ -19,6 +19,8 @@ from flask import Flask, jsonify, render_template, request
 
 import asistente
 import llm_local
+import norma
+import revisiones
 from evidencia_api import (CATALOGO_POR_DEFECTO, TIPOS, ErrorEvidencia, comprobar_cadena,
                            estado_integridad, evaluar_cobertura, leer_catalogo, leer_indice,
                            registrar_evidencia, verificar_expediente)
@@ -71,6 +73,7 @@ def _resumen(fuente):
     rol, vigencia, fecha = _parametros_cobertura(fuente)
     cob = evaluar_cobertura(EXPEDIENTE, CATALOGO, rol, vigencia, fecha)
     evidencias = leer_indice(EXPEDIENTE)["evidencias"]
+    revisiones.aplicar(cob, EXPEDIENTE, evidencias)
     return cob, asistente.resumen_expediente(cob, _integridad_sin_registrar(), evidencias)
 
 
@@ -96,12 +99,25 @@ def api_estado():
         ev["integridad"] = estado_ev.get(ev["id"], "OK")
     return jsonify({"modelo": llm_local.estado(), "evidencias": indice["evidencias"],
                     "integridad": integridad,
-                    "rag": {"fragmentos": len(RAG.fragmentos)}})
+                    "rag": {"fragmentos": len(RAG.fragmentos),
+                            "norma": sum(f["tipo"] == "norma" for f in RAG.fragmentos)}})
 
 
 @app.route("/api/catalogo")
 def api_catalogo():
     return jsonify(CATALOGO)
+
+
+@app.route("/api/norma/<ref>")
+def api_norma(ref):
+    """Texto de ISO/IEC 27701:2025 (ISOS/texto) para un control: requisito y guia."""
+    secciones = norma.para_control(ref)
+    if not secciones:
+        return _error("No hay texto de la norma para %s en ISOS/texto "
+                      "(ejecuta python extraer_norma.py)" % ref, 404)
+    return jsonify({"ref": ref, "secciones": [
+        {"ref": s["ref"], "titulo": s["titulo"], "cita": norma.cita(s), "texto": s["texto"]}
+        for s in secciones]})
 
 
 @app.route("/api/cobertura")
@@ -191,6 +207,51 @@ def api_hallazgo():
     except llm_local.ErrorModelo as e:
         return _error(str(e), 503)
     return jsonify({"ref": fila["ref"], "hallazgo": texto})
+
+
+@app.route("/api/pertinencia", methods=["POST"])
+def api_pertinencia():
+    """La IA lee las evidencias de un control y propone si lo demuestran (paso 4)."""
+    d = request.get_json(force=True)
+    cob, _ = _resumen(d)
+    fila = next((f for f in cob["controles"] if f["ref"] == d.get("ref")), None)
+    if not fila:
+        return _error("Control no encontrado")
+    if fila["estado"] not in revisiones.EVALUABLES:
+        return _error("El control %s esta %s: no hay evidencia valida que revisar"
+                      % (fila["ref"], fila["estado"]))
+    control = next(c for c in CATALOGO if c["ref"] == fila["ref"])
+    indice = leer_indice(EXPEDIENTE)["evidencias"]
+    leidas = [dict(ev, texto=leer_texto(os.path.join(EXPEDIENTE, ev["archivo"]), limite=200000))
+              for ev in indice if ev["id"] in fila["evidencias"]]
+    try:
+        propuesta = asistente.evaluar_pertinencia(control, fila, leidas)
+    except llm_local.ErrorModelo as e:
+        return _error(str(e), 503)
+    with _bloqueo:
+        rev = revisiones.guardar_propuesta(EXPEDIENTE, fila["ref"], propuesta, indice,
+                                           fila["evidencias"], llm_local.MODELO_CHAT)
+    return jsonify(rev)
+
+
+@app.route("/api/pertinencia/decision", methods=["POST"])
+def api_pertinencia_decision():
+    """El auditor acepta o rechaza la propuesta; queda anotado en la cadena de custodia."""
+    d = request.get_json(force=True)
+    if d.get("decision") not in ("aceptada", "rechazada"):
+        return _error("La decision debe ser 'aceptada' o 'rechazada'")
+    cob, _ = _resumen(d)
+    fila = next((f for f in cob["controles"] if f["ref"] == d.get("ref")), {})
+    if not fila.get("revision", {}).get("vigente"):
+        return _error("Las evidencias del control cambiaron: vuelve a evaluarlo con la IA")
+    try:
+        with _bloqueo:
+            rev = revisiones.decidir(EXPEDIENTE, d.get("ref", ""), d["decision"],
+                                     (d.get("auditor") or "").strip() or "auditor (web)",
+                                     (d.get("comentario") or "").strip())
+    except ValueError as e:
+        return _error(str(e))
+    return jsonify(rev)
 
 
 def preparar():

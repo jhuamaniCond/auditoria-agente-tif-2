@@ -6,6 +6,9 @@ vectorial FAISS en memoria y en disco.
 Fuentes que se indexan:
   conocimiento  catalogo de controles (un fragmento por control), criterios de
                 evidencia, plantilla de hallazgo, reglas de la skill y glosario.
+  norma         texto de ISO/IEC 27701:2025 (ISOS/texto, ver extraer_norma.py):
+                una o varias piezas por clausula, control del Anexo A y guia
+                del Anexo B, con la referencia y la pagina del PDF.
   evidencia     texto de cada evidencia archivada en el expediente, con su ID.
 
 El indice se reconstruye solo cuando cambia alguna fuente (se compara una
@@ -22,6 +25,7 @@ import faiss
 import numpy as np
 
 import llm_local
+import norma
 
 # FAISS usa OpenMP; combinado con los hilos de Flask en Windows puede bloquearse.
 # El indice es pequeno: un hilo basta y el acceso se serializa con un candado.
@@ -96,6 +100,31 @@ class IndiceRAG(object):
             for s in _secciones_markdown(contenido):
                 frags.append({"texto": s, "fuente": os.path.basename(ruta),
                               "tipo": "conocimiento", "ref": ""})
+        return frags + self._fragmentos_norma()
+
+    def _titulo_es(self, ref):
+        """Titulo en espanol del catalogo para una seccion de la norma (B.x -> A.x,
+        9.2.1 -> 9.2): la norma esta en ingles y las preguntas llegan en espanol."""
+        titulos = {c["ref"]: c["titulo"] for c in self.catalogo}
+        if ref.startswith("B."):
+            ref = "A." + ref[2:]
+        while ref:
+            if ref in titulos:
+                return titulos[ref]
+            ref = ref.rpartition(".")[0] if not ref.startswith("A.") else ""
+        return ""
+
+    def _fragmentos_norma(self):
+        frags = []
+        for s in norma.secciones():
+            if len(s["texto"]) < 40:
+                continue
+            es = self._titulo_es(s["ref"])
+            cabecera = "%s - %s %s%s" % (norma.cita(s), s["ref"], s["titulo"],
+                                         " (%s)" % es if es else "")
+            for t in _trocear(s["texto"]):
+                frags.append({"texto": cabecera + "\n" + t, "fuente": norma.cita(s),
+                              "tipo": "norma", "ref": s["ref"]})
         return frags
 
     def _fragmentos_evidencia(self):
@@ -169,7 +198,9 @@ class IndiceRAG(object):
         vector = llm_local.embeber([PREFIJO_CONSULTA + consulta])
         with _CANDADO:
             q = _normalizar(vector)
-            n = min(self.indice.ntotal, k * 4 if tipos else k)
+            # Con filtro de tipo se recorre todo el indice (es pequeno): una pregunta
+            # en espanol tiene cerca muchos textos en espanol antes que la norma.
+            n = self.indice.ntotal if tipos else min(self.indice.ntotal, k)
             puntajes, posiciones = self.indice.search(q, n)
         salida = []
         for p, i in zip(puntajes[0], posiciones[0]):

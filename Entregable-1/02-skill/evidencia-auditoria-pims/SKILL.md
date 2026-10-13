@@ -126,6 +126,14 @@ y ejecuta los pasos 2 a 5 con un modelo local (Ollama) y RAG sobre FAISS. Las
 reglas de esta skill y los archivos de `references/` y `assets/` forman parte de
 la base de conocimiento que recupera el asistente.
 
+En la web, el paso 4 es el botón **Evaluar pertinencia con IA** de la pestaña
+Cobertura: el modelo lee el texto de las evidencias de cada control `Cubierto`
+o `Parcial`, lo compara con la evidencia esperada y propone `cumple`,
+`cumple_parcialmente` o `no_cumple` con justificación y citas (cada cita se
+comprueba contra el documento). La propuesta no cambia nada hasta que el
+auditor la **acepta**; entonces un control `Cubierto` baja a `Parcial` y la
+decisión se anota en la cadena de custodia (`REVISION_PERTINENCIA`).
+
 ## Ejemplo completo
 
 `assets/demo/` contiene un expediente de ejemplo (empresa ficticia ClinData

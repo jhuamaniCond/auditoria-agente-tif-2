@@ -103,11 +103,16 @@
       <article class="tarjeta">
         <div class="tarjeta-cab">
           <h2>Matriz de cobertura</h2>
-          <select id="filtro-estado" aria-label="Filtrar por estado"><option value="">Todos los estados</option></select>
+          <div class="acciones-cab">
+            <button class="boton secundario" id="btn-evaluar-todos">Evaluar pertinencia con IA</button>
+            <select id="filtro-estado" aria-label="Filtrar por estado"><option value="">Todos los estados</option></select>
+          </div>
         </div>
+        <p class="ayuda">El estado sale del conteo de <code>evidencia.py</code> (evidencia íntegra, vigente y suficiente en número). La <strong>revisión IA</strong> lee el contenido de las evidencias y propone si de verdad demuestran el control; solo cuando el auditor acepta la propuesta un control <em>Cubierto</em> baja a <em>Parcial</em>. La IA nunca sube un control.</p>
+        <p class="nota" id="nota-evaluacion"></p>
         <div class="tabla-envoltura">
           <table class="tabla" id="tabla-cobertura">
-            <thead><tr><th>Control</th><th>Título</th><th>Estado</th><th>Evidencias</th><th>Observación</th><th></th></tr></thead>
+            <thead><tr><th>Control</th><th>Título</th><th>Estado</th><th>Evidencias</th><th>Observación</th><th>Revisión IA</th><th></th></tr></thead>
             <tbody></tbody>
           </table>
         </div>

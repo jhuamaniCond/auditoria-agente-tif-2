@@ -16,13 +16,58 @@ bloque CONTEXTO, junto con el estado del expediente calculado por `evidencia.py`
 | `plantilla_hallazgo.md` | 1 | Formato obligatorio del hallazgo |
 | `SKILL.md` | por sección | Reglas no negociables y pasos |
 | `glosario_pims.md` | por sección | Vocabulario: PII, SoA, RoPA, DPIA, ARCO, HITL |
+| Norma ISO/IEC 27701:2025 (`ISOS/texto/`) | 238, por cláusula, control del Anexo A y guía del Anexo B | Criterio de auditoría: qué exige exactamente cada requisito, con referencia y página |
 | Evidencias del expediente | por párrafos, con su ID | Leer qué dice cada evidencia al valorar o redactar |
+
+### La norma como fuente de conocimiento
+
+El PDF de la norma está en `ISOS/pdf/`. Es un escaneo sin capa de texto, así
+que `04-aplicacion/extraer_norma.py` lo convierte una sola vez con el OCR que
+trae Windows (Windows.Media.Ocr, sin instalar Tesseract) en
+`ISOS/texto/ISO 27701-2025.md`: introducción, cláusulas 1-10, los 78 controles
+del Anexo A (31 + 18 + 29, reconstruidos de las tablas) y su guía del Anexo B.
+Los Anexos C-F son tablas de correspondencia y no se incluyen.
+`04-aplicacion/norma.py` separa ese texto por secciones y relaciona cada control
+del catálogo con su requisito (cláusula o A.x) y su guía (B.x).
+
+La norma está en inglés y las preguntas llegan en español, y
+`nomic-embed-text` cruza mal de idioma. Por eso cada fragmento de la norma
+lleva también el título en español del catálogo, y el chat busca en la norma
+dos veces: con la pregunta original y con su traducción al inglés hecha por el
+modelo local (unos 2-3 s más por pregunta).
+
+Dónde la usa el asistente:
+
+- **Chat**: además de los 5 fragmentos más parecidos de toda la base, recibe
+  hasta 6 de la norma; si la pregunta nombra un control o una cláusula
+  (p. ej. `A.3.11`), se adjunta su requisito y su guía. Cita así:
+  `[ISO 27701-2025 §A.3.11 (p. 25)]`.
+- **Revisión de pertinencia**: el modelo compara las evidencias con el
+  requisito exacto del control (lo que dice *shall*), no solo con la evidencia
+  esperada del catálogo.
+- **Hallazgo**: el campo *Criterio* se redacta a partir del requisito de la
+  norma, con referencia y página.
+- **Interfaz**: en la pestaña Cobertura, al pulsar la referencia de un control
+  se abre el texto de la norma (requisito + guía).
+
+Si se añade otra norma, basta con dejar su PDF en `ISOS/pdf/` y volver a
+ejecutar `python extraer_norma.py` (las páginas de cada parte están definidas
+al inicio del script para ISO/IEC 27701:2025).
+
+La **revisión de pertinencia** (botón *Evaluar pertinencia con IA*) no usa
+fragmentos sueltos: entrega al modelo el texto completo de las evidencias del
+control (hasta 10 000 caracteres en total; si un documento es más largo se
+avisa de que solo se leyó el inicio), el requisito y la guía del control en
+ISO/IEC 27701:2025 (hasta 3 000 caracteres), la evidencia esperada del catálogo
+y la sección 1 de `criterios_evidencia.md`. Las propuestas y las decisiones del
+auditor se guardan en `datos/expediente/revisiones_pertinencia.json`.
 
 El índice se reconstruye solo si cambia alguna fuente (se compara una huella
 SHA-256 de todo lo indexado); las evidencias nuevas se añaden al registrarlas.
 
-No se indexa el texto de la norma ISO/IEC 27701:2025 por estar protegido por
-derechos de autor; el catálogo resume lo necesario para auditar.
+La norma está protegida por derechos de autor: el PDF y su texto extraído se
+usan solo dentro de la máquina del auditor (nada se envía fuera) y no deben
+publicarse en un repositorio público.
 
 ## 2. Modelos locales (Ollama)
 
@@ -47,10 +92,14 @@ ollama pull qwen2.5:7b
 cd 04-aplicacion
 pip install -r requirements.txt       # flask, faiss-cpu, numpy
 
-# 3. (Opcional) cargar el caso de estudio ClinData S.A.C.
+# 3. Texto de la norma (solo si cambia el PDF de ISOS/pdf; ya viene generado)
+pip install pymupdf
+python extraer_norma.py               # -> ISOS/texto/ISO 27701-2025.md
+
+# 4. (Opcional) cargar el caso de estudio ClinData S.A.C.
 python cargar_demo.py
 
-# 4. Arrancar
+# 5. Arrancar
 python app.py                         # http://127.0.0.1:5000
 ```
 

@@ -70,7 +70,8 @@ async function cargarEstado() {
   pm.textContent = m.listo ? `LLM local: ${m.chat}` : (m.activo ? "Faltan modelos en Ollama" : "Ollama apagado");
   pm.className = "pastilla " + (m.listo ? "bien" : "mal");
   const pr = $("#p-rag");
-  pr.textContent = `FAISS · ${m.embeddings} · ${d.rag.fragmentos} fragmentos`;
+  pr.textContent = `FAISS · ${m.embeddings} · ${d.rag.fragmentos} fragmentos (${d.rag.norma} de ISO 27701)`;
+  pr.title = d.rag.norma ? "La norma de ISOS/texto está indexada" : "Sin texto de la norma: ejecuta python extraer_norma.py";
   pr.className = "pastilla " + (d.rag.fragmentos ? "bien" : "mal");
   const i = d.integridad, malas = [...i.resultados.ALTERADA, ...i.resultados.FALTANTE];
   const pi = $("#p-integridad");
@@ -192,9 +193,12 @@ async function cargarCobertura() {
   const c = await api("/api/cobertura?" + new URLSearchParams(parametros()));
   estado.cobertura = c;
   const kp = c.conteo_estados;
+  const pct = (n) => n.toFixed(1).replace(".", ",");
+  const revisada = c.degradados.length
+    ? `<div class="rotulo">Automática ${pct(c.porcentaje_automatico)} % · bajados por revisión: ${c.degradados.map(esc).join(", ")}</div>` : "";
   $("#kpis").innerHTML = `
-    <div class="kpi principal"><div class="cifra">${c.porcentaje_cobertura.toFixed(1).replace(".", ",")} %</div>
-      <div class="rotulo">Cobertura · ${kp.Cubierto} de ${c.controles_aplicables} aplicables</div>
+    <div class="kpi principal"><div class="cifra">${pct(c.porcentaje_cobertura)} %</div>
+      <div class="rotulo">Cobertura · ${kp.Cubierto} de ${c.controles_aplicables} aplicables</div>${revisada}
       <div class="barra-cob"><span style="width:${c.porcentaje_cobertura}%"></span></div></div>` +
     ORDEN.map((e) => `<div class="kpi"><div class="cifra">${kp[e]}</div><div class="rotulo"><span class="insignia e-${clase(e)}">${e}</span></div></div>`).join("");
   const filtro = $("#filtro-estado");
@@ -206,19 +210,141 @@ function pintarCobertura() {
   const filas = estado.cobertura.controles.filter((x) => !f || x.estado === f);
   $("#tabla-cobertura tbody").innerHTML = filas.map((x) => `
     <tr>
-      <td class="ref">${esc(x.ref)}</td>
+      <td><button class="ref enlace-norma" data-norma="${esc(x.ref)}" title="Ver el texto de ISO/IEC 27701:2025">${esc(x.ref)}</button></td>
       <td>${esc(x.titulo)}</td>
       <td><span class="insignia e-${clase(x.estado)}">${esc(x.estado)}</span></td>
       <td class="mono">${x.evidencias.map(esc).join(", ") || "—"}</td>
       <td><small>${esc(x.nota || "—")}</small></td>
+      <td>${celdaRevision(x)}</td>
       <td>${["Cubierto", "No aplica"].includes(x.estado) ? "" : `<button class="boton secundario mini" data-hallazgo="${esc(x.ref)}">Redactar hallazgo</button>`}</td>
     </tr>`).join("");
 }
+
+/* ------------------------------------------------- revisión de pertinencia */
+const VEREDICTO = { cumple: "Cumple", cumple_parcialmente: "Cumple parcialmente", no_cumple: "No cumple" };
+const evaluable = (x) => ["Cubierto", "Parcial"].includes(x.estado);
+function celdaRevision(x) {
+  const r = x.revision;
+  if (!evaluable(x)) return r ? `<small>${esc(VEREDICTO[r.veredicto])} (no aplicada)</small>` : "—";
+  if (!r || !r.vigente) {
+    return `<button class="boton secundario mini" data-evaluar="${esc(x.ref)}">Evaluar con IA</button>` +
+      (r ? `<br><small>Las evidencias cambiaron</small>` : "");
+  }
+  const decision = r.decision ? (r.decision === "aceptada" ? "✓ aceptada" : "✕ rechazada") : "pendiente";
+  return `<button class="insignia v-${r.veredicto} enlace" data-revision="${esc(x.ref)}">${esc(VEREDICTO[r.veredicto])}</button>` +
+    `<br><small class="${r.decision ? "" : "pendiente"}">${decision}</small>`;
+}
+function filaDe(ref) { return estado.cobertura.controles.find((x) => x.ref === ref); }
+
+function mostrarRevision(ref) {
+  const x = filaDe(ref), r = x.revision;
+  $("#panel-titulo").textContent = `Revisión de pertinencia · ${ref}`;
+  const control = estado.catalogo.find((c) => c.ref === ref);
+  const citas = r.citas.length ? "<ul class=\"citas\">" + r.citas.map((c) => `
+      <li><span class="ref">${esc(c.evidencia)}</span> «${esc(c.texto)}»
+        <small class="${c.verificada ? "ok" : "mal"}">${c.verificada ? "✓ cita encontrada en el documento" : "✕ no aparece literal en el documento"}</small></li>`).join("") + "</ul>"
+    : "<p><small>El modelo no aportó citas.</small></p>";
+  const truncadas = r.truncadas.length
+    ? `<p class="aviso-panel">Solo se leyó el inicio de ${r.truncadas.map(esc).join(", ")} (documento largo).</p>` : "";
+  const decision = r.decision
+    ? `<p class="decision">Decisión del auditor: <strong>${esc(r.decision)}</strong> por ${esc(r.auditor)} el ${esc(r.fecha_decision.slice(0, 16).replace("T", " "))}` +
+      `${r.comentario ? ` — «${esc(r.comentario)}»` : ""}. Anotada en la cadena de custodia.</p>
+       <button class="boton secundario" data-evaluar="${esc(ref)}">Volver a evaluar con IA</button>`
+    : `<label>Auditor<input type="text" id="rev-auditor" placeholder="Nombre de quien decide"></label>
+       <label>Comentario<textarea id="rev-comentario" rows="2" placeholder="Opcional: por qué aceptas o rechazas"></textarea></label>
+       <div class="acciones">
+         <button class="boton" data-decidir="aceptada">Aceptar propuesta</button>
+         <button class="boton secundario" data-decidir="rechazada">Rechazar</button>
+       </div>
+       <p class="ayuda">${r.veredicto === "cumple" || x.estado !== "Cubierto"
+         ? "Aceptar deja la matriz como está y registra que el contenido fue revisado."
+         : "Si aceptas, el control baja de Cubierto a Parcial y podrás redactar su hallazgo."}</p>`;
+  $("#panel-cuerpo").innerHTML = `
+    <p><span class="insignia v-${r.veredicto}">${esc(VEREDICTO[r.veredicto])}</span>
+       <small>propuesta de ${esc(r.modelo)} · ${esc(r.fecha_ia.slice(0, 16).replace("T", " "))} · evidencias ${Object.keys(r.huellas).map(esc).join(", ")}</small></p>
+    <p><small>Evidencia esperada: ${esc(control ? control.evidencia_esperada : "")} ·
+       <button class="enlace-norma" data-norma="${esc(ref)}">Ver requisito en ISO/IEC 27701:2025</button></small></p>
+    <h3>Justificación</h3><p>${esc(r.justificacion || "—")}</p>
+    ${r.falta ? `<h3>Qué falta</h3><p>${esc(r.falta)}</p>` : ""}
+    <h3>Citas de las evidencias</h3>${citas}${truncadas}
+    <hr>${decision}`;
+  $("#panel-cuerpo").dataset.ref = ref;
+  $("#panel-hallazgo").classList.remove("oculto");
+}
+
+async function evaluar(ref) {
+  const r = await api("/api/pertinencia", json({ ref, ...parametros() }));
+  return r;
+}
+async function evaluarYMostrar(ref) {
+  $("#panel-titulo").textContent = `Revisión de pertinencia · ${ref}`;
+  $("#panel-cuerpo").innerHTML = `<p class="pensando">El modelo local está leyendo las evidencias de ${esc(ref)} y comparándolas con la evidencia esperada…</p>`;
+  $("#panel-hallazgo").classList.remove("oculto");
+  try {
+    await evaluar(ref);
+    await cargarCobertura();
+    mostrarRevision(ref);
+  } catch (err) { $("#panel-cuerpo").innerHTML = `<p>${esc(err.message)}</p>`; }
+}
+
+$("#btn-evaluar-todos").addEventListener("click", async (e) => {
+  if (!estado.cobertura) await cargarCobertura();
+  const pendientes = estado.cobertura.controles.filter((x) => evaluable(x) && !(x.revision && x.revision.vigente));
+  const nota = $("#nota-evaluacion");
+  if (!pendientes.length) { nota.textContent = "Todos los controles con evidencia válida ya tienen revisión IA."; return; }
+  e.target.disabled = true;
+  let hechos = 0;
+  for (const x of pendientes) {
+    nota.textContent = `Evaluando ${x.ref} (${hechos + 1} de ${pendientes.length}) con el modelo local…`;
+    try { await evaluar(x.ref); hechos++; }
+    catch (err) { nota.textContent = `${x.ref}: ${err.message}`; break; }
+    await cargarCobertura();
+  }
+  if (hechos === pendientes.length) nota.textContent = `${hechos} propuestas listas. Ábrelas en la columna «Revisión IA» para aceptarlas o rechazarlas.`;
+  e.target.disabled = false;
+});
+
+/* Texto de la norma (ISOS/texto): requisito del Anexo A o cláusula + guía del Anexo B. */
+async function mostrarNorma(ref) {
+  $("#panel-cuerpo").dataset.ref = "";
+  $("#panel-titulo").textContent = `ISO/IEC 27701:2025 · ${ref}`;
+  $("#panel-cuerpo").innerHTML = `<p class="pensando">Buscando ${esc(ref)} en la norma…</p>`;
+  $("#panel-hallazgo").classList.remove("oculto");
+  try {
+    const r = await api(`/api/norma/${encodeURIComponent(ref)}`);
+    $("#panel-cuerpo").innerHTML =
+      `<p class="aviso-panel">Texto oficial en inglés, extraído por OCR del PDF de <code>ISOS/</code>. Es el criterio que usa la IA al evaluar y redactar hallazgos.</p>` +
+      r.secciones.map((s) => `<h3>${esc(s.ref)} ${esc(s.titulo)}</h3><p><small>${esc(s.cita)}</small></p>${md(s.texto)}`).join("<hr>");
+  } catch (err) { $("#panel-cuerpo").innerHTML = `<p>${esc(err.message)}</p>`; }
+}
+
+$("#panel-cuerpo").addEventListener("click", async (e) => {
+  const ref = $("#panel-cuerpo").dataset.ref;
+  if (e.target.dataset.norma) { mostrarNorma(e.target.dataset.norma); return; }
+  if (e.target.dataset.evaluar) { evaluarYMostrar(e.target.dataset.evaluar); return; }
+  const decision = e.target.dataset.decidir;
+  if (!decision || !ref) return;
+  e.target.disabled = true;
+  try {
+    await api("/api/pertinencia/decision", json({
+      ref, decision, auditor: $("#rev-auditor").value, comentario: $("#rev-comentario").value, ...parametros(),
+    }));
+    await cargarCobertura();
+    mostrarRevision(ref);
+  } catch (err) {
+    e.target.disabled = false;
+    $("#panel-cuerpo").insertAdjacentHTML("beforeend", `<p class="aviso-panel">${esc(err.message)}</p>`);
+  }
+});
 $("#form-cobertura").addEventListener("submit", (e) => { e.preventDefault(); cargarCobertura().catch((err) => alertaSuave(err)); });
 $("#filtro-estado").addEventListener("change", pintarCobertura);
 $("#tabla-cobertura").addEventListener("click", async (e) => {
+  if (e.target.dataset.evaluar) { evaluarYMostrar(e.target.dataset.evaluar); return; }
+  if (e.target.dataset.revision) { mostrarRevision(e.target.dataset.revision); return; }
+  if (e.target.dataset.norma) { mostrarNorma(e.target.dataset.norma); return; }
   const ref = e.target.dataset.hallazgo;
   if (!ref) return;
+  $("#panel-cuerpo").dataset.ref = "";
   const panel = $("#panel-hallazgo");
   $("#panel-titulo").textContent = `Hallazgo preliminar · ${ref}`;
   $("#panel-cuerpo").innerHTML = `<p class="pensando">El modelo local está redactando el hallazgo con la plantilla de la skill…</p>`;
