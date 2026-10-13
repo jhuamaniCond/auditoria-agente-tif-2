@@ -38,6 +38,32 @@ small, .nota, .ayuda { color: var(--tinta-3); }
   background: #f1f1ee; color: var(--tinta); font-weight: 700; font-size: 18px;
 }
 .estado { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* Proyecto activo: siempre visible en la barra */
+.selector-proyecto { display: flex; align-items: center; gap: 8px; margin-right: auto; margin-left: 24px; flex-wrap: wrap; }
+.selector-proyecto label {
+  display: inline; margin: 0; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: #b9bdc0;
+}
+.barra .selector-proyecto select {
+  width: auto; min-width: 220px; max-width: 320px; margin: 0; padding: 6px 10px; font-weight: 600;
+  background: #f1f1ee; border-color: transparent;
+}
+.lista-excluir .excluir input { width: auto; margin: 0; }
+.selector-proyecto select:disabled { opacity: .6; cursor: not-allowed; }
+.boton-barra {
+  padding: 6px 12px; border-radius: 6px; font: inherit; font-size: 13px; cursor: pointer;
+  background: transparent; color: #f1f1ee; border: 1px solid rgba(255,255,255,.35);
+}
+.boton-barra:hover { background: rgba(255,255,255,.1); }
+.boton-barra:disabled { opacity: .5; cursor: not-allowed; }
+
+/* Formulario de nuevo proyecto */
+.form-proyecto { display: grid; gap: 12px; }
+.form-proyecto details { border: 1px solid var(--borde); border-radius: 6px; padding: 8px 12px; }
+.form-proyecto summary { cursor: pointer; font-weight: 600; }
+.lista-excluir { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 6px; max-height: 40vh; overflow-y: auto; }
+.lista-excluir .excluir { display: flex; gap: 8px; align-items: baseline; font-weight: 400; }
+.lista-excluir .justificacion { margin: 4px 0 0 24px; width: calc(100% - 24px); }
 .pastilla {
   font-size: 12px; padding: 4px 10px; border-radius: 99px;
   background: rgba(255,255,255,.1); color: #e8e8e4; white-space: nowrap;

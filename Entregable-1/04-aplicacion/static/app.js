@@ -2,7 +2,8 @@
 "use strict";
 
 const $ = (sel) => document.querySelector(sel);
-const estado = { catalogo: [], cobertura: null, historial: [], subida: null, controles: [], evaluando: null };
+const estado = { catalogo: [], cobertura: null, historial: [], subida: null, controles: [], evaluando: null,
+  proyecto: null, proyectos: [] };
 const ORDEN = ["Cubierto", "Parcial", "Desactualizada", "Comprometida", "Sin evidencia", "No aplica"];
 
 function clase(texto) {
@@ -11,8 +12,11 @@ function clase(texto) {
 function esc(t) {
   return String(t ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
+/* Toda petición va al proyecto activo: el servidor solo ve su expediente. */
 async function api(ruta, opciones = {}) {
-  const r = await fetch(ruta, opciones);
+  const headers = { ...(opciones.headers || {}) };
+  if (estado.proyecto) headers["X-Proyecto"] = estado.proyecto.id;
+  const r = await fetch(ruta, { ...opciones, headers });
   const datos = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error(datos.error || `Error ${r.status}`);
   return datos;
@@ -65,8 +69,15 @@ function irA(vista) {
 document.querySelectorAll(".pestana").forEach((b) => b.addEventListener("click", () => irA(b.dataset.vista)));
 
 /* ------------------------------------------------------------------ estado */
+const idActivo = () => estado.proyecto && estado.proyecto.id;
+
 async function cargarEstado() {
+  if (!estado.proyecto) return;
+  const pid = idActivo();
   const d = await api("/api/estado");
+  if (idActivo() !== pid) return;     // se cambió de proyecto mientras llegaba la respuesta
+  Object.assign(estado.proyecto, d.proyecto);
+  pintarSelectorProyectos();
   const m = d.modelo;
   const pm = $("#p-modelo");
   pm.textContent = m.listo ? `LLM local: ${m.chat}` : (m.activo ? "Faltan modelos en Ollama" : "Ollama apagado");
@@ -196,7 +207,10 @@ function parametros() {
   return { rol: $("#rol").value, vigencia: $("#vigencia").value, fecha: $("#fecha-corte").value || hoy() };
 }
 async function cargarCobertura() {
+  if (!estado.proyecto) return;
+  const pid = idActivo();
   const c = await api("/api/cobertura?" + new URLSearchParams(parametros()));
+  if (idActivo() !== pid) return;
   estado.cobertura = c;
   const kp = c.conteo_estados;
   const pct = (n) => n.toFixed(1).replace(".", ",");
@@ -310,6 +324,9 @@ function avisoEvaluacion(texto, tipo = "info") {
 function pintarProgreso() {
   const ev = estado.evaluando, boton = $("#btn-evaluar-todos"), pastilla = $("#p-evaluacion");
   boton.disabled = !!ev;
+  // Mientras la IA evalúa un expediente no se puede cambiar de organización.
+  $("#proyecto").disabled = !!ev;
+  $("#btn-nuevo-proyecto").disabled = !!ev;
   boton.textContent = ev ? `Evaluando ${ev.hechos + 1} de ${ev.total}…` : "Evaluar pertinencia con IA";
   pastilla.classList.toggle("oculto", !ev);
   if (ev) {
@@ -411,8 +428,14 @@ function tablaCsv(texto) {
     `</tbody></table></div><p><small>${filas.length - 1} filas</small></p>`;
 }
 
+/* Los enlaces a archivos no llevan cabeceras: el proyecto va en la URL. */
+function urlArchivo(id, descargar = false) {
+  return `/api/evidencia/${encodeURIComponent(id)}/archivo?proyecto=${encodeURIComponent(estado.proyecto.id)}` +
+    (descargar ? "&descargar=1" : "");
+}
+
 function contenidoEvidencia(ev) {
-  const url = `/api/evidencia/${encodeURIComponent(ev.id)}/archivo`;
+  const url = urlArchivo(ev.id);
   if (!ev.existe) return `<p class="aviso-panel">El archivo no está en el expediente (FALTANTE).</p>`;
   if (ev.formato === "pdf") return `<iframe class="visor-archivo" src="${url}" title="${esc(ev.titulo)}"></iframe>`;
   if (["png", "jpg", "jpeg"].includes(ev.formato)) return `<img class="visor-imagen" src="${url}" alt="${esc(ev.titulo)}">`;
@@ -448,7 +471,7 @@ async function mostrarEvidencia(id, { cita = "", volver = "" } = {}) {
   $("#panel-hallazgo").classList.remove("oculto");
   try {
     const ev = await api(`/api/evidencia/${encodeURIComponent(id)}`);
-    const url = `/api/evidencia/${encodeURIComponent(id)}/archivo`;
+    const url = urlArchivo(id, true);
     const alterada = ev.integridad !== "OK"
       ? `<p class="aviso-panel">Integridad ${esc(ev.integridad)}: el archivo no coincide con el hash registrado. Lo que ves no es necesariamente lo que se archivó.</p>` : "";
     $("#panel-cuerpo").innerHTML = `
@@ -458,7 +481,7 @@ async function mostrarEvidencia(id, { cita = "", volver = "" } = {}) {
         ${esc(ev.fuente || "sin fuente")} · registrada ${esc(ev.fecha_registro.slice(0, 10))}</small><br>
         <small class="mono" title="${esc(ev.sha256)}">SHA-256 ${esc(ev.sha256.slice(0, 16))}…</small>
         <span class="insignia i-${clase(ev.integridad)}">${esc(ev.integridad)}</span>
-        · <a href="${url}?descargar=1">Descargar original</a></p>
+        · <a href="${url}">Descargar original</a></p>
       ${alterada}
       <p class="ayuda">Vista de solo lectura: abrir el documento no lo modifica ni se anota en la cadena de custodia.</p>
       <hr>
@@ -538,8 +561,10 @@ function agregarMensaje(rol, html) {
 async function preguntar(texto) {
   agregarMensaje("usuario", esc(texto));
   const espera = agregarMensaje("asistente", `<span class="pensando">Buscando en el conocimiento y consultando el modelo local…</span>`);
+  const pid = idActivo();
   try {
     const r = await api("/api/chat", json({ mensaje: texto, historial: estado.historial, ...parametros() }));
+    if (idActivo() !== pid) return;   // la conversación era de otro proyecto
     const fuentes = [...new Set(r.fuentes.map((f) => f.fuente))].map((f) => `<span>${esc(f)}</span>`).join("");
     espera.querySelector(".burbuja").innerHTML = md(r.respuesta) + `<div class="fuentes">Fuentes recuperadas: ${fuentes}</div>`;
     estado.historial.push({ role: "user", content: texto }, { role: "assistant", content: r.respuesta });
@@ -555,6 +580,121 @@ $("#pregunta").addEventListener("keydown", (e) => {
 });
 $("#sugeridas").addEventListener("click", (e) => { if (e.target.tagName === "BUTTON") preguntar(e.target.textContent); });
 
+/* --------------------------------------------------------------- proyectos */
+/* Cada organización auditada es un proyecto con su propio expediente, cobertura,
+   revisiones y chat. Al cambiar de proyecto se vacía todo lo del anterior. */
+const CLAVE_PROYECTO = "audita-pims.proyecto";
+const ROLES = { responsable: "Responsable del tratamiento", encargado: "Encargado del tratamiento", ambos: "Responsable y encargado" };
+function recordarProyecto(id) { try { localStorage.setItem(CLAVE_PROYECTO, id); } catch (e) { /* sin almacenamiento */ } }
+function proyectoRecordado() { try { return localStorage.getItem(CLAVE_PROYECTO); } catch (e) { return null; } }
+
+function pintarSelectorProyectos() {
+  const sel = $("#proyecto");
+  sel.innerHTML = estado.proyectos.length
+    ? estado.proyectos.map((p) => `<option value="${esc(p.id)}">${esc(p.nombre)}</option>`).join("")
+    : `<option value="">— sin proyectos —</option>`;
+  if (estado.proyecto) sel.value = estado.proyecto.id;
+}
+
+function bienvenidaChat(p) {
+  return `<div class="mensaje asistente"><div class="burbuja">Soy <strong>AUDITA-PIMS</strong>. Estoy trabajando con el expediente de
+    <strong>${esc(p.nombre)}</strong>${p.descripcion ? ` (${esc(p.descripcion)})` : ""}: solo veo sus evidencias y su cobertura,
+    más la norma ISO/IEC 27701:2025 y la base de conocimiento. Para otra organización, cámbiala arriba.</div></div>`;
+}
+
+async function cambiarProyecto(id) {
+  const p = estado.proyectos.find((x) => x.id === id);
+  if (!p || estado.evaluando) { pintarSelectorProyectos(); return; }
+  estado.proyecto = { ...p };
+  recordarProyecto(id);
+  // Nada del proyecto anterior debe quedar a la vista.
+  estado.cobertura = null;
+  estado.historial = [];
+  reiniciarRegistro();
+  $("#panel-hallazgo").classList.add("oculto");
+  $("#mensajes").innerHTML = bienvenidaChat(p);
+  $("#tabla-cobertura tbody").innerHTML = "";
+  $("#kpis").innerHTML = "";
+  $("#resumen-revision").classList.add("oculto");
+  $("#filtro-estado").value = "";
+  avisoEvaluacion("");
+  ["#nota-verificacion", "#nota-registro"].forEach((s) => { $(s).textContent = ""; });
+  $("#rol").value = p.rol;
+  document.title = `${p.nombre} · AUDITA-PIMS`;
+  pintarSelectorProyectos();
+  await cargarEstado();
+  if ($("#vista-cobertura").classList.contains("activa")) await cargarCobertura();
+}
+$("#proyecto").addEventListener("change", (e) => cambiarProyecto(e.target.value).catch(alertaSuave));
+
+async function cargarProyectos() {
+  estado.proyectos = await api("/api/proyectos");
+  pintarSelectorProyectos();
+}
+
+/* Formulario «Nuevo proyecto» en el panel lateral. */
+function mostrarNuevoProyecto() {
+  $("#panel-cuerpo").dataset.ref = "";
+  $("#panel-titulo").textContent = "Nuevo proyecto de auditoría";
+  const filas = estado.catalogo.map((c) => `
+    <li><label class="excluir"><input type="checkbox" data-excluir="${esc(c.ref)}">
+      <span class="ref">${esc(c.ref)}</span> ${esc(c.titulo)}</label>
+      <input type="text" class="justificacion oculto" data-justificacion="${esc(c.ref)}" placeholder="Por qué no aplica (obligatorio)"></li>`).join("");
+  $("#panel-cuerpo").innerHTML = `
+    <form id="form-proyecto" class="form-proyecto">
+      <p class="ayuda">Cada proyecto tiene su propio expediente, cadena de custodia, cobertura, revisiones IA y chat.
+        Las evidencias de un proyecto nunca se mezclan con las de otro.</p>
+      <label>Nombre de la organización<input type="text" id="np-nombre" required placeholder="p. ej. Farmacias Andinas S.A."></label>
+      <label>Descripción <small>(sector, alcance; el asistente la usa como contexto)</small>
+        <input type="text" id="np-descripcion" placeholder="p. ej. Cadena de farmacias con venta online"></label>
+      <label>Rol en el tratamiento de datos personales
+        <select id="np-rol">${Object.entries(ROLES).map(([v, t]) => `<option value="${v}">${t}</option>`).join("")}</select></label>
+      <details>
+        <summary>Controles que no aplican (Declaración de Aplicabilidad) — opcional</summary>
+        <p class="ayuda">Marca solo los que la organización excluye con justificación; el resto se audita.</p>
+        <ul class="lista-excluir">${filas}</ul>
+      </details>
+      <p class="aviso-panel oculto" id="np-error"></p>
+      <div class="acciones">
+        <button class="boton" type="submit">Crear proyecto</button>
+        <button class="boton fantasma" type="button" id="np-cancelar">Cancelar</button>
+      </div>
+    </form>`;
+  $("#panel-hallazgo").classList.remove("oculto");
+  $("#np-nombre").focus();
+}
+$("#btn-nuevo-proyecto").addEventListener("click", mostrarNuevoProyecto);
+$("#panel-cuerpo").addEventListener("change", (e) => {
+  const ref = e.target.dataset.excluir;
+  if (ref) $(`[data-justificacion="${CSS.escape(ref)}"]`).classList.toggle("oculto", !e.target.checked);
+});
+$("#panel-cuerpo").addEventListener("click", (e) => {
+  if (e.target.id === "np-cancelar") $("#panel-hallazgo").classList.add("oculto");
+});
+$("#panel-cuerpo").addEventListener("submit", async (e) => {
+  if (e.target.id !== "form-proyecto") return;
+  e.preventDefault();
+  const excluidos = [...document.querySelectorAll("[data-excluir]:checked")].map((c) => ({
+    ref: c.dataset.excluir,
+    justificacion: $(`[data-justificacion="${CSS.escape(c.dataset.excluir)}"]`).value.trim(),
+  }));
+  const boton = e.target.querySelector("button[type=submit]");
+  boton.disabled = true;
+  try {
+    const p = await api("/api/proyectos", json({
+      nombre: $("#np-nombre").value, descripcion: $("#np-descripcion").value, rol: $("#np-rol").value, excluidos,
+    }));
+    await cargarProyectos();
+    await cambiarProyecto(p.id);
+    irA("expediente");
+    $("#nota-registro").textContent = `Proyecto «${p.nombre}» creado. Registra aquí su primera evidencia.`;
+  } catch (err) {
+    $("#np-error").textContent = err.message;
+    $("#np-error").classList.remove("oculto");
+    boton.disabled = false;
+  }
+});
+
 /* ----------------------------------------------------------------- inicio */
 (async function iniciar() {
   $("#fecha-corte").value = hoy();
@@ -562,6 +702,9 @@ $("#sugeridas").addEventListener("click", (e) => { if (e.target.tagName === "BUT
     estado.catalogo = await api("/api/catalogo");
     const sel = $("#agregar-control");
     estado.catalogo.forEach((c) => sel.add(new Option(`${c.ref} — ${c.titulo}`, c.ref)));
-    await cargarEstado();
+    await cargarProyectos();
+    if (!estado.proyectos.length) { mostrarNuevoProyecto(); return; }
+    const recordado = proyectoRecordado();
+    await cambiarProyecto(estado.proyectos.some((p) => p.id === recordado) ? recordado : estado.proyectos[0].id);
   } catch (err) { $("#p-modelo").textContent = err.message; }
 })();

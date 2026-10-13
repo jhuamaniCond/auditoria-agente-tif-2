@@ -15,6 +15,11 @@
         <p>Evidencia y auditoría interna · ISO/IEC 27701:2025</p>
       </div>
     </div>
+    <div class="selector-proyecto">
+      <label for="proyecto">Organización auditada</label>
+      <select id="proyecto" aria-label="Proyecto activo"></select>
+      <button class="boton-barra" id="btn-nuevo-proyecto" type="button">+ Nuevo proyecto</button>
+    </div>
     <div class="estado" id="estado-sistema">
       <span class="pastilla" id="p-modelo">Modelo local…</span>
       <span class="pastilla" id="p-rag">RAG…</span>
@@ -125,9 +130,6 @@
     <section class="vista" id="vista-asistente">
       <article class="tarjeta chat">
         <div class="mensajes" id="mensajes">
-          <div class="mensaje asistente">
-            <div class="burbuja">Soy <strong>AUDITA-PIMS</strong>. Respondo con el estado real del expediente y con la base de conocimiento de la skill, recuperada por búsqueda semántica local. Todo se ejecuta en esta máquina.</div>
-          </div>
         </div>
         <div class="sugeridas" id="sugeridas">
           <button>¿Qué controles críticos no tienen evidencia?</button>
@@ -136,7 +138,7 @@
           <button>¿Cuándo un hallazgo es no conformidad mayor?</button>
         </div>
         <form class="entrada" id="form-chat">
-          <textarea id="pregunta" rows="2" placeholder="Pregunta sobre el expediente o la norma…" required></textarea>
+          <textarea id="pregunta" rows="2" placeholder="Pregunta sobre el expediente de esta organización o la norma…" required></textarea>
           <button class="boton" type="submit">Enviar</button>
         </form>
       </article>

@@ -21,6 +21,7 @@ URL = os.environ.get("AUDITA_URL", "http://127.0.0.1:5000")
 AQUI = os.path.dirname(os.path.abspath(__file__))
 SALIDA = os.path.join(AQUI, "resultados")
 PARAMS = {"rol": "responsable", "vigencia": 365, "fecha": "2026-10-01"}
+PROYECTO = os.environ.get("AUDITA_PROYECTO", "clindata")   # proyecto de la app
 
 CASOS = [
     ("CP-01", "sugerir", "acta_comite_privacidad_2026.md"),
@@ -39,7 +40,7 @@ CASOS = [
 
 def post_json(ruta, datos):
     peticion = urllib.request.Request(URL + ruta, data=json.dumps(datos).encode("utf-8"),
-                                      headers={"Content-Type": "application/json"})
+                                      headers={"Content-Type": "application/json", "X-Proyecto": PROYECTO})
     return json.loads(urllib.request.urlopen(peticion, timeout=900).read().decode("utf-8"))
 
 
@@ -51,7 +52,7 @@ def post_archivo(ruta, archivo):
                "Content-Type: text/markdown\r\n\r\n" % (limite, os.path.basename(archivo)))
               .encode("utf-8") + contenido + ("\r\n--%s--\r\n" % limite).encode("utf-8"))
     peticion = urllib.request.Request(URL + ruta, data=cuerpo, headers={
-        "Content-Type": "multipart/form-data; boundary=" + limite})
+        "Content-Type": "multipart/form-data; boundary=" + limite, "X-Proyecto": PROYECTO})
     return json.loads(urllib.request.urlopen(peticion, timeout=900).read().decode("utf-8"))
 
 

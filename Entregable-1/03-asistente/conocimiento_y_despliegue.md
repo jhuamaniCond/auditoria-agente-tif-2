@@ -4,10 +4,32 @@
 
 El asistente no recibe la base de conocimiento completa en cada consulta. La
 aplicación la divide en fragmentos, los convierte en vectores con el modelo
-local de embeddings `nomic-embed-text` y los guarda en un índice **FAISS**
-(`04-aplicacion/datos/indice.faiss`). En cada pregunta recupera los 6
-fragmentos más parecidos por similitud coseno y se los entrega al modelo en el
-bloque CONTEXTO, junto con el estado del expediente calculado por `evidencia.py`.
+local de embeddings `nomic-embed-text` y los guarda en índices **FAISS**. En
+cada pregunta recupera los fragmentos más parecidos por similitud coseno y se
+los entrega al modelo en el bloque CONTEXTO, junto con el estado del expediente
+calculado por `evidencia.py`.
+
+### Proyectos: una organización auditada por proyecto
+
+Cada organización auditada es un **proyecto** con su propia carpeta:
+
+```
+04-aplicacion/datos/
+  indice_conocimiento.*         norma, catálogo, criterios, glosario (común a todos)
+  proyectos/<id>/
+    proyecto.json               nombre, descripción, rol en el tratamiento
+    expediente/                 evidencias, cadena de custodia, SoA, revisiones IA
+    indice_evidencias.*         índice FAISS solo con las evidencias de este proyecto
+```
+
+En la cabecera de la aplicación se elige la organización auditada o se crea
+una nueva (nombre, descripción, rol y controles excluidos con su
+justificación, que se guardan como `soa.csv`). Cada petición al servidor lleva
+el proyecto activo, y el asistente busca en la base común más el índice de
+evidencias de **ese** proyecto; el estado del expediente que recibe empieza con
+el nombre de la organización. Por eso la cobertura, las revisiones IA, los
+hallazgos y el chat de una organización nunca ven documentos de otra. Al
+cambiar de proyecto se vacía la conversación.
 
 | Fuente indexada | Fragmentos | Para qué la usa el asistente |
 |---|---|---|
@@ -60,7 +82,7 @@ control (hasta 10 000 caracteres en total; si un documento es más largo se
 avisa de que solo se leyó el inicio), el requisito y la guía del control en
 ISO/IEC 27701:2025 (hasta 3 000 caracteres), la evidencia esperada del catálogo
 y la sección 1 de `criterios_evidencia.md`. Las propuestas y las decisiones del
-auditor se guardan en `datos/expediente/revisiones_pertinencia.json`.
+auditor se guardan en `datos/proyectos/<id>/expediente/revisiones_pertinencia.json`.
 
 El índice se reconstruye solo si cambia alguna fuente (se compara una huella
 SHA-256 de todo lo indexado); las evidencias nuevas se añaden al registrarlas.

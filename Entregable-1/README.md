@@ -15,6 +15,11 @@ en el RAG. El asistente lo cita con referencia y página al responder, evaluar
 pertinencia y redactar el *Criterio* de los hallazgos; en la pestaña Cobertura,
 al pulsar un control se abre su requisito (Anexo A o cláusula) y su guía (Anexo B).
 
+Cada organización auditada es un **proyecto** (selector y botón «Nuevo
+proyecto» en la cabecera) con su propio expediente, cobertura, revisiones y
+chat; ClinData S.A.C. es el proyecto de ejemplo. Los datos están en
+`04-aplicacion/datos/proyectos/<id>/`.
+
 **Tecnologías:** Python · Flask · HTML · CSS · JavaScript puro · FAISS ·
 modelo local de embeddings (`nomic-embed-text`) · LLM local (`qwen2.5:7b`)
 servidos con Ollama. Todo se ejecuta en la máquina del auditor.
@@ -39,7 +44,7 @@ ollama pull qwen2.5:7b
 cd 04-aplicacion
 pip install -r requirements.txt
 python extraer_norma.py      # solo si cambia el PDF de ISOS/pdf (pide pymupdf; OCR de Windows)
-python cargar_demo.py        # opcional: caso de estudio ClinData S.A.C.
+python cargar_demo.py        # opcional: (re)carga el proyecto ClinData S.A.C.
 python app.py                # http://127.0.0.1:5000
 ```
 

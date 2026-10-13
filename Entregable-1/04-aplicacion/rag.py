@@ -11,8 +11,9 @@ Fuentes que se indexan:
                 del Anexo B, con la referencia y la pagina del PDF.
   evidencia     texto de cada evidencia archivada en el expediente, con su ID.
 
-El indice se reconstruye solo cuando cambia alguna fuente (se compara una
-huella SHA-256 de todo lo indexado).
+Hay dos indices: el de conocimiento, comun a todos los proyectos (datos/), y
+el de evidencias de cada proyecto (datos/proyectos/<id>/). Cada uno se
+reconstruye solo cuando cambian sus fuentes (huella SHA-256 de lo indexado).
 """
 
 import hashlib
@@ -37,6 +38,7 @@ PREFIJO_DOC = "search_document: "
 PREFIJO_CONSULTA = "search_query: "
 EXTENSIONES_TEXTO = (".md", ".txt", ".csv", ".json", ".log")
 TAM_FRAGMENTO = 1200
+DIMENSION = 768             # nomic-embed-text; solo si un indice nace vacio
 
 
 def _normalizar(matriz):
@@ -75,18 +77,78 @@ def leer_texto(ruta, limite=20000):
         return f.read(limite)
 
 
-class IndiceRAG(object):
-    def __init__(self, rutas_conocimiento, catalogo, expediente, carpeta_datos):
-        self.rutas_conocimiento = rutas_conocimiento
-        self.catalogo = catalogo
-        self.expediente = expediente
-        self.ruta_indice = os.path.join(carpeta_datos, "indice.faiss")
-        self.ruta_meta = os.path.join(carpeta_datos, "indice_meta.json")
-        self.fragmentos = []          # [{"texto", "fuente", "tipo", "ref"}]
+class _Indice(object):
+    """Un indice FAISS en disco con sus fragmentos ({"texto", "fuente", "tipo", "ref"})."""
+
+    def __init__(self, ruta_indice, ruta_meta):
+        self.ruta_indice, self.ruta_meta = ruta_indice, ruta_meta
+        self.fragmentos = []
         self.indice = None
 
-    # ------------------------------------------------------------ fragmentos
-    def _fragmentos_conocimiento(self):
+    def _huella(self, frags):
+        h = hashlib.sha256(llm_local.MODELO_EMBEDDINGS.encode("utf-8"))
+        for f in frags:
+            h.update(f["texto"].encode("utf-8"))
+        return h.hexdigest()
+
+    def construir(self, frags, forzar=False):
+        """Carga el indice de disco si sigue vigente; si no, lo reconstruye."""
+        huella = self._huella(frags)
+        if not forzar and os.path.exists(self.ruta_indice) and os.path.exists(self.ruta_meta):
+            with open(self.ruta_meta, encoding="utf-8") as f:
+                meta = json.load(f)
+            if meta.get("huella") == huella:
+                self.indice = faiss.read_index(self.ruta_indice)
+                self.fragmentos = meta["fragmentos"]
+                return "cargado"
+        vectores = []
+        for i in range(0, len(frags), 32):
+            lote = frags[i:i + 32]
+            vectores.extend(llm_local.embeber([PREFIJO_DOC + f["texto"] for f in lote]))
+        with _CANDADO:
+            self.indice = faiss.IndexFlatIP(len(vectores[0]) if vectores else DIMENSION)
+            self.fragmentos = []
+            self._agregar(frags, vectores)
+        return "reconstruido"
+
+    def agregar(self, frags):
+        vectores = llm_local.embeber([PREFIJO_DOC + f["texto"] for f in frags])
+        with _CANDADO:
+            self._agregar(frags, vectores)
+
+    def _agregar(self, frags, vectores):
+        if frags:
+            self.indice.add(_normalizar(vectores))
+            self.fragmentos.extend(frags)
+        faiss.write_index(self.indice, self.ruta_indice)
+        with open(self.ruta_meta, "w", encoding="utf-8") as f:
+            json.dump({"huella": self._huella(self.fragmentos), "fragmentos": self.fragmentos},
+                      f, ensure_ascii=False)
+
+    def buscar(self, vector, n):
+        """[(similitud, fragmento)] de los n mas parecidos."""
+        if self.indice is None or self.indice.ntotal == 0:
+            return []
+        with _CANDADO:
+            puntajes, posiciones = self.indice.search(vector, min(n, self.indice.ntotal))
+        return [(float(p), self.fragmentos[i]) for p, i in zip(puntajes[0], posiciones[0])
+                if i >= 0]
+
+
+class Conocimiento(_Indice):
+    """Base de conocimiento comun a todos los proyectos: catalogo, archivos de la
+    skill y del asistente, y el texto de la norma (ISOS/texto)."""
+
+    def __init__(self, rutas_conocimiento, catalogo, carpeta_datos):
+        _Indice.__init__(self, os.path.join(carpeta_datos, "indice_conocimiento.faiss"),
+                         os.path.join(carpeta_datos, "indice_conocimiento.json"))
+        self.rutas_conocimiento = rutas_conocimiento
+        self.catalogo = catalogo
+
+    def construir(self, forzar=False):
+        return _Indice.construir(self, self._fragmentos(), forzar)
+
+    def _fragmentos(self):
         frags = []
         for c in self.catalogo:
             texto = ("Control %s (%s): %s. Evidencia esperada: %s. Minimo de evidencias: %d."
@@ -127,90 +189,59 @@ class IndiceRAG(object):
                               "tipo": "norma", "ref": s["ref"]})
         return frags
 
-    def _fragmentos_evidencia(self):
+
+def fragmentos_de_evidencia(expediente, ev):
+    texto = leer_texto(os.path.join(expediente, ev["archivo"]))
+    cabecera = "%s - %s (tipo %s, fecha %s, controles %s)" % (
+        ev["id"], ev["titulo"], ev["tipo"], ev["fecha_documento"], ", ".join(ev["controles"]))
+    if not texto:
+        return [{"texto": cabecera + ". Archivo no textual.", "fuente": ev["id"],
+                 "tipo": "evidencia", "ref": ev["id"]}]
+    return [{"texto": cabecera + "\n" + t, "fuente": ev["id"], "tipo": "evidencia",
+             "ref": ev["id"]} for t in _trocear(texto)]
+
+
+class IndiceRAG(object):
+    """Lo que ve el asistente en un proyecto: la base de conocimiento comun mas
+    las evidencias de ESE expediente. Cada proyecto tiene su propio indice de
+    evidencias, asi el chat nunca mezcla documentos de dos organizaciones."""
+
+    def __init__(self, conocimiento, expediente, carpeta_proyecto):
+        self.conocimiento = conocimiento
+        self.expediente = expediente
+        self.evidencias = _Indice(os.path.join(carpeta_proyecto, "indice_evidencias.faiss"),
+                                  os.path.join(carpeta_proyecto, "indice_evidencias.json"))
+
+    @property
+    def fragmentos(self):
+        return self.conocimiento.fragmentos + self.evidencias.fragmentos
+
+    def construir(self, forzar=False):
         from evidencia_api import leer_indice
         frags = []
         for ev in leer_indice(self.expediente)["evidencias"]:
-            frags.extend(self.fragmentos_de_evidencia(ev))
-        return frags
-
-    def fragmentos_de_evidencia(self, ev):
-        texto = leer_texto(os.path.join(self.expediente, ev["archivo"]))
-        cabecera = "%s - %s (tipo %s, fecha %s, controles %s)" % (
-            ev["id"], ev["titulo"], ev["tipo"], ev["fecha_documento"], ", ".join(ev["controles"]))
-        if not texto:
-            return [{"texto": cabecera + ". Archivo no textual.", "fuente": ev["id"],
-                     "tipo": "evidencia", "ref": ev["id"]}]
-        return [{"texto": cabecera + "\n" + t, "fuente": ev["id"], "tipo": "evidencia",
-                 "ref": ev["id"]} for t in _trocear(texto)]
-
-    # --------------------------------------------------------------- indice
-    def _huella(self, frags):
-        h = hashlib.sha256(llm_local.MODELO_EMBEDDINGS.encode("utf-8"))
-        for f in frags:
-            h.update(f["texto"].encode("utf-8"))
-        return h.hexdigest()
-
-    def construir(self, forzar=False):
-        """Carga el indice de disco si sigue vigente; si no, lo reconstruye."""
-        frags = self._fragmentos_conocimiento() + self._fragmentos_evidencia()
-        huella = self._huella(frags)
-        if not forzar and os.path.exists(self.ruta_indice) and os.path.exists(self.ruta_meta):
-            with open(self.ruta_meta, encoding="utf-8") as f:
-                meta = json.load(f)
-            if meta.get("huella") == huella:
-                self.indice = faiss.read_index(self.ruta_indice)
-                self.fragmentos = meta["fragmentos"]
-                return "cargado"
-        vectores = []
-        for i in range(0, len(frags), 32):
-            lote = frags[i:i + 32]
-            vectores.extend(llm_local.embeber([PREFIJO_DOC + f["texto"] for f in lote]))
-        matriz = _normalizar(vectores)
-        self.indice = faiss.IndexFlatIP(matriz.shape[1])
-        self.indice.add(matriz)
-        self.fragmentos = frags
-        faiss.write_index(self.indice, self.ruta_indice)
-        with open(self.ruta_meta, "w", encoding="utf-8") as f:
-            json.dump({"huella": huella, "fragmentos": frags}, f, ensure_ascii=False)
-        return "reconstruido"
+            frags.extend(fragmentos_de_evidencia(self.expediente, ev))
+        return self.evidencias.construir(frags, forzar)
 
     def agregar_evidencia(self, ev):
         """Indexa una evidencia recien registrada sin reconstruir todo."""
-        frags = self.fragmentos_de_evidencia(ev)
-        vectores = llm_local.embeber([PREFIJO_DOC + f["texto"] for f in frags])
-        with _CANDADO:
-            self._agregar(frags, vectores)
-
-    def _agregar(self, frags, vectores):
-        matriz = _normalizar(vectores)
-        self.indice.add(matriz)
-        self.fragmentos.extend(frags)
-        faiss.write_index(self.indice, self.ruta_indice)
-        with open(self.ruta_meta, "w", encoding="utf-8") as f:
-            json.dump({"huella": self._huella(self.fragmentos), "fragmentos": self.fragmentos},
-                      f, ensure_ascii=False)
+        self.evidencias.agregar(fragmentos_de_evidencia(self.expediente, ev))
 
     def buscar(self, consulta, k=6, tipos=None):
-        """Devuelve los k fragmentos mas parecidos, con su similitud coseno."""
-        if self.indice is None or self.indice.ntotal == 0:
-            return []
-        vector = llm_local.embeber([PREFIJO_CONSULTA + consulta])
-        with _CANDADO:
-            q = _normalizar(vector)
-            # Con filtro de tipo se recorre todo el indice (es pequeno): una pregunta
-            # en espanol tiene cerca muchos textos en espanol antes que la norma.
-            n = self.indice.ntotal if tipos else min(self.indice.ntotal, k)
-            puntajes, posiciones = self.indice.search(q, n)
+        """Los k fragmentos mas parecidos de los dos indices, con su similitud coseno."""
+        vector = _normalizar(llm_local.embeber([PREFIJO_CONSULTA + consulta]))
+        # Con filtro de tipo se recorre todo (los indices son pequenos): una pregunta
+        # en espanol tiene cerca muchos textos en espanol antes que la norma.
+        candidatos = []
+        for indice in (self.conocimiento, self.evidencias):
+            total = indice.indice.ntotal if indice.indice is not None else 0
+            candidatos.extend(indice.buscar(vector, total if tipos else k))
+        candidatos.sort(key=lambda c: -c[0])
         salida = []
-        for p, i in zip(puntajes[0], posiciones[0]):
-            if i < 0:
-                continue
-            frag = dict(self.fragmentos[i])
+        for p, frag in candidatos:
             if tipos and frag["tipo"] not in tipos:
                 continue
-            frag["similitud"] = round(float(p), 3)
-            salida.append(frag)
+            salida.append(dict(frag, similitud=round(p, 3)))
             if len(salida) == k:
                 break
         return salida
