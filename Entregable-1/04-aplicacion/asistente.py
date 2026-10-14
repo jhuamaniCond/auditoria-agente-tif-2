@@ -163,7 +163,8 @@ def responder(rag, mensaje, historial, resumen):
     mensajes.append({"role": "user", "content": _bloque_contexto(fragmentos, resumen) + aviso
                      + "\n\nPREGUNTA DEL USUARIO:\n" + mensaje})
     respuesta = llm_local.conversar(mensajes, temperatura=0.1)
-    return respuesta, [{"fuente": f["fuente"], "similitud": f["similitud"]} for f in fragmentos]
+    return respuesta, [{"fuente": f["fuente"], "similitud": f["similitud"],
+                        "tipo": f["tipo"], "ref": f["ref"]} for f in fragmentos]
 
 
 def sugerir_clasificacion(rag, catalogo, nombre_archivo, texto):

@@ -21,6 +21,7 @@ import uuid
 from flask import Flask, jsonify, render_template, request, send_file
 
 import asistente
+import grafo
 import llm_local
 import norma
 import revisiones
@@ -279,7 +280,24 @@ def api_chat():
                                                  d.get("historial", []), resumen)
     except llm_local.ErrorModelo as e:
         return _error(str(e), 503)
-    return jsonify({"respuesta": respuesta, "fuentes": fuentes})
+    return jsonify({"respuesta": respuesta, "fuentes": fuentes,
+                    "nodos": grafo.nodos_de_fuentes(fuentes, [c["ref"] for c in CATALOGO])})
+
+
+@app.route("/api/grafo")
+def api_grafo():
+    """Grafo de conocimiento del agente en el proyecto activo (pestana Grafo)."""
+    p = _proyecto()
+    try:
+        cob, _ = _resumen(request.args, p)
+    except (ValueError, KeyError) as e:
+        return _error(str(e))
+    integridad = {}
+    for clave, ids in _integridad_sin_registrar(p)["resultados"].items():
+        for i in ids:
+            integridad[i] = clave
+    return jsonify(grafo.construir(CATALOGO, CONOCIMIENTO_RAG, p, cob,
+                                   leer_indice(p.expediente)["evidencias"], integridad))
 
 
 @app.route("/api/hallazgo", methods=["POST"])

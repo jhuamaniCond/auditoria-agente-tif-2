@@ -65,6 +65,8 @@ function irA(vista) {
   document.querySelectorAll(".vista").forEach((v) => v.classList.toggle("activa", v.id === "vista-" + vista));
   // Al volver a Cobertura se recarga: la matriz pudo cambiar mientras estabas en otra pestaña.
   if (vista === "cobertura") cargarCobertura().catch((err) => alertaSuave(err));
+  // El grafo se recarga al entrar: refleja evidencias y estados recién cambiados.
+  if (vista === "grafo") cargarGrafo().catch(errorGrafo);
 }
 document.querySelectorAll(".pestana").forEach((b) => b.addEventListener("click", () => irA(b.dataset.vista)));
 
@@ -566,7 +568,11 @@ async function preguntar(texto) {
     const r = await api("/api/chat", json({ mensaje: texto, historial: estado.historial, ...parametros() }));
     if (idActivo() !== pid) return;   // la conversación era de otro proyecto
     const fuentes = [...new Set(r.fuentes.map((f) => f.fuente))].map((f) => `<span>${esc(f)}</span>`).join("");
-    espera.querySelector(".burbuja").innerHTML = md(r.respuesta) + `<div class="fuentes">Fuentes recuperadas: ${fuentes}</div>`;
+    const verGrafo = r.nodos && r.nodos.length ? ` · <button class="ver-grafo" data-ir-grafo="1">Ver en el grafo</button>` : "";
+    espera.querySelector(".burbuja").innerHTML = md(r.respuesta) + `<div class="fuentes">Fuentes recuperadas: ${fuentes}${verGrafo}</div>`;
+    grafo.usados = r.nodos || [];
+    grafo.pregunta = texto;
+    if (grafo.datos) marcarUsados();
     estado.historial.push({ role: "user", content: texto }, { role: "assistant", content: r.respuesta });
   } catch (err) { espera.querySelector(".burbuja").textContent = err.message; }
 }
@@ -578,7 +584,434 @@ $("#form-chat").addEventListener("submit", (e) => {
 $("#pregunta").addEventListener("keydown", (e) => {
   if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("#form-chat").requestSubmit(); }
 });
+$("#mensajes").addEventListener("click", (e) => { if (e.target.dataset.irGrafo) irA("grafo"); });
 $("#sugeridas").addEventListener("click", (e) => { if (e.target.tagName === "BUTTON") preguntar(e.target.textContent); });
+
+/* ------------------------------------------------------------------- grafo */
+/* Grafo de conocimiento: lo que el agente sabe ahora (fuentes del RAG, controles,
+   evidencias del proyecto) y cómo se relaciona. Disposición por fuerzas en SVG,
+   sin librerías. Las posiciones se conservan entre recargas. */
+const SVG_NS = "http://www.w3.org/2000/svg";
+const grafo = {
+  datos: null, nodos: [], aristas: [], porId: new Map(), vecinos: new Map(), pos: new Map(),
+  vista: { x: 0, y: 0, k: 1 }, seleccion: null, usados: [], pregunta: "", calor: 0, animando: false,
+  filtros: { semejanza: true, remite: true, evidencia: true, estructura: true },
+};
+const RADIO = { agente: 20, proyecto: 15, fuente: 11, grupo: 12, control: 8, evidencia: 7 };
+const LARGO = { conoce: 130, audita: 170, organiza: 120, define: 150, incluye: 55, remite: 90, semejanza: 80, aporta: 70, respalda: 80 };
+const FUERZA = { semejanza: 0.012, remite: 0.02, define: 0.01, aporta: 0.02 };
+const ESTRUCTURA = new Set(["conoce", "audita", "organiza", "define", "incluye"]);
+const RELACION = {   // [vista desde el origen, vista desde el destino]
+  conoce: ["conoce", "conocida por"], audita: ["audita", "auditada por"], organiza: ["organiza", "organizado por"],
+  define: ["define", "definido en"], incluye: ["incluye", "pertenece a"], remite: ["remite a", "citado por"],
+  semejanza: ["semejante a", "semejante a"], aporta: ["aporta", "aportada por"], respalda: ["respalda", "respaldado por"],
+};
+const TIPO_NODO = { agente: "Agente", fuente: "Fuente de conocimiento", grupo: "Grupo de controles", control: "Control",
+  proyecto: "Organización auditada", evidencia: "Evidencia" };
+
+function svgEl(nombre, attrs = {}) {
+  const e = document.createElementNS(SVG_NS, nombre);
+  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+  return e;
+}
+
+async function cargarGrafo() {
+  if (!estado.proyecto) return;
+  const pid = idActivo();
+  const d = await api("/api/grafo?" + new URLSearchParams(parametros()));
+  if (idActivo() !== pid) return;
+  armarGrafo(d);
+}
+
+/* Posición inicial de un nodo nuevo: cada tipo en su zona, para que la
+   disposición por fuerzas parta de algo ordenado. */
+function posicionInicial(n, grupos, fuentes, azar) {
+  if (n.tipo === "fuente") {
+    const a = Math.PI + (fuentes.indexOf(n.id) + 0.5) / fuentes.length * Math.PI;
+    return { x: 150 * Math.cos(a), y: 150 * Math.sin(a) };
+  }
+  if (n.tipo === "grupo" || n.tipo === "control") {
+    const i = grupos.indexOf(n.tipo === "grupo" ? n.id : "grp:" + n.grupo);
+    const a = Math.PI + (i + 0.5) / grupos.length * Math.PI;
+    const r = n.tipo === "grupo" ? 260 : 340;
+    return { x: r * Math.cos(a) + azar() * 90, y: r * Math.sin(a) + azar() * 90 };
+  }
+  if (n.tipo === "proyecto") return { x: 0, y: 220 };
+  if (n.tipo === "evidencia") return { x: azar() * 260, y: 300 + azar() * 60 };
+  return { x: 0, y: 0 };
+}
+
+function armarGrafo(d) {
+  grafo.datos = d;
+  let semilla = 7;
+  const azar = () => (semilla = (semilla * 16807) % 2147483647) / 2147483647 - 0.5;
+  const grupos = d.nodos.filter((n) => n.tipo === "grupo").map((n) => n.id);
+  const fuentes = d.nodos.filter((n) => n.tipo === "fuente").map((n) => n.id);
+  const nuevos = d.nodos.filter((n) => !grafo.pos.has(n.id)).length;
+  grafo.nodos = d.nodos.map((n) => ({
+    ...n, ...(grafo.pos.get(n.id) || posicionInicial(n, grupos, fuentes, azar)),
+    vx: 0, vy: 0, r: RADIO[n.tipo] || 8, fijo: n.tipo === "agente",
+  }));
+  grafo.porId = new Map(grafo.nodos.map((n) => [n.id, n]));
+  grafo.aristas = d.aristas.filter((a) => grafo.porId.has(a.origen) && grafo.porId.has(a.destino))
+    .map((a) => ({ ...a, o: grafo.porId.get(a.origen), d: grafo.porId.get(a.destino) }));
+  grafo.vecinos = new Map(grafo.nodos.map((n) => [n.id, []]));
+  grafo.aristas.forEach((a) => {
+    grafo.vecinos.get(a.origen).push({ a, otro: a.d, rel: RELACION[a.tipo][0] });
+    grafo.vecinos.get(a.destino).push({ a, otro: a.o, rel: RELACION[a.tipo][1] });
+  });
+  if (!grafo.porId.has(grafo.seleccion)) grafo.seleccion = null;
+
+  dibujarGrafo();
+  if (nuevos) {                       // disposición nueva: se calcula de golpe y se encuadra
+    for (let i = 0; i < 400; i++) pasoFuerzas(Math.max(0.03, 1 - i / 400));
+    actualizarPosiciones();
+    encuadrar();
+  } else { actualizarPosiciones(); aplicarVista(); }
+  aplicarFiltros();
+  marcarUsados();
+  pintarResumenGrafo();
+  if (grafo.seleccion) seleccionar(grafo.seleccion, false); else $("#grafo-detalle").innerHTML = "";
+  $("#grafo-vacio").classList.add("oculto");
+}
+
+function visibleNodo(n) { return n.tipo !== "evidencia" || grafo.filtros.evidencia; }
+function visibleArista(a) {
+  const f = grafo.filtros;
+  if (!visibleNodo(a.o) || !visibleNodo(a.d)) return false;
+  if (a.tipo === "semejanza") return f.semejanza;
+  if (a.tipo === "remite") return f.remite;
+  if (ESTRUCTURA.has(a.tipo)) return f.estructura;
+  return f.evidencia;
+}
+
+function pasoFuerzas(alfa) {
+  const ns = grafo.nodos;
+  for (let i = 0; i < ns.length; i++) {          // repulsión entre todos los nodos
+    for (let j = i + 1; j < ns.length; j++) {
+      const a = ns[i], b = ns[j];
+      let dx = b.x - a.x, dy = b.y - a.y;
+      if (!dx && !dy) { dx = 0.5; dy = 0.3; }
+      const d2 = Math.max(dx * dx + dy * dy, 64), d = Math.sqrt(d2);
+      const f = (2600 + 120 * (a.r + b.r)) * alfa / d2 / d;
+      a.vx -= dx * f; a.vy -= dy * f;
+      b.vx += dx * f; b.vy += dy * f;
+    }
+  }
+  for (const a of grafo.aristas) {                // resortes
+    const dx = a.d.x - a.o.x, dy = a.d.y - a.o.y, d = Math.sqrt(dx * dx + dy * dy) || 1;
+    const fuerza = (FUERZA[a.tipo] ?? 0.06) * (a.tipo === "semejanza" ? (a.similitud || 0.9) : 1);
+    const k = (d - (LARGO[a.tipo] || 80)) / d * fuerza * alfa;
+    a.o.vx += dx * k; a.o.vy += dy * k; a.d.vx -= dx * k; a.d.vy -= dy * k;
+  }
+  for (const n of ns) {                           // gravedad al centro y rozamiento
+    if (n.fijo) { n.vx = n.vy = 0; continue; }
+    n.vx = (n.vx - n.x * 0.003 * alfa) * 0.6;
+    n.vy = (n.vy - n.y * 0.003 * alfa) * 0.6;
+    n.x += n.vx; n.y += n.vy;
+  }
+}
+
+function calentar(c = 0.3) {
+  grafo.calor = Math.max(grafo.calor, c);
+  if (grafo.animando) return;
+  grafo.animando = true;
+  const cuadro = () => {
+    for (let i = 0; i < 2; i++) pasoFuerzas(grafo.calor);
+    actualizarPosiciones();
+    grafo.calor *= 0.97;
+    if (grafo.calor > 0.02) requestAnimationFrame(cuadro); else grafo.animando = false;
+  };
+  requestAnimationFrame(cuadro);
+}
+
+function formaNodo(n) {
+  const r = n.r;
+  let forma;
+  if (n.tipo === "fuente") forma = svgEl("rect", { x: -r, y: -r, width: 2 * r, height: 2 * r, rx: 4 });
+  else if (n.tipo === "evidencia") forma = svgEl("rect", { x: -r, y: -r, width: 2 * r, height: 2 * r, rx: 1.5 });
+  else if (n.tipo === "grupo") forma = svgEl("rect", { x: -r * 0.8, y: -r * 0.8, width: 1.6 * r, height: 1.6 * r, transform: "rotate(45)" });
+  else forma = svgEl("circle", { r });
+  let cls = "forma n-" + n.tipo;
+  if (n.tipo === "control") cls += " est-" + clase(n.estado);
+  if (n.tipo === "evidencia") cls += " int-" + clase(n.integridad);
+  forma.setAttribute("class", cls);
+  return forma;
+}
+
+function dibujarGrafo() {
+  const svg = $("#grafo-svg");
+  svg.innerHTML = "";
+  const capa = svgEl("g", { id: "grafo-capa" });
+  const capaAristas = svgEl("g"), capaNodos = svgEl("g");
+  for (const a of grafo.aristas) {
+    a.el = svgEl("line", { class: "arista a-" + a.tipo });
+    if (a.tipo === "semejanza") a.el.style.opacity = Math.min(1, 0.35 + (a.similitud - 0.85) * 8);
+    const t = svgEl("title");
+    t.textContent = `${a.o.etiqueta} ${RELACION[a.tipo][0]} ${a.d.etiqueta}` + (a.similitud ? ` (coseno ${a.similitud})` : "");
+    a.el.appendChild(t);
+    capaAristas.appendChild(a.el);
+  }
+  for (const n of grafo.nodos) {
+    n.el = svgEl("g", { class: "nodo t-" + n.tipo, "data-id": n.id });
+    n.el.appendChild(svgEl("circle", { class: "halo", r: n.r + 5 }));
+    n.el.appendChild(formaNodo(n));
+    const texto = svgEl("text", { y: n.r + 12, "text-anchor": "middle" });
+    texto.textContent = n.etiqueta.length > 34 ? n.etiqueta.slice(0, 32) + "…" : n.etiqueta;
+    n.el.appendChild(texto);
+    const t = svgEl("title");
+    t.textContent = n.titulo ? `${n.etiqueta} — ${n.titulo}` : n.etiqueta;
+    n.el.appendChild(t);
+    capaNodos.appendChild(n.el);
+  }
+  capa.append(capaAristas, capaNodos);
+  svg.appendChild(capa);
+}
+
+function actualizarPosiciones() {
+  for (const a of grafo.aristas) {
+    a.el.setAttribute("x1", a.o.x.toFixed(1)); a.el.setAttribute("y1", a.o.y.toFixed(1));
+    a.el.setAttribute("x2", a.d.x.toFixed(1)); a.el.setAttribute("y2", a.d.y.toFixed(1));
+  }
+  for (const n of grafo.nodos) {
+    n.el.setAttribute("transform", `translate(${n.x.toFixed(1)},${n.y.toFixed(1)})`);
+    grafo.pos.set(n.id, { x: n.x, y: n.y });
+  }
+}
+
+function aplicarVista() {
+  const svg = $("#grafo-svg"), capa = $("#grafo-capa");
+  if (!capa) return;
+  const v = grafo.vista;
+  capa.setAttribute("transform", `translate(${svg.clientWidth / 2 + v.x},${svg.clientHeight / 2 + v.y}) scale(${v.k})`);
+}
+
+function encuadrar() {
+  const ns = grafo.nodos.filter(visibleNodo);
+  const svg = $("#grafo-svg");
+  if (!ns.length || !svg.clientWidth) return;
+  const xs = ns.map((n) => n.x), ys = ns.map((n) => n.y);
+  const [x0, x1, y0, y1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
+  const k = Math.min(svg.clientWidth / (x1 - x0 + 120), svg.clientHeight / (y1 - y0 + 120), 1.8);
+  grafo.vista = { k, x: -((x0 + x1) / 2) * k, y: -((y0 + y1) / 2) * k };
+  aplicarVista();
+}
+
+function centrarEn(n) {
+  grafo.vista.x = -n.x * grafo.vista.k;
+  grafo.vista.y = -n.y * grafo.vista.k;
+  aplicarVista();
+}
+
+function aplicarFiltros() {
+  grafo.nodos.forEach((n) => { n.el.style.display = visibleNodo(n) ? "" : "none"; });
+  grafo.aristas.forEach((a) => { a.el.style.display = visibleArista(a) ? "" : "none"; });
+}
+
+/* Resalta un nodo y sus vecinos visibles; sin id, quita el resalte. */
+function enfocar(id) {
+  const svg = $("#grafo-svg");
+  svg.querySelectorAll(".vecino, .vecina").forEach((e) => e.classList.remove("vecino", "vecina"));
+  const n = grafo.porId.get(id);
+  svg.classList.toggle("enfocado", !!n);
+  if (!n) return;
+  n.el.classList.add("vecino");
+  for (const { a, otro } of grafo.vecinos.get(id)) {
+    if (!visibleArista(a)) continue;
+    a.el.classList.add("vecina");
+    otro.el.classList.add("vecino");
+  }
+}
+
+function seleccionar(id, centrar = true) {
+  const n = grafo.porId.get(id);
+  grafo.seleccion = n ? id : null;
+  grafo.nodos.forEach((x) => x.el.classList.toggle("seleccionado", x.id === grafo.seleccion));
+  if (n && !visibleNodo(n)) {
+    grafo.filtros.evidencia = true;
+    $('[data-filtro="evidencia"]').checked = true;
+    aplicarFiltros();
+  }
+  enfocar(grafo.seleccion);
+  if (!n) { $("#grafo-detalle").innerHTML = ""; return; }
+  if (centrar) centrarEn(n);
+  pintarDetalleNodo(n);
+}
+
+function pintarDetalleNodo(n) {
+  const filas = [], acciones = [];
+  const fila = (k, v) => { if (v !== undefined && v !== null && v !== "") filas.push(`<dt>${k}</dt><dd>${v}</dd>`); };
+  let titulo = esc(n.etiqueta), texto = "";
+  if (n.tipo === "control") {
+    titulo = `<span class="ref">${esc(n.etiqueta)}</span> ${esc(n.titulo)}`;
+    fila("Estado", `<span class="insignia e-${clase(n.estado)}">${esc(n.estado)}</span>`);
+    if (n.nota !== "Se espera: " + n.evidencia_esperada) fila("Observación", esc(n.nota));
+    fila("Evidencia esperada", esc(n.evidencia_esperada));
+    fila("Mínimo", esc(n.minimo));
+    fila("En la norma", n.norma.length ? n.norma.map(esc).join("<br>") : "<small>sin texto en ISOS/texto</small>");
+    acciones.push(`<button class="boton mini" data-norma="${esc(n.etiqueta)}">Texto de la norma</button>`);
+    acciones.push(`<button class="boton mini secundario" data-preguntar="¿Qué evidencia se espera para ${esc(n.etiqueta)} y cómo está en el expediente?">Preguntar al asistente</button>`);
+  } else if (n.tipo === "evidencia") {
+    titulo = `<span class="ref">${esc(n.etiqueta)}</span> ${esc(n.titulo)}`;
+    fila("Integridad", `<span class="insignia i-${clase(n.integridad)}">${esc(n.integridad)}</span>`);
+    fila("Tipo", esc(n.tipo_doc));
+    fila("Fecha", esc(n.fecha));
+    fila("SHA-256", `<span class="mono" title="${esc(n.sha256)}">${esc(n.sha256.slice(0, 16))}…</span>`);
+    acciones.push(`<button class="boton mini" data-evidencia="${esc(n.etiqueta)}">Ver evidencia</button>`);
+    acciones.push(`<button class="boton mini secundario" data-preguntar="¿Qué demuestra la evidencia ${esc(n.etiqueta)} y para qué controles sirve?">Preguntar al asistente</button>`);
+  } else if (n.tipo === "fuente") {
+    texto = n.detalle ? `<p>${esc(n.detalle)}</p>` : "";
+    fila("Fragmentos en FAISS", esc(n.fragmentos));
+    fila("Archivo", n.archivo ? `<span class="mono">${esc(n.archivo)}</span>` : "");
+  } else if (n.tipo === "grupo") {
+    const ctl = grafo.vecinos.get(n.id).filter((v) => v.otro.tipo === "control").map((v) => v.otro);
+    const cuenta = {};
+    ctl.forEach((c) => { cuenta[c.estado] = (cuenta[c.estado] || 0) + 1; });
+    fila("Controles", ctl.length);
+    fila("Estados", Object.entries(cuenta).map(([e, k]) => `<span class="insignia e-${clase(e)}">${k} ${esc(e)}</span>`).join(" "));
+  } else if (n.tipo === "proyecto") {
+    texto = n.detalle ? `<p>${esc(n.detalle)}</p>` : "";
+    fila("Rol", esc(ROLES[n.rol] || n.rol));
+    fila("Cobertura", `${esc(n.cobertura)} %`);
+  } else texto = `<p>${esc(n.detalle || "")}</p>`;
+
+  const rels = grafo.vecinos.get(n.id).filter((v) => visibleArista(v.a))
+    .sort((x, y) => x.rel.localeCompare(y.rel) || x.otro.etiqueta.localeCompare(y.otro.etiqueta, "es", { numeric: true }));
+  const lista = rels.map((v) => `<li><small>${esc(v.rel)}</small> <button data-nodo="${esc(v.otro.id)}">${esc(v.otro.etiqueta)}</button>` +
+    `${v.otro.titulo ? ` <small>${esc(v.otro.titulo)}</small>` : ""}${v.a.similitud ? ` <small>(coseno ${v.a.similitud})</small>` : ""}</li>`).join("");
+  $("#grafo-detalle").innerHTML = `
+    <small>${esc(TIPO_NODO[n.tipo] || n.tipo)}</small>
+    <h3>${titulo}</h3>${texto}
+    ${filas.length ? `<dl>${filas.join("")}</dl>` : ""}
+    ${acciones.length ? `<div class="acciones">${acciones.join("")}</div>` : ""}
+    ${rels.length ? `<h3 style="margin-top:12px">Relaciones (${rels.length})</h3><ul class="relaciones">${lista}</ul>` : ""}`;
+}
+
+function pintarResumenGrafo() {
+  const r = grafo.datos.resumen;
+  const cifra = (v, t) => `<div><b>${esc(v)}</b><small>${t}</small></div>`;
+  $("#grafo-resumen").innerHTML = `
+    <h3>Lo que sabe el agente ahora</h3>
+    <p class="nota" style="margin:4px 0 8px">Conocimiento común (norma y skill) más el expediente de <strong>${esc(estado.proyecto.nombre)}</strong>.</p>
+    <div class="grafo-cifras">
+      ${cifra(r.fragmentos_conocimiento, "fragmentos de conocimiento")}${cifra(r.fragmentos_norma, "de ellos, de ISO 27701")}
+      ${cifra(r.controles, "controles del catálogo")}${cifra(r.evidencias, "evidencias del proyecto")}
+      ${cifra(r.semejanzas, "relaciones semánticas")}${cifra(r.remisiones, "remisiones de la norma")}
+    </div>
+    ${r.indexado ? "" : `<p class="aviso-panel" style="margin-top:8px">El índice FAISS aún no está construido (¿Ollama apagado?): faltan las relaciones semánticas.</p>`}`;
+  const cuenta = {};
+  grafo.nodos.filter((n) => n.tipo === "control").forEach((n) => { cuenta[n.estado] = (cuenta[n.estado] || 0) + 1; });
+  $("#grafo-estados").innerHTML = Object.entries(cuenta)
+    .map(([e, k]) => `<span class="insignia e-${clase(e)}">${k} ${esc(e)}</span>`).join("");
+}
+
+/* Nodos que el asistente recuperó (RAG) para su última respuesta. */
+function marcarUsados() {
+  const usados = new Set(grafo.usados);
+  grafo.nodos.forEach((n) => n.el.classList.toggle("usado", usados.has(n.id)));
+  const caja = $("#grafo-usados");
+  const nodos = grafo.usados.map((id) => grafo.porId.get(id)).filter(Boolean);
+  caja.classList.toggle("oculto", !nodos.length);
+  if (!nodos.length) return;
+  caja.innerHTML = `<strong>Última respuesta del asistente</strong><br><small>«${esc(grafo.pregunta)}» se respondió con:</small>
+    <div class="chips">${nodos.map((n) => `<button class="chip-nodo" data-nodo="${esc(n.id)}">${esc(n.etiqueta)}</button>`).join("")}</div>
+    <button class="boton mini fantasma" data-quitar-usados="1">Quitar resaltado</button>`;
+}
+
+function errorGrafo(err) {
+  $("#grafo-vacio").textContent = err.message;
+  $("#grafo-vacio").classList.remove("oculto");
+}
+
+(function eventosGrafo() {
+  const svg = $("#grafo-svg");
+  const aGrafo = (e) => {
+    const r = svg.getBoundingClientRect(), v = grafo.vista;
+    return { x: (e.clientX - r.left - svg.clientWidth / 2 - v.x) / v.k, y: (e.clientY - r.top - svg.clientHeight / 2 - v.y) / v.k };
+  };
+  let arrastre = null;
+  svg.addEventListener("pointerdown", (e) => {
+    const g = e.target.closest(".nodo");
+    const n = g && grafo.porId.get(g.dataset.id);
+    arrastre = { n, x0: e.clientX, y0: e.clientY, vx: grafo.vista.x, vy: grafo.vista.y, movido: false };
+    if (n) n.fijo = true;
+    svg.setPointerCapture(e.pointerId);
+    svg.classList.add("moviendo");
+  });
+  svg.addEventListener("pointermove", (e) => {
+    if (!arrastre) return;
+    if (Math.abs(e.clientX - arrastre.x0) + Math.abs(e.clientY - arrastre.y0) > 4) arrastre.movido = true;
+    if (!arrastre.movido) return;
+    if (arrastre.n) {
+      Object.assign(arrastre.n, aGrafo(e), { vx: 0, vy: 0 });
+      actualizarPosiciones();
+      calentar(0.25);
+    } else {
+      grafo.vista.x = arrastre.vx + e.clientX - arrastre.x0;
+      grafo.vista.y = arrastre.vy + e.clientY - arrastre.y0;
+      aplicarVista();
+    }
+  });
+  const soltar = () => {
+    if (!arrastre) return;
+    const { n, movido } = arrastre;
+    if (n && n.tipo !== "agente") n.fijo = false;
+    if (!movido) seleccionar(n ? n.id : null, false);
+    arrastre = null;
+    svg.classList.remove("moviendo");
+  };
+  svg.addEventListener("pointerup", soltar);
+  svg.addEventListener("pointercancel", soltar);
+  svg.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    const v = grafo.vista, p = aGrafo(e);
+    const k = Math.min(4, Math.max(0.2, v.k * Math.exp(-e.deltaY * 0.0015)));
+    v.x += p.x * (v.k - k); v.y += p.y * (v.k - k); v.k = k;
+    aplicarVista();
+  }, { passive: false });
+  svg.addEventListener("pointerover", (e) => {
+    const g = e.target.closest(".nodo");
+    if (g && !arrastre) enfocar(g.dataset.id);
+  });
+  svg.addEventListener("pointerout", (e) => {
+    const g = e.target.closest(".nodo");
+    if (g && !arrastre && !g.contains(e.relatedTarget)) enfocar(grafo.seleccion);
+  });
+
+  $("#grafo-filtros").addEventListener("change", (e) => {
+    const f = e.target.dataset.filtro;
+    if (!f) return;
+    grafo.filtros[f] = e.target.checked;
+    if (!grafo.datos) return;
+    aplicarFiltros();
+    enfocar(grafo.seleccion);
+    if (grafo.seleccion) pintarDetalleNodo(grafo.porId.get(grafo.seleccion));
+  });
+  $("#grafo-buscar").addEventListener("input", (e) => {
+    const q = e.target.value.trim().toLowerCase();
+    grafo.nodos.forEach((n) => n.el.classList.toggle("coincide",
+      !!q && `${n.etiqueta} ${n.titulo || ""}`.toLowerCase().includes(q)));
+  });
+  $("#grafo-buscar").addEventListener("keydown", (e) => {
+    if (e.key !== "Enter") return;
+    const n = grafo.nodos.find((x) => x.el.classList.contains("coincide"));
+    if (n) seleccionar(n.id);
+  });
+  $("#btn-grafo-encuadrar").addEventListener("click", encuadrar);
+  $("#btn-grafo-recargar").addEventListener("click", () => cargarGrafo().catch(errorGrafo));
+  const acciones = (e) => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    if (b.dataset.nodo) seleccionar(b.dataset.nodo);
+    else if (b.dataset.norma) mostrarNorma(b.dataset.norma);
+    else if (b.dataset.evidencia) mostrarEvidencia(b.dataset.evidencia);
+    else if (b.dataset.preguntar) { irA("asistente"); preguntar(b.dataset.preguntar); }
+    else if (b.dataset.quitarUsados) { grafo.usados = []; marcarUsados(); }
+  };
+  $("#grafo-detalle").addEventListener("click", acciones);
+  $("#grafo-usados").addEventListener("click", acciones);
+  window.addEventListener("resize", aplicarVista);
+})();
 
 /* --------------------------------------------------------------- proyectos */
 /* Cada organización auditada es un proyecto con su propio expediente, cobertura,
@@ -610,6 +1043,11 @@ async function cambiarProyecto(id) {
   // Nada del proyecto anterior debe quedar a la vista.
   estado.cobertura = null;
   estado.historial = [];
+  Object.assign(grafo, { datos: null, seleccion: null, usados: [], pregunta: "" });
+  grafo.pos.clear();
+  $("#grafo-svg").innerHTML = "";
+  ["#grafo-resumen", "#grafo-detalle", "#grafo-estados"].forEach((s) => { $(s).innerHTML = ""; });
+  $("#grafo-usados").classList.add("oculto");
   reiniciarRegistro();
   $("#panel-hallazgo").classList.add("oculto");
   $("#mensajes").innerHTML = bienvenidaChat(p);
@@ -624,6 +1062,7 @@ async function cambiarProyecto(id) {
   pintarSelectorProyectos();
   await cargarEstado();
   if ($("#vista-cobertura").classList.contains("activa")) await cargarCobertura();
+  if ($("#vista-grafo").classList.contains("activa")) await cargarGrafo().catch(errorGrafo);
 }
 $("#proyecto").addEventListener("change", (e) => cambiarProyecto(e.target.value).catch(alertaSuave));
 

@@ -32,6 +32,7 @@
     <button class="pestana activa" data-vista="expediente" role="tab">Expediente</button>
     <button class="pestana" data-vista="cobertura" role="tab">Cobertura</button>
     <button class="pestana" data-vista="asistente" role="tab">Asistente</button>
+    <button class="pestana" data-vista="grafo" role="tab">Grafo de conocimiento</button>
   </nav>
 
   <main>
@@ -142,6 +143,49 @@
           <button class="boton" type="submit">Enviar</button>
         </form>
       </article>
+    </section>
+
+    <!-- ============================================================ GRAFO -->
+    <section class="vista" id="vista-grafo">
+      <div class="rejilla-grafo">
+        <article class="tarjeta lienzo-grafo">
+          <div class="tarjeta-cab">
+            <h2>Grafo de conocimiento</h2>
+            <div class="acciones-cab">
+              <input type="search" id="grafo-buscar" placeholder="Buscar control, evidencia…" aria-label="Buscar en el grafo">
+              <button class="boton secundario" id="btn-grafo-encuadrar" type="button">Encuadrar</button>
+              <button class="boton secundario" id="btn-grafo-recargar" type="button">Actualizar</button>
+            </div>
+          </div>
+          <div class="grafo-filtros" id="grafo-filtros">
+            <label><input type="checkbox" data-filtro="semejanza" checked><i class="l-semejanza"></i>Semejanza semántica (FAISS)</label>
+            <label><input type="checkbox" data-filtro="remite" checked><i class="l-remite"></i>Remisión en la norma</label>
+            <label><input type="checkbox" data-filtro="evidencia" checked><i class="l-respalda"></i>Evidencias del proyecto</label>
+            <label><input type="checkbox" data-filtro="estructura" checked><i class="l-estructura"></i>Estructura</label>
+          </div>
+          <div class="grafo-contenedor">
+            <svg id="grafo-svg" role="img" aria-label="Grafo de conocimiento del agente"></svg>
+            <p class="grafo-vacio oculto" id="grafo-vacio"></p>
+          </div>
+          <p class="nota">Arrastra un nodo para moverlo · rueda del ratón para acercar · arrastra el fondo para desplazarte · clic en un nodo para ver su detalle.</p>
+        </article>
+
+        <aside class="tarjeta grafo-lateral">
+          <div id="grafo-resumen"></div>
+          <div id="grafo-usados" class="grafo-usados oculto"></div>
+          <div id="grafo-detalle" class="grafo-detalle"></div>
+          <h3 class="grafo-leyenda-titulo">Leyenda</h3>
+          <ul class="grafo-leyenda">
+            <li><svg width="16" height="16"><circle cx="8" cy="8" r="7" class="n-agente"/></svg>Agente AUDITA-PIMS</li>
+            <li><svg width="16" height="16"><rect x="2" y="2" width="12" height="12" rx="3" class="n-fuente"/></svg>Fuente indexada en el RAG</li>
+            <li><svg width="16" height="16"><rect x="3" y="3" width="10" height="10" transform="rotate(45 8 8)" class="n-grupo"/></svg>Grupo de controles</li>
+            <li><svg width="16" height="16"><circle cx="8" cy="8" r="6" class="n-control est-cubierto"/></svg>Control (color = estado de cobertura)</li>
+            <li><svg width="16" height="16"><circle cx="8" cy="8" r="7" class="n-proyecto"/></svg>Organización auditada</li>
+            <li><svg width="16" height="16"><rect x="3" y="3" width="10" height="10" class="n-evidencia int-ok"/></svg>Evidencia (color = integridad)</li>
+          </ul>
+          <div class="grafo-estados" id="grafo-estados"></div>
+        </aside>
+      </div>
     </section>
   </main>
 

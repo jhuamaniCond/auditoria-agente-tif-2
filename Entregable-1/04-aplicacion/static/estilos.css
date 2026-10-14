@@ -134,7 +134,7 @@ main { padding: 22px 28px 40px; max-width: 1400px; margin: 0 auto; }
 .e-cubierto, .i-ok        { background: var(--ok-fondo); color: var(--ok); }
 .e-parcial, .e-desactualizada { background: var(--aviso-fondo); color: var(--aviso); }
 .e-comprometida, .e-sin-evidencia, .i-alterada, .i-faltante { background: var(--grave-fondo); color: var(--grave); }
-.e-no-aplica { background: var(--neutro-fondo); color: var(--neutro); }
+.e-no-aplica, .e-fuera-del-rol { background: var(--neutro-fondo); color: var(--neutro); }
 
 /* --------------------------------------------------------------- alertas */
 .alerta {
@@ -286,3 +286,93 @@ pre.documento {
 .decision { background: var(--acento-suave); padding: 10px 12px; border-radius: 6px; }
 .panel-cuerpo hr { border: 0; border-top: 1px solid var(--borde); margin: 16px 0; }
 .panel-cuerpo h3 { font-size: 14px; margin: 14px 0 4px; }
+
+/* ------------------------------------------------- grafo de conocimiento */
+.rejilla-grafo { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 18px; align-items: start; }
+.lienzo-grafo { padding-bottom: 10px; }
+.lienzo-grafo .tarjeta-cab input[type=search] { width: 220px; margin: 0; }
+.grafo-filtros { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-bottom: 10px; }
+.grafo-filtros label { display: flex; align-items: center; gap: 6px; margin: 0; font-weight: 400; color: var(--tinta-2); cursor: pointer; }
+.grafo-filtros input { margin: 0; }
+.grafo-filtros i { display: inline-block; width: 22px; height: 0; border-top: 2px solid; }
+.l-semejanza { border-color: #6b8fa0 !important; border-top-style: dashed !important; }
+.l-remite { border-color: #8a5a00 !important; border-top-style: dotted !important; border-top-width: 3px !important; }
+.l-respalda { border-color: var(--ok) !important; }
+.l-estructura { border-color: #c6c2b8 !important; }
+
+.grafo-contenedor { position: relative; }
+#grafo-svg {
+  display: block; width: 100%; height: calc(100vh - 300px); min-height: 440px;
+  background: var(--fondo); border: 1px solid var(--borde); border-radius: 6px;
+  cursor: grab; touch-action: none; user-select: none;
+}
+#grafo-svg.moviendo { cursor: grabbing; }
+.grafo-vacio { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: var(--tinta-3); }
+
+.arista { stroke: #c6c2b8; stroke-width: 1.2; fill: none; }
+.arista.a-semejanza { stroke: #6b8fa0; stroke-dasharray: 5 4; }
+.arista.a-remite { stroke: #8a5a00; stroke-dasharray: 1.5 3; stroke-width: 2; stroke-linecap: round; }
+.arista.a-respalda { stroke: var(--ok); stroke-width: 1.5; }
+.arista.a-aporta { stroke: #9fb9a3; }
+
+.nodo { cursor: pointer; }
+.nodo text {
+  font-size: 11px; fill: var(--tinta); pointer-events: none;
+  paint-order: stroke; stroke: var(--fondo); stroke-width: 3px; stroke-linejoin: round;
+}
+.nodo.t-control text, .nodo.t-evidencia text { font-family: var(--mono); font-size: 10px; }
+.nodo.t-agente text, .nodo.t-proyecto text, .nodo.t-fuente text, .nodo.t-grupo text { font-weight: 600; }
+.n-agente { fill: var(--tinta); }
+.n-proyecto { fill: var(--acento); }
+.n-fuente { fill: var(--acento-suave); stroke: var(--acento); stroke-width: 1.5; }
+.n-grupo { fill: #fff; stroke: var(--tinta-2); stroke-width: 1.5; }
+.n-control, .n-evidencia { stroke: #fff; stroke-width: 1.5; }
+.est-cubierto, .int-ok { fill: #4f9a5c; }
+.est-parcial, .est-desactualizada { fill: #d39b2a; }
+.est-comprometida, .est-sin-evidencia, .int-alterada, .int-faltante { fill: #c2493a; }
+.est-no-aplica, .est-fuera-del-rol { fill: #a7abae; }
+
+/* Hover y selección: lo no relacionado se atenúa */
+#grafo-svg.enfocado .nodo, #grafo-svg.enfocado .arista { opacity: .15; transition: opacity .15s; }
+#grafo-svg.enfocado .nodo.vecino, #grafo-svg.enfocado .arista.vecina { opacity: 1; }
+.nodo.seleccionado .forma { stroke: var(--tinta); stroke-width: 3; }
+.nodo.coincide .forma { stroke: #e0a800; stroke-width: 3; }
+/* Nodos que el agente recuperó en su última respuesta */
+.halo { fill: none; stroke: #e0a800; stroke-width: 3; opacity: 0; pointer-events: none; }
+.nodo.usado .halo { opacity: .9; animation: latir 1.6s ease-in-out infinite; }
+@keyframes latir { 50% { stroke-width: 7; opacity: .35; } }
+
+.grafo-lateral { display: grid; gap: 12px; position: sticky; top: 12px; max-height: calc(100vh - 140px); overflow-y: auto; }
+.grafo-lateral h3 { font-size: 13px; margin: 0; }
+.grafo-cifras { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.grafo-cifras div { background: var(--fondo); border-radius: 6px; padding: 8px 10px; }
+.grafo-cifras b { display: block; font-size: 20px; font-weight: 600; line-height: 1.1; }
+.grafo-cifras small { font-size: 11px; }
+.grafo-usados { background: #fbf3d5; border: 1px solid #ecd49c; border-radius: 6px; padding: 10px 12px; font-size: 13px; }
+.grafo-usados .chips { margin: 6px 0 0; }
+.grafo-detalle { border-top: 1px solid var(--borde); padding-top: 12px; font-size: 13px; }
+.grafo-detalle:empty { display: none; }
+.grafo-detalle h3 { font-size: 14px; margin-bottom: 4px; }
+.grafo-detalle dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; margin: 8px 0; }
+.grafo-detalle dt { color: var(--tinta-3); }
+.grafo-detalle dd { margin: 0; }
+.grafo-detalle .acciones { flex-wrap: wrap; margin-top: 10px; }
+.relaciones { list-style: none; padding: 0; margin: 6px 0 0; display: grid; gap: 3px; }
+.relaciones button { border: 0; background: none; padding: 0; font: inherit; color: var(--acento); cursor: pointer; text-align: left; }
+.relaciones button:hover { text-decoration: underline; }
+.relaciones small { color: var(--tinta-3); }
+.chip-nodo {
+  font-family: var(--mono); font-size: 11px; border: 1px solid #ecd49c; background: #fff;
+  border-radius: 99px; padding: 2px 8px; cursor: pointer; color: var(--aviso);
+}
+.grafo-leyenda-titulo { border-top: 1px solid var(--borde); padding-top: 12px; }
+.grafo-leyenda { list-style: none; padding: 0; margin: 0; display: grid; gap: 4px; font-size: 12px; color: var(--tinta-2); }
+.grafo-leyenda li { display: flex; align-items: center; gap: 8px; }
+.grafo-estados { display: flex; flex-wrap: wrap; gap: 4px; }
+.fuentes .ver-grafo { border: 0; background: none; padding: 0; font: inherit; color: var(--acento); cursor: pointer; text-decoration: underline; }
+
+@media (max-width: 1000px) {
+  .rejilla-grafo { grid-template-columns: 1fr; }
+  .grafo-lateral { position: static; max-height: none; }
+  #grafo-svg { height: 60vh; }
+}
