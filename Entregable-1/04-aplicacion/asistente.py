@@ -174,7 +174,7 @@ def sugerir_clasificacion(rag, catalogo, nombre_archivo, texto):
     candidatos = rag.buscar(consulta, k=6, tipos=["control"])
     refs_validas = {c["ref"] for c in catalogo}
     from evidencia_api import TIPOS
-    # Catalogo completo (33 lineas cortas); el RAG solo ordena las pistas.
+    # Catalogo completo (41 lineas cortas); el RAG solo ordena las pistas.
     lista = "\n".join("- %s: %s" % (c["ref"], c["titulo"]) for c in catalogo)
     pistas = ", ".join("%s (%.2f)" % (c["ref"], c["similitud"]) for c in candidatos)
     instruccion = (

@@ -1,0 +1,7 @@
+# Las evidencias archivadas se guardan byte a byte: su SHA-256 esta en la cadena
+# de custodia. Si git convierte LF<->CRLF al hacer checkout, el hash deja de
+# coincidir y la app las marca como ALTERADAS. Nunca convertir sus finales de linea.
+**/expediente/archivos/** -text
+**/expediente/*.json -text
+**/expediente/*.log -text
+**/expediente/*.csv -text
