@@ -4,7 +4,7 @@ Cliente minimo de Ollama (servidor local en http://localhost:11434).
 
 Dos modelos, ambos ejecutados en la maquina del auditor:
   - EMBEDDINGS (nomic-embed-text): convierte texto en vectores para el RAG.
-  - CHAT (qwen2.5:7b): redacta respuestas y hallazgos a partir del contexto.
+  - CHAT (qwen2.5:3b): redacta respuestas y hallazgos a partir del contexto.
 
 Solo usa la biblioteca estandar (urllib), sin dependencias.
 """
@@ -15,7 +15,7 @@ import urllib.error
 import urllib.request
 
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434")
-MODELO_CHAT = os.environ.get("AUDITA_MODELO_CHAT", "qwen2.5:7b")
+MODELO_CHAT = os.environ.get("AUDITA_MODELO_CHAT", "qwen2.5:3b")
 MODELO_EMBEDDINGS = os.environ.get("AUDITA_MODELO_EMBEDDINGS", "nomic-embed-text")
 
 

@@ -1,0 +1,152 @@
+[
+  {
+    "archivo": "politica_privacidad_unsa.txt",
+    "titulo": "Politica de Privacidad de la UNSA (Ley 29733)",
+    "url_origen": "https://www.unsa.edu.pe/servicios/politica-proteccion-datos.html",
+    "fecha_consulta": "2026-10-27",
+    "fecha_documento": "2021-03-01",
+    "tipo": "politica",
+    "controles": ["5.2", "A.1.2.2", "A.1.3.7"],
+    "justificacion_controles": "Politica publicada en la web institucional (texto copiado de unsa.txt de la raiz del repo; contenido verificado contra la URL). 5.2: es la politica de privacidad comunicada al publico. A.1.2.2: declara la finalidad del tratamiento por categoria de titular y banco de datos (Estudiantes, Postulantes, Recursos Humanos, Seguridad y Vigilancia, etc.). A.1.3.7: describe el ejercicio de derechos ARCO y los requisitos de la solicitud (art. 50 DS 003-2013-JUS). El documento solo indica 'Marzo, 2021' (se usa el dia 01); no muestra version ni aprobacion formal y cita el reglamento derogado DS 003-2013-JUS."
+  },
+  {
+    "archivo": "GUIA-PARA-REALIZAR-COPIAS-DE-SEGURIDAD-y-PROTOCOLO-DE-RESPALDO-DE-BASE-DE-DATOS.pdf",
+    "titulo": "Guia para realizar copias de seguridad del Repositorio Institucional de la UNSA y protocolo de respaldo de base de datos",
+    "url_origen": null,
+    "fecha_consulta": "2026-10-27",
+    "fecha_documento": "2024-05-31",
+    "tipo": "procedimiento",
+    "controles": ["A.3.14"],
+    "justificacion_controles": "Archivo aportado por el grupo (raiz del repo). Origen web probable repositorio.unsa.edu.pe, pero no se pudo verificar: el sitio responde con una pagina anti-bot. Fecha tomada de los metadatos del PDF (CreationDate), el texto no trae fecha. A.3.14 (parcial): define responsables (Asistente Tecnico UGINF) y actividades para respaldar software, metadatos y documentos digitales del repositorio DSpace, lo que protege los registros contra perdida; no cubre retencion ni inmutabilidad de logs de acceso a PII."
+  },
+  {
+    "archivo": "rr_0987_2025_oficial_datos_personales.pdf",
+    "titulo": "RR 0987-2025 Designacion del Oficial de Datos Personales y del Coordinador de Datos Personales",
+    "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/1627/RR-0987-2025.pdf?sequence=1&isAllowed=y",
+    "fecha_consulta": "2026-10-27",
+    "fecha_documento": "2025-08-19",
+    "tipo": "acta",
+    "controles": ["5.3"],
+    "justificacion_controles": "Resolucion rectoral firmada (Rector y Secretaria General) que designa al Jefe de la Oficina de Asesoria Juridica como Oficial de Datos Personales y a un Coordinador de Datos Personales, y ordena comunicarlo a la Autoridad Nacional de Proteccion de Datos Personales. Es la designacion formal del DPO que pide 5.3 (no incluye matriz RACI). PDF escaneado, sin capa de texto."
+  },
+  {
+    "archivo": "rr_1244_2025_oficial_seguridad_confianza_digital.pdf",
+    "titulo": "RR 1244-2025 Designacion del Oficial de Seguridad y Confianza Digital (OSCD)",
+    "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/1702/RR-1244-2025.pdf?sequence=1&isAllowed=y",
+    "fecha_consulta": "2026-10-27",
+    "fecha_documento": "2025-11-06",
+    "tipo": "acta",
+    "controles": ["5.3"],
+    "justificacion_controles": "Resolucion rectoral firmada que designa al Jefe de la Unidad de Sistemas de Informacion, Redes y Telecomunicaciones como OSCD (Directiva 001-2023-PCM/SGTD), citando sus funciones de control de acceso y seguridad de la informacion del ROF (art. 97-98). Asigna un rol de seguridad complementario al DPO (5.3). PDF escaneado."
+  },
+  {
+    "archivo": "rr_1000_2025_comite_gobierno_transformacion_digital.pdf",
+    "titulo": "RR 1000-2025 Reconformacion del Comite de Gobierno y Transformacion Digital de la UNSA",
+    "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/857/RR-1000-2025.pdf?sequence=5&isAllowed=y",
+    "fecha_consulta": "2026-10-27",
+    "fecha_documento": "2025-08-20",
+    "tipo": "acta",
+    "controles": ["5.1", "5.3"],
+    "justificacion_controles": "Resolucion rectoral firmada: el comite lo preside el Rector e integra al Oficial de Datos Personales, al Oficial de Seguridad y Confianza Digital, al Lider de Gobierno Digital y a jefes de oficinas. 5.1 (parcial): muestra compromiso de la alta direccion con la gobernanza digital y de datos, aunque no asigna recursos al PIMS de forma expresa. 5.3: fija la composicion del organo de gobierno con roles de privacidad y seguridad. PDF escaneado."
+  },
+  {
+    "archivo": "rr_0503_2026_csirt_unsa.pdf",
+    "titulo": "RR 0503-2026 Conformacion del Equipo de Respuestas ante Incidentes de Seguridad Digital - CSIRT UNSA",
+    "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/1814/RR-0503-2026.pdf?sequence=1&isAllowed=y",
+    "fecha_consulta": "2026-10-27",
+    "fecha_documento": "2026-03-25",
+    "tipo": "acta",
+    "controles": ["A.3.11", "5.3"],
+    "justificacion_controles": "Resolucion rectoral firmada que conforma el CSIRT UNSA con roles (Coordinador, OSCD, Gestor de incidentes, Gestor de redes, Gestor de infraestructura) y funciones (comunicar incidentes al Centro Nacional de Seguridad Digital, gestionar riesgos e incidentes, alertas tempranas, corregir vulnerabilidades). A.3.11 (parcial): es preparacion organizativa para la gestion de incidentes, pero no es un procedimiento de incidentes y brechas de PII. 5.3: asigna responsabilidades. PDF escaneado."
+  },
+  {
+    "archivo": "rcu_0422_2026_plan_contingencia_sla_data_center.pdf",
+    "titulo": "RCU 0422-2026 Plan de Contingencia y Plan de Atenciones SLA para Data Center (OTI, v1.0)",
+    "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/1920/RCU-0422-2026.pdf?sequence=1&isAllowed=y",
+    "fecha_consulta": "2026-10-27",
+    "fecha_documento": "2026-08-27",
+    "tipo": "procedimiento",
+    "controles": ["A.3.11"],
+    "justificacion_controles": "Plan aprobado por Consejo Universitario con niveles de activacion N1-N3, organizacion para la contingencia, comunicaciones y escalamiento, bitacora obligatoria, indicadores, pruebas y control de cambios. A.3.11 (parcial): prepara la respuesta a incidentes de infraestructura del data center, pero excluye de forma expresa ciberseguridad y respaldo/recuperacion de datos, y no trata brechas de PII. Los anexos de ejemplo traen campos de aprobacion '[Completar]'. Fecha tomada del registro del portal de transparencia."
+  },
+  {
+    "archivo": "rcu_0350_2021_plan_contingencias_ti.pdf",
+    "titulo": "RCU 0350-2021 Plan de Contingencias de Tecnologias de la Informacion (OUIS)",
+    "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/667/RCU-0350-2021.pdf?sequence=1&isAllowed=y",
+    "fecha_consulta": "2026-10-27",
+    "fecha_documento": "2021-07-23",
+    "tipo": "procedimiento",
+    "controles": ["A.3.11"],
+    "justificacion_controles": "Plan aprobado por Consejo Universitario (a raiz de recomendaciones de la sociedad auditora) para recuperar servicios informaticos ante desastre, incidencia o evento y prevenir la perdida o corrupcion de informacion digital; toma como base la NTP-ISO/IEC 27001 y la RM 028-2015-PCM. A.3.11 (parcial, preparacion ante incidentes). Es de 2021 y probablemente lo sustituye en parte el plan de 2026, por lo que se espera que figure como Desactualizada. La mayor parte esta escaneada."
+  },
+  {
+    "archivo": "rcu_0152_2023_plan_gobierno_digital.pdf",
+    "titulo": "RCU 0152-2023 Plan de Gobierno Digital (PGD) de la UNSA 2023-2025",
+    "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/1091/RCU-0152-2023.pdf?sequence=1&isAllowed=y",
+    "fecha_consulta": "2026-10-27",
+    "fecha_documento": "2023-04-04",
+    "tipo": "politica",
+    "controles": ["6.2", "7.1"],
+    "justificacion_controles": "Plan aprobado por Consejo Universitario. 6.2 (parcial): objetivos de gobierno digital con indicadores, formula y metas 2023-2025, y cartera de proyectos con responsable y periodo; no son objetivos de privacidad propiamente dichos. 7.1 (parcial): presupuesto TIC aprobado (S/ 2M en 2023, S/ 6M en 2024, S/ 3M en 2025) y cartera con montos; no asigna recursos al PIMS de forma especifica. Cuerpo del plan escaneado. Vigencia hasta 2025."
+  },
+  {
+    "archivo": "inf_178_2025_oti_ejecucion_pgd.pdf",
+    "titulo": "Informe N. 178-2025-OTI-UNSA Ejecucion del Plan de Gobierno Digital al 2025-06",
+    "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/1091/INF-178-2025-OTI-UNSA-PGD.pdf?sequence=6&isAllowed=y",
+    "fecha_consulta": "2026-10-27",
+    "fecha_documento": "2025-07-18",
+    "tipo": "informe",
+    "controles": ["9.1"],
+    "justificacion_controles": "Informe del Jefe de la OTI al Rector con la medicion del indicador '% de iniciativas del PGD ejecutadas': 20 de 33 ejecutadas (60.6%), 8 en proceso y 5 pendientes, mas recomendaciones. 9.1 (parcial): es seguimiento y medicion con datos del periodo, pero sobre gobierno digital y no sobre indicadores del PIMS."
+  },
+  {
+    "archivo": "rcu_0748_2019_directiva_transparencia_acceso_informacion.pdf",
+    "titulo": "RCU 0748-2019 Directiva N. 002-2019-ODO-SG de Transparencia y Acceso a la Informacion Publica (v02) y formato FUT",
+    "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/255/RCU_0748-2019.pdf?sequence=1&isAllowed=y",
+    "fecha_consulta": "2026-10-27",
+    "fecha_documento": "2019-08-26",
+    "tipo": "procedimiento",
+    "controles": ["4.2", "7.4"],
+    "justificacion_controles": "Directiva aprobada y versionada. 4.2 (parcial): su base legal identifica requisitos externos aplicables, entre ellos la Ley 27806, la Ley 29733 y su reglamento, y el D.Leg. 1353; no es una matriz de partes interesadas. 7.4: regula que se comunica, quien lo hace y en que plazos hacia el exterior (Funcionario Responsable de Acceso a la Informacion, Portal de Transparencia Estandar, respuesta de las unidades en 3 dias habiles). Es de 2019; se espera estado Desactualizada. Escaneado en su mayor parte."
+  },
+  {
+    "archivo": "rcu_0306_2022_rof_organigrama.pdf",
+    "titulo": "RCU 0306-2022 Reglamento de Organizacion y Funciones (ROF) y Organigrama de la UNSA",
+    "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/911/RCU-0306-2022-ROF-Organigrama.pdf?sequence=7&isAllowed=y",
+    "fecha_consulta": "2026-10-27",
+    "fecha_documento": "2022-07-05",
+    "tipo": "politica",
+    "controles": ["5.3"],
+    "justificacion_controles": "ROF vigente (las RR 1244-2025 y 0503-2026 lo citan) que fija las funciones de las unidades organicas, entre ellas la Unidad de Sistemas de Informacion, Redes y Telecomunicaciones (art. 98: control de acceso y seguridad de la informacion), la OTI y la Asesoria Juridica. Respalda la asignacion de responsabilidades (5.3). El cuerpo esta escaneado. Lo modifican resoluciones posteriores (p. ej. RCU 0312-2026) que no se descargaron."
+  },
+  {
+    "archivo": "rcu_0085_2026_reglamento_admision_pregrado.pdf",
+    "titulo": "RCU 0085-2026 Reglamento del Proceso de Admision de Pregrado de la UNSA (version 5)",
+    "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/1795/RCU-0085-2026.pdf?sequence=1&isAllowed=y",
+    "fecha_consulta": "2026-10-27",
+    "fecha_documento": "2026-03-06",
+    "tipo": "procedimiento",
+    "controles": ["8.1"],
+    "justificacion_controles": "Procedimiento operativo aprobado (version 5, con elaboracion, revision, validacion y aprobacion firmadas) que regula la inscripcion, la verificacion de identidad (DNI/CE) y las modalidades de los postulantes, incluidas categorias con datos sensibles (discapacidad - CONADIS, victimas del terrorismo). 8.1 (parcial): es un procedimiento operativo del tratamiento de PII de postulantes, pero su base legal (art. 3.1-3.12) no cita la Ley 29733 ni define controles de privacidad. PDF escaneado."
+  },
+  {
+    "archivo": "rcu_348_2011_reglamento_general_trabajo.pdf",
+    "titulo": "RCU 348-2011 Reglamento General de Trabajo de la UNSA",
+    "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/247/reglamentoweb.pdf?sequence=1&isAllowed=y",
+    "fecha_consulta": "2026-10-27",
+    "fecha_documento": "2011-09-16",
+    "tipo": "politica",
+    "controles": ["A.3.18", "8.1"],
+    "justificacion_controles": "A.3.18 (parcial): impone a docentes y administrativos el deber de 'guardar en absoluta reserva las gestiones y/o trabajos propios de la institucion' y tipifica como falta sacar documentos reservados sin autorizacion; no son acuerdos de confidencialidad firmados de forma individual. 8.1 (parcial): arts. 179-180 regulan el control y el acceso restringido a los legajos personales (PII del personal). Es de 2011 (la edicion impresa dice 2013); se espera estado Desactualizada."
+  },
+  {
+    "archivo": "plan_capacitacion_2026.pdf",
+    "titulo": "Plan de Capacitacion Docente 2026 (Direccion Universitaria de Desarrollo Docente, RV 107-2026-VR.AC)",
+    "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/1820/PC-2026.pdf?sequence=1&isAllowed=y",
+    "fecha_consulta": "2026-10-27",
+    "fecha_documento": "2026-02-10",
+    "tipo": "informe",
+    "controles": [],
+    "justificacion_controles": "NO REGISTRADO. Se reviso como posible evidencia de A.3.17 o 7.2, pero sus componentes (pedagogico, tecnologico, IA en docencia, etica e integridad, investigacion) no incluyen formacion en privacidad, proteccion de datos ni seguridad de la informacion. Que falte este contenido es en si un indicio para el hallazgo de A.3.17."
+  }
+]

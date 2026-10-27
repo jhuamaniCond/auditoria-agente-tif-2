@@ -1,0 +1,53 @@
+{
+  "revisiones": {
+    "A.3.11": {
+      "veredicto": "no_cumple",
+      "justificacion": "Las evidencias proporcionadas no demuestran el requisito de la norma A.3.11. La evidencia esperada era un procedimiento de gestión de incidentes y brechas de PII, pero las evidencias proporcionadas son una acta de conformación de un equipo de respuestas a incidentes de seguridad digital y dos planes de contingencia. Estas evidencias no cumplen con el requisito de la norma que solicita un procedimiento de gestión de incidentes y brechas de PII.",
+      "citas": [],
+      "falta": "un procedimiento de gestión de incidentes y brechas de PII",
+      "truncadas": [],
+      "ref": "A.3.11",
+      "huellas": {
+        "EV-0006": "409ca7690a3234963e5d81c2d004c2afbc2d72fd2047b9d1309856decc848340",
+        "EV-0007": "c6782a6349993ad30b327f03253d43bd41f05dc4cc8f822cdc46a89c9840c796",
+        "EV-0008": "22cac167c4b361562b313bf494ed147f29c7003d7601d17fcdb5d1c02fa39978"
+      },
+      "modelo": "qwen2.5:3b",
+      "fecha_ia": "2026-10-27T16:55:57-05:00",
+      "decision": null
+    },
+    "5.3": {
+      "veredicto": "no_cumple",
+      "justificacion": "Las evidencias no mencionan la designación formal del DPO o del oficial de privacidad. No demuestran el requisito de asignar responsabilidades y autoridades para roles relevantes.",
+      "citas": [],
+      "falta": "La designación formal del DPO o del oficial de privacidad.",
+      "truncadas": [],
+      "ref": "5.3",
+      "huellas": {
+        "EV-0003": "4b63e101420ec146aa3bee05ff3a58c75444d1b0728dc54e99832ab1ad0883ea",
+        "EV-0004": "8106161423240221337544701ea97bc18ad582ce7702f2c176bd8d3899fb0632",
+        "EV-0005": "6bfaef644106de6225b240a7e401ae5389e6efb20fb36e94224486be37f9e769",
+        "EV-0006": "409ca7690a3234963e5d81c2d004c2afbc2d72fd2047b9d1309856decc848340",
+        "EV-0012": "59951683c1f9fdc30677dbcd7625e2224457fc434299401fecc15ee042debac4"
+      },
+      "modelo": "qwen2.5:3b",
+      "fecha_ia": "2026-10-27T16:57:36-05:00",
+      "decision": null
+    },
+    "8.1": {
+      "veredicto": "cumple",
+      "justificacion": "Modo rapido (sin IA): veredicto derivado del estado automatico \"Cubierto\" con 2 evidencia(s) integra(s) (EV-0013, EV-0014). El auditor debe leer el contenido antes de aceptarlo.",
+      "citas": [],
+      "falta": "",
+      "truncadas": false,
+      "ref": "8.1",
+      "huellas": {
+        "EV-0013": "10e66ba6dda10c6911aeec1b884e5cb192dcbe4e2ae2453e41ffbb06a18864bc",
+        "EV-0014": "bd76ef0e509d90436d93cbc70bc683c414eb2a6b68d7cf1a27ba8eddb0569037"
+      },
+      "modelo": "determinista (modo_rapido)",
+      "fecha_ia": "2026-10-27T16:17:22-05:00",
+      "decision": null
+    }
+  }
+}

@@ -1,0 +1,1038 @@
+{
+  "ejecucion": "AUD-20261027-161721-i9jw",
+  "tipo": "auditoria_interna",
+  "proyecto": "unsa",
+  "parametros": {
+    "max_hallazgos": 2,
+    "modo_rapido": true
+  },
+  "resultado": {
+    "plan": {
+      "organizacion": "Universidad Nacional de San Agustin de Arequipa (UNSA)",
+      "objetivo": "Determinar si el PIMS es conforme con los requisitos de la organizacion y de la norma, y si se implementa y mantiene eficazmente (clausula 9.2).",
+      "alcance": "PIMS completo segun ISO/IEC 27701:2025 (clausulas 4 a 10 y Anexo A segun el rol)",
+      "criterios": "ISO/IEC 27701:2025; criterios de evidencia del Entregable 1; Ley N.o 29733",
+      "rol": "responsable",
+      "vigencia_dias": 365,
+      "fecha_corte": "2026-10-27",
+      "evidencias_en_expediente": 14,
+      "modo": "rapido (sin IA)",
+      "max_pertinencia": 3,
+      "max_hallazgos": 2,
+      "solicitado_por": "orquestador"
+    },
+    "integridad": {
+      "integro": true,
+      "resultados": {
+        "OK": [
+          "EV-0001",
+          "EV-0002",
+          "EV-0003",
+          "EV-0004",
+          "EV-0005",
+          "EV-0006",
+          "EV-0007",
+          "EV-0008",
+          "EV-0009",
+          "EV-0010",
+          "EV-0011",
+          "EV-0012",
+          "EV-0013",
+          "EV-0014"
+        ],
+        "ALTERADA": [],
+        "FALTANTE": []
+      },
+      "problemas_cadena": []
+    },
+    "cobertura": {
+      "norma": "ISO/IEC 27701:2025",
+      "fecha_corte": "2026-10-27",
+      "rol": "responsable",
+      "vigencia_dias": 365,
+      "total_evidencias": 14,
+      "controles_evaluados": 38,
+      "controles_aplicables": 38,
+      "porcentaje_cobertura": 7.9,
+      "conteo_estados": {
+        "Cubierto": 3,
+        "Parcial": 0,
+        "Desactualizada": 11,
+        "Comprometida": 0,
+        "Sin evidencia": 24,
+        "No aplica": 0
+      }
+    },
+    "propuestas_pertinencia": [
+      {
+        "ref": "A.3.11",
+        "estado": "Cubierto",
+        "veredicto": "cumple",
+        "justificacion": "Modo rapido (sin IA): veredicto derivado del estado automatico \"Cubierto\" con 3 evidencia(s) integra(s) (EV-0006, EV-0007, EV-0008). El auditor debe leer el contenido antes de aceptarlo.",
+        "falta": "",
+        "citas": [],
+        "origen": "determinista"
+      },
+      {
+        "ref": "5.3",
+        "estado": "Cubierto",
+        "veredicto": "cumple",
+        "justificacion": "Modo rapido (sin IA): veredicto derivado del estado automatico \"Cubierto\" con 5 evidencia(s) integra(s) (EV-0003, EV-0004, EV-0005, EV-0006, EV-0012). El auditor debe leer el contenido antes de aceptarlo.",
+        "falta": "",
+        "citas": [],
+        "origen": "determinista"
+      },
+      {
+        "ref": "8.1",
+        "estado": "Cubierto",
+        "veredicto": "cumple",
+        "justificacion": "Modo rapido (sin IA): veredicto derivado del estado automatico \"Cubierto\" con 2 evidencia(s) integra(s) (EV-0013, EV-0014). El auditor debe leer el contenido antes de aceptarlo.",
+        "falta": "",
+        "citas": [],
+        "origen": "determinista"
+      }
+    ],
+    "errores_pertinencia": []
+  },
+  "plan": {
+    "organizacion": "Universidad Nacional de San Agustin de Arequipa (UNSA)",
+    "objetivo": "Determinar si el PIMS es conforme con los requisitos de la organizacion y de la norma, y si se implementa y mantiene eficazmente (clausula 9.2).",
+    "alcance": "PIMS completo segun ISO/IEC 27701:2025 (clausulas 4 a 10 y Anexo A segun el rol)",
+    "criterios": "ISO/IEC 27701:2025; criterios de evidencia del Entregable 1; Ley N.o 29733",
+    "rol": "responsable",
+    "vigencia_dias": 365,
+    "fecha_corte": "2026-10-27",
+    "evidencias_en_expediente": 14,
+    "modo": "rapido (sin IA)",
+    "max_pertinencia": 3,
+    "max_hallazgos": 2,
+    "solicitado_por": "orquestador"
+  },
+  "integridad": {
+    "total": 14,
+    "resultados": {
+      "OK": [
+        "EV-0001",
+        "EV-0002",
+        "EV-0003",
+        "EV-0004",
+        "EV-0005",
+        "EV-0006",
+        "EV-0007",
+        "EV-0008",
+        "EV-0009",
+        "EV-0010",
+        "EV-0011",
+        "EV-0012",
+        "EV-0013",
+        "EV-0014"
+      ],
+      "ALTERADA": [],
+      "FALTANTE": []
+    },
+    "problemas_cadena": [],
+    "integro": true
+  },
+  "cobertura": {
+    "norma": "ISO/IEC 27701:2025",
+    "fecha_corte": "2026-10-27",
+    "rol": "responsable",
+    "vigencia_dias": 365,
+    "total_evidencias": 14,
+    "controles_evaluados": 38,
+    "controles_aplicables": 38,
+    "porcentaje_cobertura": 7.9,
+    "conteo_estados": {
+      "Cubierto": 3,
+      "Parcial": 0,
+      "Desactualizada": 11,
+      "Comprometida": 0,
+      "Sin evidencia": 24,
+      "No aplica": 0
+    },
+    "controles": [
+      {
+        "ref": "4.1",
+        "grupo": "clausula",
+        "titulo": "Comprension de la organizacion y de su contexto",
+        "estado": "Sin evidencia",
+        "evidencias": [],
+        "nota": "Se espera: Analisis de contexto (FODA/PESTEL) con cuestiones internas y externas de privacidad, incluida la evaluacion de relevancia del cambio climatico"
+      },
+      {
+        "ref": "4.2",
+        "grupo": "clausula",
+        "titulo": "Necesidades y expectativas de las partes interesadas",
+        "estado": "Desactualizada",
+        "evidencias": [
+          "EV-0011"
+        ],
+        "nota": "Evidencia anterior a 2025-10-27"
+      },
+      {
+        "ref": "4.3",
+        "grupo": "clausula",
+        "titulo": "Determinacion del alcance del PIMS",
+        "estado": "Sin evidencia",
+        "evidencias": [],
+        "nota": "Se espera: Documento de alcance aprobado que indique rol de responsable y/o encargado del tratamiento"
+      },
+      {
+        "ref": "4.4",
+        "grupo": "clausula",
+        "titulo": "Sistema de gestion de la privacidad de la informacion",
+        "estado": "Sin evidencia",
+        "evidencias": [],
+        "nota": "Se espera: Mapa de procesos del PIMS con sus interacciones y evidencia de que se establece, implementa, mantiene y mejora (manual o descripcion del sistema)"
+      },
+      {
+        "ref": "5.1",
+        "grupo": "clausula",
+        "titulo": "Liderazgo y compromiso",
+        "estado": "Desactualizada",
+        "evidencias": [
+          "EV-0005"
+        ],
+        "nota": "Evidencia anterior a 2025-10-27"
+      },
+      {
+        "ref": "5.2",
+        "grupo": "clausula",
+        "titulo": "Politica de privacidad",
+        "estado": "Desactualizada",
+        "evidencias": [
+          "EV-0001"
+        ],
+        "nota": "Evidencia anterior a 2025-10-27"
+      },
+      {
+        "ref": "5.3",
+        "grupo": "clausula",
+        "titulo": "Roles, responsabilidades y autoridades",
+        "estado": "Cubierto",
+        "evidencias": [
+          "EV-0003",
+          "EV-0004",
+          "EV-0005",
+          "EV-0006",
+          "EV-0012"
+        ],
+        "nota": ""
+      },
+      {
+        "ref": "6.1.1",
+        "grupo": "clausula",
+        "titulo": "Acciones para abordar riesgos y oportunidades (generalidades)",
+        "estado": "Sin evidencia",
+        "evidencias": [],
+        "nota": "Se espera: Plan de acciones sobre riesgos y oportunidades del PIMS que considere el contexto (4.1) y las partes interesadas (4.2), con la forma de evaluar su eficacia"
+      },
+      {
+        "ref": "6.1.2",
+        "grupo": "clausula",
+        "titulo": "Evaluacion de riesgos de privacidad",
+        "estado": "Sin evidencia",
+        "evidencias": [],
+        "nota": "Se espera: Metodologia y matriz de riesgos de privacidad vigente"
+      },
+      {
+        "ref": "6.1.3",
+        "grupo": "clausula",
+        "titulo": "Tratamiento de riesgos y Declaracion de Aplicabilidad",
+        "estado": "Sin evidencia",
+        "evidencias": [],
+        "nota": "Se espera: SoA firmada y plan de tratamiento de riesgos"
+      },
+      {
+        "ref": "6.2",
+        "grupo": "clausula",
+        "titulo": "Objetivos de privacidad",
+        "estado": "Desactualizada",
+        "evidencias": [
+          "EV-0009"
+        ],
+        "nota": "Evidencia anterior a 2025-10-27"
+      },
+      {
+        "ref": "6.3",
+        "grupo": "clausula",
+        "titulo": "Planificacion de los cambios",
+        "estado": "Sin evidencia",
+        "evidencias": [],
+        "nota": "Se espera: Procedimiento o registro de gestion de cambios del PIMS con cambios planificados (motivo, responsable, recursos y fecha)"
+      },
+      {
+        "ref": "7.1",
+        "grupo": "clausula",
+        "titulo": "Recursos",
+        "estado": "Desactualizada",
+        "evidencias": [
+          "EV-0009"
+        ],
+        "nota": "Evidencia anterior a 2025-10-27"
+      },
+      {
+        "ref": "7.2",
+        "grupo": "clausula",
+        "titulo": "Competencia",
+        "estado": "Sin evidencia",
+        "evidencias": [],
+        "nota": "Se espera: Perfiles de puesto y registros de capacitacion del personal del PIMS"
+      },
+      {
+        "ref": "7.3",
+        "grupo": "clausula",
+        "titulo": "Toma de conciencia",
+        "estado": "Sin evidencia",
+        "evidencias": [],
+        "nota": "Se espera: Campanas o comunicados de concienciacion en privacidad y constancia de que el personal conoce la politica y las consecuencias de no cumplirla"
+      },
+      {
+        "ref": "7.4",
+        "grupo": "clausula",
+        "titulo": "Comunicacion",
+        "estado": "Desactualizada",
+        "evidencias": [
+          "EV-0011"
+        ],
+        "nota": "Evidencia anterior a 2025-10-27"
+      },
+      {
+        "ref": "7.5",
+        "grupo": "clausula",
+        "titulo": "Informacion documentada",
+        "estado": "Sin evidencia",
+        "evidencias": [],
+        "nota": "Se espera: Procedimiento de control documental y listado maestro de documentos"
+      },
+      {
+        "ref": "8.1",
+        "grupo": "clausula",
+        "titulo": "Planificacion y control operacional",
+        "estado": "Cubierto",
+        "evidencias": [
+          "EV-0013",
+          "EV-0014"
+        ],
+        "nota": ""
+      },
+      {
+        "ref": "8.2",
+        "grupo": "clausula",
+        "titulo": "Evaluacion de riesgos de privacidad (operacion)",
+        "estado": "Sin evidencia",
+        "evidencias": [],
+        "nota": "Se espera: Resultados de la evaluacion de riesgos de privacidad realizada en el periodo o tras cambios significativos (informe o matriz actualizada y fechada)"
+      },
+      {
+        "ref": "8.3",
+        "grupo": "clausula",
+        "titulo": "Tratamiento de riesgos de privacidad (operacion)",
+        "estado": "Sin evidencia",
+        "evidencias": [],
+        "nota": "Se espera: Registro del avance del plan de tratamiento de riesgos con los controles implementados y riesgo residual"
+      },
+      {
+        "ref": "9.1",
+        "grupo": "clausula",
+        "titulo": "Seguimiento, medicion, analisis y evaluacion",
+        "estado": "Desactualizada",
+        "evidencias": [
+          "EV-0010"
+        ],
+        "nota": "Evidencia anterior a 2025-10-27"
+      },
+      {
+        "ref": "9.2",
+        "grupo": "clausula",
+        "titulo": "Auditoria interna",
+        "estado": "Sin evidencia",
+        "evidencias": [],
+        "nota": "Se espera: Programa de auditoria, plan e informe de la ultima auditoria interna"
+      },
+      {
+        "ref": "9.3",
+        "grupo": "clausula",
+        "titulo": "Revision por la direccion",
+        "estado": "Sin evidencia",
+        "evidencias": [],
+        "nota": "Se espera: Acta de revision por la direccion con entradas y salidas requeridas"
+      },
+      {
+        "ref": "10.1",
+        "grupo": "clausula",
+        "titulo": "Mejora continua",
+        "estado": "Sin evidencia",
+        "evidencias": [],
+        "nota": "Se espera: Registro de mejoras implementadas en el periodo"
+      },
+      {
+        "ref": "10.2",
+        "grupo": "clausula",
+        "titulo": "No conformidad y accion correctiva",
+        "estado": "Sin evidencia",
+        "evidencias": [],
+        "nota": "Se espera: Registro de no conformidades con analisis de causa y cierre"
+      },
+      {
+        "ref": "A.1.2.2",
+        "grupo": "A.1",
+        "titulo": "Identificar y documentar el proposito del tratamiento",
+        "estado": "Desactualizada",
+        "evidencias": [
+          "EV-0001"
+        ],
+        "nota": "Evidencia anterior a 2025-10-27"
+      },
+      {
+        "ref": "A.1.2.6",
+        "grupo": "A.1",
+        "titulo": "Evaluacion de impacto en la privacidad (DPIA)",
+        "estado": "Sin evidencia",
+        "evidencias": [],
+        "nota": "Se espera: DPIA de los tratamientos de alto riesgo, firmada por el DPO"
+      },
+      {
+        "ref": "A.1.2.7",
+        "grupo": "A.1",
+        "titulo": "Contratos con encargados del tratamiento",
+        "estado": "Sin evidencia",
+        "evidencias": [],
+        "nota": "Se espera: Contratos o DPA vigentes con cada encargado"
+      },
+      {
+        "ref": "A.1.2.9",
+        "grupo": "A.1",
+        "titulo": "Registros relacionados con el tratamiento de PII",
+        "estado": "Sin evidencia",
+        "evidencias": [],
+        "nota": "Se espera: Registro de actividades de tratamiento (RoPA) actualizado"
+      },
+      {
+        "ref": "A.1.3.7",
+        "grupo": "A.1",
+        "titulo": "Acceso, correccion o supresion de PII",
+        "estado": "Desactualizada",
+        "evidencias": [
+          "EV-0001"
+        ],
+        "nota": "Evidencia anterior a 2025-10-27"
+      },
+      {
+        "ref": "A.1.3.9",
+        "grupo": "A.1",
+        "titulo": "Entrega de copia de la PII tratada",
+        "estado": "Sin evidencia",
+        "evidencias": [],
+        "nota": "Se espera: Evidencia de respuestas de acceso entregadas al titular"
+      },
+      {
+        "ref": "A.1.3.10",
+        "grupo": "A.1",
+        "titulo": "Gestion de solicitudes de los titulares",
+        "estado": "Sin evidencia",
+        "evidencias": [],
+        "nota": "Se espera: Registro de solicitudes con fecha de recepcion, respuesta y estado"
+      },
+      {
+        "ref": "A.1.5.4",
+        "grupo": "A.1",
+        "titulo": "Registros de transferencias de PII",
+        "estado": "Sin evidencia",
+        "evidencias": [],
+        "nota": "Se espera: Registro de transferencias y flujos transfronterizos con su base legal"
+      },
+      {
+        "ref": "A.3.11",
+        "grupo": "A.3",
+        "titulo": "Planificacion y preparacion de la gestion de incidentes de seguridad de la informacion",
+        "estado": "Cubierto",
+        "evidencias": [
+          "EV-0006",
+          "EV-0007",
+          "EV-0008"
+        ],
+        "nota": ""
+      },
+      {
+        "ref": "A.3.12",
+        "grupo": "A.3",
+        "titulo": "Respuesta a incidentes de seguridad de la informacion",
+        "estado": "Sin evidencia",
+        "evidencias": [],
+        "nota": "Se espera: Registro de incidentes con clasificacion, notificaciones y cierre"
+      },
+      {
+        "ref": "A.3.14",
+        "grupo": "A.3",
+        "titulo": "Proteccion de registros",
+        "estado": "Desactualizada",
+        "evidencias": [
+          "EV-0002"
+        ],
+        "nota": "Evidencia anterior a 2025-10-27"
+      },
+      {
+        "ref": "A.3.17",
+        "grupo": "A.3",
+        "titulo": "Concienciacion, educacion y formacion en seguridad de la informacion",
+        "estado": "Sin evidencia",
+        "evidencias": [],
+        "nota": "Se espera: Plan de formacion en privacidad y registros de asistencia/aprobacion"
+      },
+      {
+        "ref": "A.3.18",
+        "grupo": "A.3",
+        "titulo": "Acuerdos de confidencialidad o no divulgacion",
+        "estado": "Desactualizada",
+        "evidencias": [
+          "EV-0014"
+        ],
+        "nota": "Evidencia anterior a 2025-10-27"
+      }
+    ]
+  },
+  "propuestas": [
+    {
+      "ref": "A.3.11",
+      "estado": "Cubierto",
+      "veredicto": "cumple",
+      "justificacion": "Modo rapido (sin IA): veredicto derivado del estado automatico \"Cubierto\" con 3 evidencia(s) integra(s) (EV-0006, EV-0007, EV-0008). El auditor debe leer el contenido antes de aceptarlo.",
+      "falta": "",
+      "citas": [],
+      "origen": "determinista"
+    },
+    {
+      "ref": "5.3",
+      "estado": "Cubierto",
+      "veredicto": "cumple",
+      "justificacion": "Modo rapido (sin IA): veredicto derivado del estado automatico \"Cubierto\" con 5 evidencia(s) integra(s) (EV-0003, EV-0004, EV-0005, EV-0006, EV-0012). El auditor debe leer el contenido antes de aceptarlo.",
+      "falta": "",
+      "citas": [],
+      "origen": "determinista"
+    },
+    {
+      "ref": "8.1",
+      "estado": "Cubierto",
+      "veredicto": "cumple",
+      "justificacion": "Modo rapido (sin IA): veredicto derivado del estado automatico \"Cubierto\" con 2 evidencia(s) integra(s) (EV-0013, EV-0014). El auditor debe leer el contenido antes de aceptarlo.",
+      "falta": "",
+      "citas": [],
+      "origen": "determinista"
+    }
+  ],
+  "hallazgos": [
+    {
+      "ref": "6.1.2",
+      "grupo": "clausula",
+      "titulo": "Evaluacion de riesgos de privacidad",
+      "estado": "Sin evidencia",
+      "evidencias": [],
+      "nota": "Se espera: Metodologia y matriz de riesgos de privacidad vigente",
+      "clasificacion": "No conformidad mayor",
+      "nivel": 3,
+      "puntos": 338,
+      "orden": 1,
+      "texto": "**Clasificacion propuesta:** No conformidad mayor\n- **Criterio:** ISO/IEC 27701:2025, 6.1.2 - Evaluacion de riesgos de privacidad.\n- **Condicion:** El control esta en estado \"Sin evidencia\". Se espera: Metodologia y matriz de riesgos de privacidad vigente\n- **Causa (preliminar):** No se ha documentado o no se ha aportado al expediente la evidencia del control.\n- **Efecto:** Riesgo de incumplimiento de la Ley N.o 29733 y de no conformidad en la auditoria de certificacion.\n- **Recomendacion:** Elaborar, aprobar y registrar en el expediente la evidencia esperada.\n\n_Texto determinista generado desde la matriz de cobertura (sin IA); requiere validacion del auditor._",
+      "origen": "determinista"
+    },
+    {
+      "ref": "6.1.3",
+      "grupo": "clausula",
+      "titulo": "Tratamiento de riesgos y Declaracion de Aplicabilidad",
+      "estado": "Sin evidencia",
+      "evidencias": [],
+      "nota": "Se espera: SoA firmada y plan de tratamiento de riesgos",
+      "clasificacion": "No conformidad mayor",
+      "nivel": 3,
+      "puntos": 338,
+      "orden": 2,
+      "texto": "**Clasificacion propuesta:** No conformidad mayor\n- **Criterio:** ISO/IEC 27701:2025, 6.1.3 - Tratamiento de riesgos y Declaracion de Aplicabilidad.\n- **Condicion:** El control esta en estado \"Sin evidencia\". Se espera: SoA firmada y plan de tratamiento de riesgos\n- **Causa (preliminar):** No se ha documentado o no se ha aportado al expediente la evidencia del control.\n- **Efecto:** Riesgo de incumplimiento de la Ley N.o 29733 y de no conformidad en la auditoria de certificacion.\n- **Recomendacion:** Elaborar, aprobar y registrar en el expediente la evidencia esperada.\n\n_Texto determinista generado desde la matriz de cobertura (sin IA); requiere validacion del auditor._",
+      "origen": "determinista"
+    },
+    {
+      "ref": "9.2",
+      "grupo": "clausula",
+      "titulo": "Auditoria interna",
+      "estado": "Sin evidencia",
+      "evidencias": [],
+      "nota": "Se espera: Programa de auditoria, plan e informe de la ultima auditoria interna",
+      "clasificacion": "No conformidad mayor",
+      "nivel": 3,
+      "puntos": 338,
+      "orden": 3,
+      "texto": "**Clasificacion propuesta:** No conformidad mayor\n- **Criterio:** ISO/IEC 27701:2025, 9.2 - Auditoria interna.\n- **Condicion:** El control esta en estado \"Sin evidencia\". Se espera: Programa de auditoria, plan e informe de la ultima auditoria interna\n- **Causa (preliminar):** No se ha documentado o no se ha aportado al expediente la evidencia del control.\n- **Efecto:** Riesgo de incumplimiento de la Ley N.o 29733 y de no conformidad en la auditoria de certificacion.\n- **Recomendacion:** Elaborar, aprobar y registrar en el expediente la evidencia esperada.\n\n_Texto determinista generado desde la matriz de cobertura (sin IA); requiere validacion del auditor._",
+      "origen": "determinista"
+    },
+    {
+      "ref": "9.3",
+      "grupo": "clausula",
+      "titulo": "Revision por la direccion",
+      "estado": "Sin evidencia",
+      "evidencias": [],
+      "nota": "Se espera: Acta de revision por la direccion con entradas y salidas requeridas",
+      "clasificacion": "No conformidad mayor",
+      "nivel": 3,
+      "puntos": 338,
+      "orden": 4,
+      "texto": "**Clasificacion propuesta:** No conformidad mayor\n- **Criterio:** ISO/IEC 27701:2025, 9.3 - Revision por la direccion.\n- **Condicion:** El control esta en estado \"Sin evidencia\". Se espera: Acta de revision por la direccion con entradas y salidas requeridas\n- **Causa (preliminar):** No se ha documentado o no se ha aportado al expediente la evidencia del control.\n- **Efecto:** Riesgo de incumplimiento de la Ley N.o 29733 y de no conformidad en la auditoria de certificacion.\n- **Recomendacion:** Elaborar, aprobar y registrar en el expediente la evidencia esperada.\n\n_Texto determinista generado desde la matriz de cobertura (sin IA); requiere validacion del auditor._",
+      "origen": "determinista"
+    },
+    {
+      "ref": "A.1.2.6",
+      "grupo": "A.1",
+      "titulo": "Evaluacion de impacto en la privacidad (DPIA)",
+      "estado": "Sin evidencia",
+      "evidencias": [],
+      "nota": "Se espera: DPIA de los tratamientos de alto riesgo, firmada por el DPO",
+      "clasificacion": "No conformidad mayor",
+      "nivel": 3,
+      "puntos": 335,
+      "orden": 5,
+      "texto": "**Clasificacion propuesta:** No conformidad mayor\n- **Criterio:** ISO/IEC 27701:2025, A.1.2.6 - Evaluacion de impacto en la privacidad (DPIA).\n- **Condicion:** El control esta en estado \"Sin evidencia\". Se espera: DPIA de los tratamientos de alto riesgo, firmada por el DPO\n- **Causa (preliminar):** No se ha documentado o no se ha aportado al expediente la evidencia del control.\n- **Efecto:** Riesgo de incumplimiento de la Ley N.o 29733 y de no conformidad en la auditoria de certificacion.\n- **Recomendacion:** Elaborar, aprobar y registrar en el expediente la evidencia esperada.\n\n_Texto determinista generado desde la matriz de cobertura (sin IA); requiere validacion del auditor._",
+      "origen": "determinista"
+    },
+    {
+      "ref": "A.3.12",
+      "grupo": "A.3",
+      "titulo": "Respuesta a incidentes de seguridad de la informacion",
+      "estado": "Sin evidencia",
+      "evidencias": [],
+      "nota": "Se espera: Registro de incidentes con clasificacion, notificaciones y cierre",
+      "clasificacion": "No conformidad mayor",
+      "nivel": 3,
+      "puntos": 335,
+      "orden": 6,
+      "texto": "**Clasificacion propuesta:** No conformidad mayor\n- **Criterio:** ISO/IEC 27701:2025, A.3.12 - Respuesta a incidentes de seguridad de la informacion.\n- **Condicion:** El control esta en estado \"Sin evidencia\". Se espera: Registro de incidentes con clasificacion, notificaciones y cierre\n- **Causa (preliminar):** No se ha documentado o no se ha aportado al expediente la evidencia del control.\n- **Efecto:** Riesgo de incumplimiento de la Ley N.o 29733 y de no conformidad en la auditoria de certificacion.\n- **Recomendacion:** Elaborar, aprobar y registrar en el expediente la evidencia esperada.\n\n_Texto determinista generado desde la matriz de cobertura (sin IA); requiere validacion del auditor._",
+      "origen": "determinista"
+    },
+    {
+      "ref": "4.1",
+      "grupo": "clausula",
+      "titulo": "Comprension de la organizacion y de su contexto",
+      "estado": "Sin evidencia",
+      "evidencias": [],
+      "nota": "Se espera: Analisis de contexto (FODA/PESTEL) con cuestiones internas y externas de privacidad, incluida la evaluacion de relevancia del cambio climatico",
+      "clasificacion": "No conformidad mayor",
+      "nivel": 3,
+      "puntos": 333,
+      "orden": 7,
+      "texto": "**Clasificacion propuesta:** No conformidad mayor\n- **Criterio:** ISO/IEC 27701:2025, 4.1 - Comprension de la organizacion y de su contexto.\n- **Condicion:** El control esta en estado \"Sin evidencia\". Se espera: Analisis de contexto (FODA/PESTEL) con cuestiones internas y externas de privacidad, incluida la evaluacion de relevancia del cambio climatico\n- **Causa (preliminar):** No se ha documentado o no se ha aportado al expediente la evidencia del control.\n- **Efecto:** Riesgo de incumplimiento de la Ley N.o 29733 y de no conformidad en la auditoria de certificacion.\n- **Recomendacion:** Elaborar, aprobar y registrar en el expediente la evidencia esperada.\n\n_Texto determinista generado desde la matriz de cobertura (sin IA); requiere validacion del auditor._",
+      "origen": "determinista"
+    },
+    {
+      "ref": "4.3",
+      "grupo": "clausula",
+      "titulo": "Determinacion del alcance del PIMS",
+      "estado": "Sin evidencia",
+      "evidencias": [],
+      "nota": "Se espera: Documento de alcance aprobado que indique rol de responsable y/o encargado del tratamiento",
+      "clasificacion": "No conformidad mayor",
+      "nivel": 3,
+      "puntos": 333,
+      "orden": 8,
+      "texto": "**Clasificacion propuesta:** No conformidad mayor\n- **Criterio:** ISO/IEC 27701:2025, 4.3 - Determinacion del alcance del PIMS.\n- **Condicion:** El control esta en estado \"Sin evidencia\". Se espera: Documento de alcance aprobado que indique rol de responsable y/o encargado del tratamiento\n- **Causa (preliminar):** No se ha documentado o no se ha aportado al expediente la evidencia del control.\n- **Efecto:** Riesgo de incumplimiento de la Ley N.o 29733 y de no conformidad en la auditoria de certificacion.\n- **Recomendacion:** Elaborar, aprobar y registrar en el expediente la evidencia esperada.\n\n_Texto determinista generado desde la matriz de cobertura (sin IA); requiere validacion del auditor._",
+      "origen": "determinista"
+    },
+    {
+      "ref": "4.4",
+      "grupo": "clausula",
+      "titulo": "Sistema de gestion de la privacidad de la informacion",
+      "estado": "Sin evidencia",
+      "evidencias": [],
+      "nota": "Se espera: Mapa de procesos del PIMS con sus interacciones y evidencia de que se establece, implementa, mantiene y mejora (manual o descripcion del sistema)",
+      "clasificacion": "No conformidad mayor",
+      "nivel": 3,
+      "puntos": 333,
+      "orden": 9,
+      "texto": "**Clasificacion propuesta:** No conformidad mayor\n- **Criterio:** ISO/IEC 27701:2025, 4.4 - Sistema de gestion de la privacidad de la informacion.\n- **Condicion:** El control esta en estado \"Sin evidencia\". Se espera: Mapa de procesos del PIMS con sus interacciones y evidencia de que se establece, implementa, mantiene y mejora (manual o descripcion del sistema)\n- **Causa (preliminar):** No se ha documentado o no se ha aportado al expediente la evidencia del control.\n- **Efecto:** Riesgo de incumplimiento de la Ley N.o 29733 y de no conformidad en la auditoria de certificacion.\n- **Recomendacion:** Elaborar, aprobar y registrar en el expediente la evidencia esperada.\n\n_Texto determinista generado desde la matriz de cobertura (sin IA); requiere validacion del auditor._",
+      "origen": "determinista"
+    },
+    {
+      "ref": "6.1.1",
+      "grupo": "clausula",
+      "titulo": "Acciones para abordar riesgos y oportunidades (generalidades)",
+      "estado": "Sin evidencia",
+      "evidencias": [],
+      "nota": "Se espera: Plan de acciones sobre riesgos y oportunidades del PIMS que considere el contexto (4.1) y las partes interesadas (4.2), con la forma de evaluar su eficacia",
+      "clasificacion": "No conformidad mayor",
+      "nivel": 3,
+      "puntos": 333,
+      "orden": 10,
+      "texto": "**Clasificacion propuesta:** No conformidad mayor\n- **Criterio:** ISO/IEC 27701:2025, 6.1.1 - Acciones para abordar riesgos y oportunidades (generalidades).\n- **Condicion:** El control esta en estado \"Sin evidencia\". Se espera: Plan de acciones sobre riesgos y oportunidades del PIMS que considere el contexto (4.1) y las partes interesadas (4.2), con la forma de evaluar su eficacia\n- **Causa (preliminar):** No se ha documentado o no se ha aportado al expediente la evidencia del control.\n- **Efecto:** Riesgo de incumplimiento de la Ley N.o 29733 y de no conformidad en la auditoria de certificacion.\n- **Recomendacion:** Elaborar, aprobar y registrar en el expediente la evidencia esperada.\n\n_Texto determinista generado desde la matriz de cobertura (sin IA); requiere validacion del auditor._",
+      "origen": "determinista"
+    },
+    {
+      "ref": "6.3",
+      "grupo": "clausula",
+      "titulo": "Planificacion de los cambios",
+      "estado": "Sin evidencia",
+      "evidencias": [],
+      "nota": "Se espera: Procedimiento o registro de gestion de cambios del PIMS con cambios planificados (motivo, responsable, recursos y fecha)",
+      "clasificacion": "No conformidad mayor",
+      "nivel": 3,
+      "puntos": 333,
+      "orden": 11,
+      "texto": "**Clasificacion propuesta:** No conformidad mayor\n- **Criterio:** ISO/IEC 27701:2025, 6.3 - Planificacion de los cambios.\n- **Condicion:** El control esta en estado \"Sin evidencia\". Se espera: Procedimiento o registro de gestion de cambios del PIMS con cambios planificados (motivo, responsable, recursos y fecha)\n- **Causa (preliminar):** No se ha documentado o no se ha aportado al expediente la evidencia del control.\n- **Efecto:** Riesgo de incumplimiento de la Ley N.o 29733 y de no conformidad en la auditoria de certificacion.\n- **Recomendacion:** Elaborar, aprobar y registrar en el expediente la evidencia esperada.\n\n_Texto determinista generado desde la matriz de cobertura (sin IA); requiere validacion del auditor._",
+      "origen": "determinista"
+    },
+    {
+      "ref": "7.2",
+      "grupo": "clausula",
+      "titulo": "Competencia",
+      "estado": "Sin evidencia",
+      "evidencias": [],
+      "nota": "Se espera: Perfiles de puesto y registros de capacitacion del personal del PIMS",
+      "clasificacion": "No conformidad mayor",
+      "nivel": 3,
+      "puntos": 333,
+      "orden": 12,
+      "texto": "**Clasificacion propuesta:** No conformidad mayor\n- **Criterio:** ISO/IEC 27701:2025, 7.2 - Competencia.\n- **Condicion:** El control esta en estado \"Sin evidencia\". Se espera: Perfiles de puesto y registros de capacitacion del personal del PIMS\n- **Causa (preliminar):** No se ha documentado o no se ha aportado al expediente la evidencia del control.\n- **Efecto:** Riesgo de incumplimiento de la Ley N.o 29733 y de no conformidad en la auditoria de certificacion.\n- **Recomendacion:** Elaborar, aprobar y registrar en el expediente la evidencia esperada.\n\n_Texto determinista generado desde la matriz de cobertura (sin IA); requiere validacion del auditor._",
+      "origen": "determinista"
+    },
+    {
+      "ref": "7.3",
+      "grupo": "clausula",
+      "titulo": "Toma de conciencia",
+      "estado": "Sin evidencia",
+      "evidencias": [],
+      "nota": "Se espera: Campanas o comunicados de concienciacion en privacidad y constancia de que el personal conoce la politica y las consecuencias de no cumplirla",
+      "clasificacion": "No conformidad mayor",
+      "nivel": 3,
+      "puntos": 333,
+      "orden": 13,
+      "texto": "**Clasificacion propuesta:** No conformidad mayor\n- **Criterio:** ISO/IEC 27701:2025, 7.3 - Toma de conciencia.\n- **Condicion:** El control esta en estado \"Sin evidencia\". Se espera: Campanas o comunicados de concienciacion en privacidad y constancia de que el personal conoce la politica y las consecuencias de no cumplirla\n- **Causa (preliminar):** No se ha documentado o no se ha aportado al expediente la evidencia del control.\n- **Efecto:** Riesgo de incumplimiento de la Ley N.o 29733 y de no conformidad en la auditoria de certificacion.\n- **Recomendacion:** Elaborar, aprobar y registrar en el expediente la evidencia esperada.\n\n_Texto determinista generado desde la matriz de cobertura (sin IA); requiere validacion del auditor._",
+      "origen": "determinista"
+    },
+    {
+      "ref": "7.5",
+      "grupo": "clausula",
+      "titulo": "Informacion documentada",
+      "estado": "Sin evidencia",
+      "evidencias": [],
+      "nota": "Se espera: Procedimiento de control documental y listado maestro de documentos",
+      "clasificacion": "No conformidad mayor",
+      "nivel": 3,
+      "puntos": 333,
+      "orden": 14,
+      "texto": "**Clasificacion propuesta:** No conformidad mayor\n- **Criterio:** ISO/IEC 27701:2025, 7.5 - Informacion documentada.\n- **Condicion:** El control esta en estado \"Sin evidencia\". Se espera: Procedimiento de control documental y listado maestro de documentos\n- **Causa (preliminar):** No se ha documentado o no se ha aportado al expediente la evidencia del control.\n- **Efecto:** Riesgo de incumplimiento de la Ley N.o 29733 y de no conformidad en la auditoria de certificacion.\n- **Recomendacion:** Elaborar, aprobar y registrar en el expediente la evidencia esperada.\n\n_Texto determinista generado desde la matriz de cobertura (sin IA); requiere validacion del auditor._",
+      "origen": "determinista"
+    },
+    {
+      "ref": "8.2",
+      "grupo": "clausula",
+      "titulo": "Evaluacion de riesgos de privacidad (operacion)",
+      "estado": "Sin evidencia",
+      "evidencias": [],
+      "nota": "Se espera: Resultados de la evaluacion de riesgos de privacidad realizada en el periodo o tras cambios significativos (informe o matriz actualizada y fechada)",
+      "clasificacion": "No conformidad mayor",
+      "nivel": 3,
+      "puntos": 333,
+      "orden": 15,
+      "texto": "**Clasificacion propuesta:** No conformidad mayor\n- **Criterio:** ISO/IEC 27701:2025, 8.2 - Evaluacion de riesgos de privacidad (operacion).\n- **Condicion:** El control esta en estado \"Sin evidencia\". Se espera: Resultados de la evaluacion de riesgos de privacidad realizada en el periodo o tras cambios significativos (informe o matriz actualizada y fechada)\n- **Causa (preliminar):** No se ha documentado o no se ha aportado al expediente la evidencia del control.\n- **Efecto:** Riesgo de incumplimiento de la Ley N.o 29733 y de no conformidad en la auditoria de certificacion.\n- **Recomendacion:** Elaborar, aprobar y registrar en el expediente la evidencia esperada.\n\n_Texto determinista generado desde la matriz de cobertura (sin IA); requiere validacion del auditor._",
+      "origen": "determinista"
+    },
+    {
+      "ref": "8.3",
+      "grupo": "clausula",
+      "titulo": "Tratamiento de riesgos de privacidad (operacion)",
+      "estado": "Sin evidencia",
+      "evidencias": [],
+      "nota": "Se espera: Registro del avance del plan de tratamiento de riesgos con los controles implementados y riesgo residual",
+      "clasificacion": "No conformidad mayor",
+      "nivel": 3,
+      "puntos": 333,
+      "orden": 16,
+      "texto": "**Clasificacion propuesta:** No conformidad mayor\n- **Criterio:** ISO/IEC 27701:2025, 8.3 - Tratamiento de riesgos de privacidad (operacion).\n- **Condicion:** El control esta en estado \"Sin evidencia\". Se espera: Registro del avance del plan de tratamiento de riesgos con los controles implementados y riesgo residual\n- **Causa (preliminar):** No se ha documentado o no se ha aportado al expediente la evidencia del control.\n- **Efecto:** Riesgo de incumplimiento de la Ley N.o 29733 y de no conformidad en la auditoria de certificacion.\n- **Recomendacion:** Elaborar, aprobar y registrar en el expediente la evidencia esperada.\n\n_Texto determinista generado desde la matriz de cobertura (sin IA); requiere validacion del auditor._",
+      "origen": "determinista"
+    },
+    {
+      "ref": "10.1",
+      "grupo": "clausula",
+      "titulo": "Mejora continua",
+      "estado": "Sin evidencia",
+      "evidencias": [],
+      "nota": "Se espera: Registro de mejoras implementadas en el periodo",
+      "clasificacion": "No conformidad mayor",
+      "nivel": 3,
+      "puntos": 333,
+      "orden": 17,
+      "texto": "**Clasificacion propuesta:** No conformidad mayor\n- **Criterio:** ISO/IEC 27701:2025, 10.1 - Mejora continua.\n- **Condicion:** El control esta en estado \"Sin evidencia\". Se espera: Registro de mejoras implementadas en el periodo\n- **Causa (preliminar):** No se ha documentado o no se ha aportado al expediente la evidencia del control.\n- **Efecto:** Riesgo de incumplimiento de la Ley N.o 29733 y de no conformidad en la auditoria de certificacion.\n- **Recomendacion:** Elaborar, aprobar y registrar en el expediente la evidencia esperada.\n\n_Texto determinista generado desde la matriz de cobertura (sin IA); requiere validacion del auditor._",
+      "origen": "determinista"
+    },
+    {
+      "ref": "10.2",
+      "grupo": "clausula",
+      "titulo": "No conformidad y accion correctiva",
+      "estado": "Sin evidencia",
+      "evidencias": [],
+      "nota": "Se espera: Registro de no conformidades con analisis de causa y cierre",
+      "clasificacion": "No conformidad mayor",
+      "nivel": 3,
+      "puntos": 333,
+      "orden": 18,
+      "texto": "**Clasificacion propuesta:** No conformidad mayor\n- **Criterio:** ISO/IEC 27701:2025, 10.2 - No conformidad y accion correctiva.\n- **Condicion:** El control esta en estado \"Sin evidencia\". Se espera: Registro de no conformidades con analisis de causa y cierre\n- **Causa (preliminar):** No se ha documentado o no se ha aportado al expediente la evidencia del control.\n- **Efecto:** Riesgo de incumplimiento de la Ley N.o 29733 y de no conformidad en la auditoria de certificacion.\n- **Recomendacion:** Elaborar, aprobar y registrar en el expediente la evidencia esperada.\n\n_Texto determinista generado desde la matriz de cobertura (sin IA); requiere validacion del auditor._",
+      "origen": "determinista"
+    },
+    {
+      "ref": "A.1.2.7",
+      "grupo": "A.1",
+      "titulo": "Contratos con encargados del tratamiento",
+      "estado": "Sin evidencia",
+      "evidencias": [],
+      "nota": "Se espera: Contratos o DPA vigentes con cada encargado",
+      "clasificacion": "No conformidad menor",
+      "nivel": 2,
+      "puntos": 230,
+      "orden": 19,
+      "texto": "**Clasificacion propuesta:** No conformidad menor\n- **Criterio:** ISO/IEC 27701:2025, A.1.2.7 - Contratos con encargados del tratamiento.\n- **Condicion:** El control esta en estado \"Sin evidencia\". Se espera: Contratos o DPA vigentes con cada encargado\n- **Causa (preliminar):** No se ha documentado o no se ha aportado al expediente la evidencia del control.\n- **Efecto:** Debilita la capacidad de demostrar el control ante el auditor externo.\n- **Recomendacion:** Elaborar, aprobar y registrar en el expediente la evidencia esperada.\n\n_Texto determinista generado desde la matriz de cobertura (sin IA); requiere validacion del auditor._",
+      "origen": "determinista"
+    },
+    {
+      "ref": "A.1.2.9",
+      "grupo": "A.1",
+      "titulo": "Registros relacionados con el tratamiento de PII",
+      "estado": "Sin evidencia",
+      "evidencias": [],
+      "nota": "Se espera: Registro de actividades de tratamiento (RoPA) actualizado",
+      "clasificacion": "No conformidad menor",
+      "nivel": 2,
+      "puntos": 230,
+      "orden": 20,
+      "texto": "**Clasificacion propuesta:** No conformidad menor\n- **Criterio:** ISO/IEC 27701:2025, A.1.2.9 - Registros relacionados con el tratamiento de PII.\n- **Condicion:** El control esta en estado \"Sin evidencia\". Se espera: Registro de actividades de tratamiento (RoPA) actualizado\n- **Causa (preliminar):** No se ha documentado o no se ha aportado al expediente la evidencia del control.\n- **Efecto:** Debilita la capacidad de demostrar el control ante el auditor externo.\n- **Recomendacion:** Elaborar, aprobar y registrar en el expediente la evidencia esperada.\n\n_Texto determinista generado desde la matriz de cobertura (sin IA); requiere validacion del auditor._",
+      "origen": "determinista"
+    },
+    {
+      "ref": "A.1.3.9",
+      "grupo": "A.1",
+      "titulo": "Entrega de copia de la PII tratada",
+      "estado": "Sin evidencia",
+      "evidencias": [],
+      "nota": "Se espera: Evidencia de respuestas de acceso entregadas al titular",
+      "clasificacion": "No conformidad menor",
+      "nivel": 2,
+      "puntos": 230,
+      "orden": 21,
+      "texto": "**Clasificacion propuesta:** No conformidad menor\n- **Criterio:** ISO/IEC 27701:2025, A.1.3.9 - Entrega de copia de la PII tratada.\n- **Condicion:** El control esta en estado \"Sin evidencia\". Se espera: Evidencia de respuestas de acceso entregadas al titular\n- **Causa (preliminar):** No se ha documentado o no se ha aportado al expediente la evidencia del control.\n- **Efecto:** Debilita la capacidad de demostrar el control ante el auditor externo.\n- **Recomendacion:** Elaborar, aprobar y registrar en el expediente la evidencia esperada.\n\n_Texto determinista generado desde la matriz de cobertura (sin IA); requiere validacion del auditor._",
+      "origen": "determinista"
+    },
+    {
+      "ref": "A.1.3.10",
+      "grupo": "A.1",
+      "titulo": "Gestion de solicitudes de los titulares",
+      "estado": "Sin evidencia",
+      "evidencias": [],
+      "nota": "Se espera: Registro de solicitudes con fecha de recepcion, respuesta y estado",
+      "clasificacion": "No conformidad menor",
+      "nivel": 2,
+      "puntos": 230,
+      "orden": 22,
+      "texto": "**Clasificacion propuesta:** No conformidad menor\n- **Criterio:** ISO/IEC 27701:2025, A.1.3.10 - Gestion de solicitudes de los titulares.\n- **Condicion:** El control esta en estado \"Sin evidencia\". Se espera: Registro de solicitudes con fecha de recepcion, respuesta y estado\n- **Causa (preliminar):** No se ha documentado o no se ha aportado al expediente la evidencia del control.\n- **Efecto:** Debilita la capacidad de demostrar el control ante el auditor externo.\n- **Recomendacion:** Elaborar, aprobar y registrar en el expediente la evidencia esperada.\n\n_Texto determinista generado desde la matriz de cobertura (sin IA); requiere validacion del auditor._",
+      "origen": "determinista"
+    },
+    {
+      "ref": "A.1.5.4",
+      "grupo": "A.1",
+      "titulo": "Registros de transferencias de PII",
+      "estado": "Sin evidencia",
+      "evidencias": [],
+      "nota": "Se espera: Registro de transferencias y flujos transfronterizos con su base legal",
+      "clasificacion": "No conformidad menor",
+      "nivel": 2,
+      "puntos": 230,
+      "orden": 23,
+      "texto": "**Clasificacion propuesta:** No conformidad menor\n- **Criterio:** ISO/IEC 27701:2025, A.1.5.4 - Registros de transferencias de PII.\n- **Condicion:** El control esta en estado \"Sin evidencia\". Se espera: Registro de transferencias y flujos transfronterizos con su base legal\n- **Causa (preliminar):** No se ha documentado o no se ha aportado al expediente la evidencia del control.\n- **Efecto:** Debilita la capacidad de demostrar el control ante el auditor externo.\n- **Recomendacion:** Elaborar, aprobar y registrar en el expediente la evidencia esperada.\n\n_Texto determinista generado desde la matriz de cobertura (sin IA); requiere validacion del auditor._",
+      "origen": "determinista"
+    },
+    {
+      "ref": "A.3.17",
+      "grupo": "A.3",
+      "titulo": "Concienciacion, educacion y formacion en seguridad de la informacion",
+      "estado": "Sin evidencia",
+      "evidencias": [],
+      "nota": "Se espera: Plan de formacion en privacidad y registros de asistencia/aprobacion",
+      "clasificacion": "No conformidad menor",
+      "nivel": 2,
+      "puntos": 230,
+      "orden": 24,
+      "texto": "**Clasificacion propuesta:** No conformidad menor\n- **Criterio:** ISO/IEC 27701:2025, A.3.17 - Concienciacion, educacion y formacion en seguridad de la informacion.\n- **Condicion:** El control esta en estado \"Sin evidencia\". Se espera: Plan de formacion en privacidad y registros de asistencia/aprobacion\n- **Causa (preliminar):** No se ha documentado o no se ha aportado al expediente la evidencia del control.\n- **Efecto:** Debilita la capacidad de demostrar el control ante el auditor externo.\n- **Recomendacion:** Elaborar, aprobar y registrar en el expediente la evidencia esperada.\n\n_Texto determinista generado desde la matriz de cobertura (sin IA); requiere validacion del auditor._",
+      "origen": "determinista"
+    },
+    {
+      "ref": "5.2",
+      "grupo": "clausula",
+      "titulo": "Politica de privacidad",
+      "estado": "Desactualizada",
+      "evidencias": [
+        "EV-0001"
+      ],
+      "nota": "Evidencia anterior a 2025-10-27",
+      "clasificacion": "No conformidad menor",
+      "nivel": 2,
+      "puntos": 228,
+      "orden": 25,
+      "texto": "**Clasificacion propuesta:** No conformidad menor\n- **Criterio:** ISO/IEC 27701:2025, 5.2 - Politica de privacidad. Evidencia esperada: Politica de privacidad aprobada, versionada y comunicada.\n- **Condicion:** El control esta en estado \"Desactualizada\". Evidencia anterior a 2025-10-27\n- **Causa (preliminar):** La evidencia existe pero no se ha revisado ni reaprobado dentro del periodo de vigencia.\n- **Efecto:** Riesgo de incumplimiento de la Ley N.o 29733 y de no conformidad en la auditoria de certificacion.\n- **Recomendacion:** Revisar, reaprobar y registrar la version vigente del documento.\n\n_Texto determinista generado desde la matriz de cobertura (sin IA); requiere validacion del auditor._",
+      "origen": "determinista"
+    },
+    {
+      "ref": "A.1.3.7",
+      "grupo": "A.1",
+      "titulo": "Acceso, correccion o supresion de PII",
+      "estado": "Desactualizada",
+      "evidencias": [
+        "EV-0001"
+      ],
+      "nota": "Evidencia anterior a 2025-10-27",
+      "clasificacion": "No conformidad menor",
+      "nivel": 2,
+      "puntos": 225,
+      "orden": 26,
+      "texto": "**Clasificacion propuesta:** No conformidad menor\n- **Criterio:** ISO/IEC 27701:2025, A.1.3.7 - Acceso, correccion o supresion de PII. Evidencia esperada: Procedimiento ARCO/DSAR y registro de solicitudes atendidas con plazos.\n- **Condicion:** El control esta en estado \"Desactualizada\". Evidencia anterior a 2025-10-27\n- **Causa (preliminar):** La evidencia existe pero no se ha revisado ni reaprobado dentro del periodo de vigencia.\n- **Efecto:** Riesgo de incumplimiento de la Ley N.o 29733 y de no conformidad en la auditoria de certificacion.\n- **Recomendacion:** Revisar, reaprobar y registrar la version vigente del documento.\n\n_Texto determinista generado desde la matriz de cobertura (sin IA); requiere validacion del auditor._",
+      "origen": "determinista"
+    },
+    {
+      "ref": "4.2",
+      "grupo": "clausula",
+      "titulo": "Necesidades y expectativas de las partes interesadas",
+      "estado": "Desactualizada",
+      "evidencias": [
+        "EV-0011"
+      ],
+      "nota": "Evidencia anterior a 2025-10-27",
+      "clasificacion": "No conformidad menor",
+      "nivel": 2,
+      "puntos": 223,
+      "orden": 27,
+      "texto": "**Clasificacion propuesta:** No conformidad menor\n- **Criterio:** ISO/IEC 27701:2025, 4.2 - Necesidades y expectativas de las partes interesadas. Evidencia esperada: Matriz de partes interesadas y requisitos legales aplicables (p. ej. Ley 29733 y su reglamento).\n- **Condicion:** El control esta en estado \"Desactualizada\". Evidencia anterior a 2025-10-27\n- **Causa (preliminar):** La evidencia existe pero no se ha revisado ni reaprobado dentro del periodo de vigencia.\n- **Efecto:** Riesgo de incumplimiento de la Ley N.o 29733 y de no conformidad en la auditoria de certificacion.\n- **Recomendacion:** Revisar, reaprobar y registrar la version vigente del documento.\n\n_Texto determinista generado desde la matriz de cobertura (sin IA); requiere validacion del auditor._",
+      "origen": "determinista"
+    },
+    {
+      "ref": "5.1",
+      "grupo": "clausula",
+      "titulo": "Liderazgo y compromiso",
+      "estado": "Desactualizada",
+      "evidencias": [
+        "EV-0005"
+      ],
+      "nota": "Evidencia anterior a 2025-10-27",
+      "clasificacion": "No conformidad menor",
+      "nivel": 2,
+      "puntos": 223,
+      "orden": 28,
+      "texto": "**Clasificacion propuesta:** No conformidad menor\n- **Criterio:** ISO/IEC 27701:2025, 5.1 - Liderazgo y compromiso. Evidencia esperada: Acta o comunicado de la alta direccion asignando recursos al PIMS.\n- **Condicion:** El control esta en estado \"Desactualizada\". Evidencia anterior a 2025-10-27\n- **Causa (preliminar):** La evidencia existe pero no se ha revisado ni reaprobado dentro del periodo de vigencia.\n- **Efecto:** Riesgo de incumplimiento de la Ley N.o 29733 y de no conformidad en la auditoria de certificacion.\n- **Recomendacion:** Revisar, reaprobar y registrar la version vigente del documento.\n\n_Texto determinista generado desde la matriz de cobertura (sin IA); requiere validacion del auditor._",
+      "origen": "determinista"
+    },
+    {
+      "ref": "6.2",
+      "grupo": "clausula",
+      "titulo": "Objetivos de privacidad",
+      "estado": "Desactualizada",
+      "evidencias": [
+        "EV-0009"
+      ],
+      "nota": "Evidencia anterior a 2025-10-27",
+      "clasificacion": "No conformidad menor",
+      "nivel": 2,
+      "puntos": 223,
+      "orden": 29,
+      "texto": "**Clasificacion propuesta:** No conformidad menor\n- **Criterio:** ISO/IEC 27701:2025, 6.2 - Objetivos de privacidad. Evidencia esperada: Objetivos medibles con responsables y plazos.\n- **Condicion:** El control esta en estado \"Desactualizada\". Evidencia anterior a 2025-10-27\n- **Causa (preliminar):** La evidencia existe pero no se ha revisado ni reaprobado dentro del periodo de vigencia.\n- **Efecto:** Riesgo de incumplimiento de la Ley N.o 29733 y de no conformidad en la auditoria de certificacion.\n- **Recomendacion:** Revisar, reaprobar y registrar la version vigente del documento.\n\n_Texto determinista generado desde la matriz de cobertura (sin IA); requiere validacion del auditor._",
+      "origen": "determinista"
+    },
+    {
+      "ref": "7.1",
+      "grupo": "clausula",
+      "titulo": "Recursos",
+      "estado": "Desactualizada",
+      "evidencias": [
+        "EV-0009"
+      ],
+      "nota": "Evidencia anterior a 2025-10-27",
+      "clasificacion": "No conformidad menor",
+      "nivel": 2,
+      "puntos": 223,
+      "orden": 30,
+      "texto": "**Clasificacion propuesta:** No conformidad menor\n- **Criterio:** ISO/IEC 27701:2025, 7.1 - Recursos. Evidencia esperada: Presupuesto o asignacion de recursos (personas, herramientas, horas) aprobada para el PIMS.\n- **Condicion:** El control esta en estado \"Desactualizada\". Evidencia anterior a 2025-10-27\n- **Causa (preliminar):** La evidencia existe pero no se ha revisado ni reaprobado dentro del periodo de vigencia.\n- **Efecto:** Riesgo de incumplimiento de la Ley N.o 29733 y de no conformidad en la auditoria de certificacion.\n- **Recomendacion:** Revisar, reaprobar y registrar la version vigente del documento.\n\n_Texto determinista generado desde la matriz de cobertura (sin IA); requiere validacion del auditor._",
+      "origen": "determinista"
+    },
+    {
+      "ref": "7.4",
+      "grupo": "clausula",
+      "titulo": "Comunicacion",
+      "estado": "Desactualizada",
+      "evidencias": [
+        "EV-0011"
+      ],
+      "nota": "Evidencia anterior a 2025-10-27",
+      "clasificacion": "No conformidad menor",
+      "nivel": 2,
+      "puntos": 223,
+      "orden": 31,
+      "texto": "**Clasificacion propuesta:** No conformidad menor\n- **Criterio:** ISO/IEC 27701:2025, 7.4 - Comunicacion. Evidencia esperada: Plan de comunicacion interna y externa del PIMS (que, cuando, a quien y como se comunica).\n- **Condicion:** El control esta en estado \"Desactualizada\". Evidencia anterior a 2025-10-27\n- **Causa (preliminar):** La evidencia existe pero no se ha revisado ni reaprobado dentro del periodo de vigencia.\n- **Efecto:** Riesgo de incumplimiento de la Ley N.o 29733 y de no conformidad en la auditoria de certificacion.\n- **Recomendacion:** Revisar, reaprobar y registrar la version vigente del documento.\n\n_Texto determinista generado desde la matriz de cobertura (sin IA); requiere validacion del auditor._",
+      "origen": "determinista"
+    },
+    {
+      "ref": "9.1",
+      "grupo": "clausula",
+      "titulo": "Seguimiento, medicion, analisis y evaluacion",
+      "estado": "Desactualizada",
+      "evidencias": [
+        "EV-0010"
+      ],
+      "nota": "Evidencia anterior a 2025-10-27",
+      "clasificacion": "No conformidad menor",
+      "nivel": 2,
+      "puntos": 223,
+      "orden": 32,
+      "texto": "**Clasificacion propuesta:** No conformidad menor\n- **Criterio:** ISO/IEC 27701:2025, 9.1 - Seguimiento, medicion, analisis y evaluacion. Evidencia esperada: Indicadores del PIMS con mediciones del periodo.\n- **Condicion:** El control esta en estado \"Desactualizada\". Evidencia anterior a 2025-10-27\n- **Causa (preliminar):** La evidencia existe pero no se ha revisado ni reaprobado dentro del periodo de vigencia.\n- **Efecto:** Riesgo de incumplimiento de la Ley N.o 29733 y de no conformidad en la auditoria de certificacion.\n- **Recomendacion:** Revisar, reaprobar y registrar la version vigente del documento.\n\n_Texto determinista generado desde la matriz de cobertura (sin IA); requiere validacion del auditor._",
+      "origen": "determinista"
+    },
+    {
+      "ref": "A.1.2.2",
+      "grupo": "A.1",
+      "titulo": "Identificar y documentar el proposito del tratamiento",
+      "estado": "Desactualizada",
+      "evidencias": [
+        "EV-0001"
+      ],
+      "nota": "Evidencia anterior a 2025-10-27",
+      "clasificacion": "No conformidad menor",
+      "nivel": 2,
+      "puntos": 220,
+      "orden": 33,
+      "texto": "**Clasificacion propuesta:** No conformidad menor\n- **Criterio:** ISO/IEC 27701:2025, A.1.2.2 - Identificar y documentar el proposito del tratamiento. Evidencia esperada: Registro de actividades de tratamiento con proposito declarado por actividad.\n- **Condicion:** El control esta en estado \"Desactualizada\". Evidencia anterior a 2025-10-27\n- **Causa (preliminar):** La evidencia existe pero no se ha revisado ni reaprobado dentro del periodo de vigencia.\n- **Efecto:** Debilita la capacidad de demostrar el control ante el auditor externo.\n- **Recomendacion:** Revisar, reaprobar y registrar la version vigente del documento.\n\n_Texto determinista generado desde la matriz de cobertura (sin IA); requiere validacion del auditor._",
+      "origen": "determinista"
+    },
+    {
+      "ref": "A.3.14",
+      "grupo": "A.3",
+      "titulo": "Proteccion de registros",
+      "estado": "Desactualizada",
+      "evidencias": [
+        "EV-0002"
+      ],
+      "nota": "Evidencia anterior a 2025-10-27",
+      "clasificacion": "No conformidad menor",
+      "nivel": 2,
+      "puntos": 220,
+      "orden": 34,
+      "texto": "**Clasificacion propuesta:** No conformidad menor\n- **Criterio:** ISO/IEC 27701:2025, A.3.14 - Proteccion de registros. Evidencia esperada: Configuracion de retencion e inmutabilidad de logs de acceso a PII.\n- **Condicion:** El control esta en estado \"Desactualizada\". Evidencia anterior a 2025-10-27\n- **Causa (preliminar):** La evidencia existe pero no se ha revisado ni reaprobado dentro del periodo de vigencia.\n- **Efecto:** Debilita la capacidad de demostrar el control ante el auditor externo.\n- **Recomendacion:** Revisar, reaprobar y registrar la version vigente del documento.\n\n_Texto determinista generado desde la matriz de cobertura (sin IA); requiere validacion del auditor._",
+      "origen": "determinista"
+    },
+    {
+      "ref": "A.3.18",
+      "grupo": "A.3",
+      "titulo": "Acuerdos de confidencialidad o no divulgacion",
+      "estado": "Desactualizada",
+      "evidencias": [
+        "EV-0014"
+      ],
+      "nota": "Evidencia anterior a 2025-10-27",
+      "clasificacion": "No conformidad menor",
+      "nivel": 2,
+      "puntos": 220,
+      "orden": 35,
+      "texto": "**Clasificacion propuesta:** No conformidad menor\n- **Criterio:** ISO/IEC 27701:2025, A.3.18 - Acuerdos de confidencialidad o no divulgacion. Evidencia esperada: Acuerdos de confidencialidad firmados por personal con acceso a PII.\n- **Condicion:** El control esta en estado \"Desactualizada\". Evidencia anterior a 2025-10-27\n- **Causa (preliminar):** La evidencia existe pero no se ha revisado ni reaprobado dentro del periodo de vigencia.\n- **Efecto:** Debilita la capacidad de demostrar el control ante el auditor externo.\n- **Recomendacion:** Revisar, reaprobar y registrar la version vigente del documento.\n\n_Texto determinista generado desde la matriz de cobertura (sin IA); requiere validacion del auditor._",
+      "origen": "determinista"
+    }
+  ]
+}

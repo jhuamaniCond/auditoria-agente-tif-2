@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AUDITA-PIMS · Agente autónomo</title>
+  <!-- Mismo estilo que el Entregable 1 (se reutiliza su hoja) + ajustes del panel -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='estilos.css') }}">
+  <link rel="stylesheet" href="{{ url_for('agente.static', filename='agente.css') }}">
+</head>
+<body>
+  <header class="barra">
+    <div class="marca">
+      <span class="sello">A</span>
+      <div>
+        <h1>AUDITA-PIMS · Agente autónomo — UNSA</h1>
+        <p>Agente de Evidencia y Auditoría · ISO/IEC 27701:2025</p>
+      </div>
+    </div>
+    <div class="estado">
+      {% if not real %}<span class="pastilla mal" title="orquestador.py aún no disponible">Orquestador provisional</span>{% endif %}
+      <span class="pastilla" id="p-integridad">Integridad…</span>
+      <a class="boton-barra" href="/">← Aplicación AUDITA-PIMS</a>
+    </div>
+  </header>
+
+  <nav class="pestanas" role="tablist">
+    <button class="pestana activa" data-vista="ejecuciones" role="tab">Ejecuciones</button>
+    <button class="pestana" data-vista="bitacoras" role="tab">Bitácoras</button>
+    <button class="pestana" data-vista="herramientas" role="tab">Herramientas del agente</button>
+  </nav>
+
+  <main>
+    <!-- ======================================================== EJECUCIONES -->
+    <section class="vista activa" id="vista-ejecuciones">
+      <div class="kpis kpis-agente" id="kpis">
+        <div class="kpi principal"><div class="cifra" id="k-cobertura">–</div><div class="rotulo">Cobertura del PIMS</div><div class="barra-cob"><span id="k-barra" style="width:0"></span></div></div>
+        <div class="kpi"><div class="cifra" id="k-evidencias">–</div><div class="rotulo">Evidencias en el expediente</div></div>
+        <div class="kpi"><div class="cifra" id="k-integridad">–</div><div class="rotulo">Integridad</div></div>
+        <div class="kpi kpi-estados"><div class="rotulo">Controles por estado</div><div class="estados-lista" id="k-estados"></div></div>
+      </div>
+
+      <div class="rejilla-3">
+        <div class="tarjeta">
+          <h2>Auditoría interna (cláusula 9.2)</h2>
+          <p class="nota">El agente verifica la integridad, calcula la cobertura, prepara hallazgos y se detiene para que el auditor valide.</p>
+          <fieldset class="opciones">
+            <label class="radio"><input type="radio" name="modo" value="rapido" checked> Modo rápido (sin IA, determinista)</label>
+            <label class="radio"><input type="radio" name="modo" value="ia"> Con IA local (Ollama)</label>
+          </fieldset>
+          <div class="fila-campos">
+            <label>Máx. hallazgos con IA<input type="number" id="max-hallazgos" min="0" max="50" value="3" disabled></label>
+            <label>Máx. evaluaciones de pertinencia<input type="number" id="max-pertinencia" min="0" max="50" value="2" disabled></label>
+          </div>
+          <div class="acciones"><button class="boton" id="btn-auditoria" type="button">Iniciar auditoría interna</button></div>
+        </div>
+
+        <div class="tarjeta">
+          <h2>Simular incidente (Agente de Incidentes)</h2>
+          <p class="nota">Otro agente notifica un incidente de privacidad; este agente lo recibe por coordinación y reacciona.</p>
+          <label for="incidente">Descripción del incidente</label>
+          <textarea id="incidente" rows="4" placeholder="Ej.: Se detectó acceso no autorizado a la base de datos de postulantes del examen de admisión…"></textarea>
+          <div class="acciones"><button class="boton" id="btn-incidente" type="button">Simular incidente</button></div>
+        </div>
+
+        <div class="tarjeta">
+          <h2>Bandeja de entrada</h2>
+          <p class="nota">Los archivos que se dejan aquí los procesa la automatización del agente (clasificar y registrar).</p>
+          <label class="zona-archivo" id="zona-bandeja">
+            <input type="file" id="archivo-bandeja" multiple>
+            <span>Arrastra y suelta archivos aquí o haz clic para elegirlos</span>
+          </label>
+          <div id="estado-bandeja" class="nota"></div>
+          <div class="tabla-envoltura lista-bandeja"><table class="tabla" id="tabla-bandeja"><tbody></tbody></table></div>
+        </div>
+      </div>
+
+      <div class="tarjeta">
+        <div class="tarjeta-cab"><h2>Flujo del grafo <span class="mono">auditoria_interna</span></h2><small id="flujo-nota"></small></div>
+        <div class="flujo" id="flujo" aria-label="Diagrama del flujo de la auditoría interna"></div>
+      </div>
+
+      <div class="rejilla-2">
+        <div class="tarjeta" id="detalle">
+          <p class="nota">Selecciona o inicia una ejecución para ver su avance.</p>
+        </div>
+        <div class="tarjeta">
+          <div class="tarjeta-cab"><h2>Ejecuciones</h2><button class="boton mini secundario" id="btn-refrescar" type="button">Actualizar</button></div>
+          <ul class="lista-ejecuciones" id="lista-ejecuciones"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================= BITACORAS -->
+    <section class="vista" id="vista-bitacoras">
+      <div class="tarjeta">
+        <div class="tarjeta-cab">
+          <h2>Bitácoras del agente <small>(últimos 100 registros)</small></h2>
+          <div class="subpestanas" id="subpestanas">
+            <button class="chip-tab activa" data-bitacora="decisiones" type="button">Decisiones</button>
+            <button class="chip-tab" data-bitacora="mcp" type="button">MCP</button>
+            <button class="chip-tab" data-bitacora="eventos" type="button">Eventos</button>
+          </div>
+        </div>
+        <div class="tabla-envoltura"><table class="tabla" id="tabla-bitacora"><thead></thead><tbody></tbody></table></div>
+      </div>
+    </section>
+
+    <!-- ====================================================== HERRAMIENTAS -->
+    <section class="vista" id="vista-herramientas">
+      <div class="tarjeta">
+        <h2>Herramientas del agente</h2>
+        <p class="nota">Contrato común (herramientas.py): las publica el servidor MCP, las encadena el orquestador y se muestran aquí.</p>
+        <div class="tabla-envoltura"><table class="tabla" id="tabla-herramientas">
+          <thead><tr><th>Herramienta</th><th>Tipo</th><th>Descripción</th></tr></thead><tbody></tbody>
+        </table></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="{{ url_for('agente.static', filename='agente.js') }}"></script>
+</body>
+</html>
