@@ -1,0 +1,1102 @@
+         UNIVERSIDAD NACIONAL DE SAN AGUSTÍN DE AREQUIPA
+                Oficina de Tecnologías de la Información (OTI)
+
+PLAN DE CONTINGENCIA, PLAN DE ATENCIONES SLA
+                    PARA DATA CENTER
+
+                                             Versión 1.0 · Julio 2026
+                                                  Arequipa, Perú
+
+                            Documento de uso interno — Oficina de Tecnologías de la Información
+
+                                                                                                P á g i n a 1 | 14
+Tabla de Contenido
+
+Tabla de Contenido..........................................................................................................................................2
+PLAN DE CONTIGENCIA ....................................................................................................................................4
+
+   1. Propósito, alcance y supuestos ................................................................................................................4
+      Alcance .....................................................................................................................................................4
+      Exclusiones ...............................................................................................................................................4
+      Criterios de activación..............................................................................................................................4
+
+   2. Contexto de riesgo y prioridades .............................................................................................................4
+   3. Organización para la contingencia ...........................................................................................................5
+
+      Reglas de operación durante el incidente................................................................................................5
+   4. Procedimiento general de respuesta .......................................................................................................5
+   5. Escenarios de contingencia ......................................................................................................................6
+
+      5.1 Falla eléctrica, UPS o distribución ......................................................................................................6
+      5.2 Sobretemperatura o falla de climatización ........................................................................................6
+      5.3 Pérdida de enlace, desconexión accidental o falla de comunicación ................................................6
+      5.4 Incendio, humo, agua o daño físico....................................................................................................7
+   6. Priorización de servicios y recuperación ..................................................................................................7
+      Secuencia mínima de retorno ..................................................................................................................7
+   7. Comunicaciones, registro y escalamiento................................................................................................8
+      Notificaciones mínimas ............................................................................................................................8
+   Bitácora obligatoria ......................................................................................................................................8
+   8. Preparación y mejoras para reducir el riesgo...........................................................................................8
+      Indicadores de seguimiento .....................................................................................................................8
+   9. Pruebas, mantenimiento y revisión del plan............................................................................................8
+   10. Aprobación y control de cambios...........................................................................................................9
+      Anexo A. Directorio de emergencia .........................................................................................................9
+      Anexo B. Lista de verificación de cierre....................................................................................................9
+PLAN DE ATENCIONES SLA .............................................................................................................................10
+   1. Objetivo, alcance y principios.................................................................................................................10
+      Alcance ...................................................................................................................................................10
+      Principios de servicio..............................................................................................................................10
+   2. Modelo de criticidad ..............................................................................................................................10
+   3. Catálogo de atención SLA.......................................................................................................................11
+      Definiciones operativas ..........................................................................................................................11
+   4. Reglas de priorización por escenario......................................................................................................11
+   5. Flujo de atención y escalamiento...........................................................................................................12
+      Escalamiento temporal obligatorio........................................................................................................12
+   6. Comunicación y reporte .........................................................................................................................12
+
+                                                                                                 P á g i n a 2 | 14
+7. Indicadores y control del SLA .................................................................................................................12
+  Tratamiento de incumplimientos...........................................................................................................13
+
+8. Roles y matriz de responsabilidades ......................................................................................................13
+9. Aprobación y anexos ..............................................................................................................................13
+ANEXOS RELACIONADOS............................................................................................................................14
+
+  1. Anexo 1: Anexo_1_Matriz_de_Servicios_Criticos_Data_Center_UNSA_v 1.0............................14
+  2. Anexo 2: Anexo_2_Cuadro_Control_Tickets_SLA_Data_Center_UNSA......................................14
+  3. Anexo 3: Anexo_3_formato de ingreso data center ...................................................................14
+  4. Anexo 4: Anexo_4_Informe_Tecnico_EJEMPLO_15.07.2026......................................................14
+
+                                                                                              P á g i n a 3 | 14
+PLAN DE CONTIGENCIA
+1. Propósito, alcance y supuestos
+
+El propósito es asegurar una respuesta coordinada frente a incidentes de infraestructura crítica, minimizar la
+interrupción de los servicios institucionales y recuperar la operación de forma segura y verificable.
+
+Alcance
+
+• Seis gabinetes de servidores y comunicaciones, sus equipos activos, cableado de cobre y fibra óptica.
+• Alimentación eléctrica, tableros, UPS, banco de baterías, transformador de voltaje y puesta a tierra
+
+        asociados.
+• Sistema aires acondicionados, monitoreo ambiental, ambiente físico y controles operativos del Data
+
+        Center.
+• Servicios académicos, administrativos e institucionales que dependan de los componentes anteriores.
+
+Exclusiones
+
+No sustituye los planes de continuidad de aplicaciones, respaldo y recuperación de datos,
+ciberseguridad, evacuación institucional ni gestión de emergencias del edificio. Estos deberán
+coordinarse cuando el incidente lo requiera.
+
+Criterios de activación
+
+Nivel            Criterio de activación                                 Dirección de respuesta
+N1 - Alerta
+N2 - Incidente   Evento controlable sin afectación de servicio o con    Técnico de turno; informar al Coordinador DC.
+                 degradación menor a 15 min.
+N3 - Emergencia  Degradación relevante, riesgo térmico/eléctrico o      Activar equipo de contingencia y comunicación
+                 indisponibilidad parcial superior a 15 min.            interna. Comunicación y escalamiento interno
+                                                                        en OTI.
+                 Indisponibilidad total, riesgo para personas/equipos,  Activar Comité de Crisis, protocolo de
+                 incendio, inundación, falla eléctrica mayor o          seguridad y continuidad institucional. Escalar
+                 temperatura crítica sostenida.                         incidencia a instancias superiores para
+                                                                        informar problemática, mediante canales
+                                                                        formales.
+
+2. Contexto de riesgo y prioridades
+
+El informe técnico de evaluación identifica un riesgo global ALTO para el Data Center. No se reporta una falla
+inminente, pero la exposición aumenta ante incidentes eléctricos, errores de operación o sobretemperatura.
+
+Riesgo base      Evidencia relevante                                    Prioridad de contingencia
+Energía                                                                 Alta: proteger equipos, aislar fallas y
+                 Deficiencias en documentación eléctrica, acometida     recuperar alimentación segura.
+Comunicaciones   eléctrica no apropiada para una continuidad del
+                 suministro.                                            Alta: evitar desconexiones accidentales
+                 Cuatro de seis gabinetes requieren reetiquetado;       y reducir el tiempo de diagnóstico.
+                 trazabilidad y documentación incompletas.
+                 Considerando que 2 gabinetes son dedicados para el                    P á g i n a 4 | 14
+                 área de investigación.
+Riesgo base              Evidencia relevante                                       Prioridad de contingencia
+HVAC                                                                               Alta: detectar temperatura, mantener
+                         Recirculación de aire caliente, posibles hot spots y sin  enfriamiento y apagar cargas no críticas
+Gestión                  extracción dirigida. Ya que se cuenta con aires           si es necesario.
+                         acondicionados comerciales. Es necesario un sistema
+                         de HVAC que se monitoreado.                               Alta: mantener bitácoras, escalamiento
+                         Falta de inventario, planos y procedimientos              y control de cambios.
+                         consolidados. Y publicación de esta información
+                         estrategia a las áreas vinculantes.
+
+3. Organización para la contingencia
+
+Los nombres, teléfonos y suplentes deben registrarse en el directorio de emergencia del Anexo A antes de
+aprobar el plan.
+
+Rol                      Responsabilidad principal                                            Suplencia
+
+Director de Crisis       Autoriza activación N3, prioriza servicios y comunica a la Alta      Responsable designado por
+(Jefatura OTI)           Dirección.                                                           la OTI
+Coordinador del Data     Dirige la respuesta técnica, clasifica el incidente y controla la    Administrador de
+Center                   bitácora.                                                            infraestructura
+Responsable eléctrico    Aísla circuitos, coordina UPS/energía y valida retorno seguro.       Técnico de soporte
+                                                                                              eléctrico autorizado
+Responsable de redes     Evalúa enlaces, equipos y restauración de servicios.                 Administrador de
+y servidores                                                                                  redes/sistemas
+Responsable HVAC y       Verifica climatización, sensores y medidas de mitigación térmica.    Técnico de soporte HVAC
+ambiente                                                                                      autorizado
+Seguridad y              Controla acceso, seguridad física y coordinación con emergencias     Tecnico de sopporte y
+mantenimiento            del campus.                                                          mantenimiento de turno
+Comunicaciones OTI       Emite avisos aprobados a usuarios, autoridades y proveedores.        Representante de OTI
+
+Reglas de operación durante el incidente
+
+• La seguridad de las personas prevalece sobre la continuidad de los servicios.
+• Solo personal autorizado interviene tableros, UPS, baterías, climatización y cableado.
+• Toda acción, hora, responsable y resultado se registra en la bitácora del incidente.
+• No se reconecta un equipo o circuito sin evaluación de causa, riesgo y autorización del Coordinador DC.
+• Toda modificación física se realiza bajo control de cambios y se actualiza en planos/inventario.
+
+4. Procedimiento general de respuesta
+
+Fase                     Acciones obligatorias                                                Resultado esperado
+1. Detectar y registrar                                                                       Ticket/bitácora abierta.
+2. Clasificar y escalar  Registrar alerta, hora, fuente, servicios afectados, condiciones     Equipo y autoridad activados.
+3. Proteger              ambientales y eléctricas visibles.                                   Riesgo contenido.
+4. Mantener servicios    Aplicar N1-N3; avisar al Coordinador DC y, en N3, al Director de     Impacto reducido.
+5. Recuperar             Crisis. O en su defecto a la jefatura de OTI                         Servicio estabilizado.
+6. Verificar y cerrar    Restringir acceso; proteger personas; aislar el componente           Retorno seguro y lecciones
+                         afectado sin agravar la falla.                                       aprendidas.
+                         Priorizar cargas y servicios críticos; activar respaldos operativos
+                         disponibles.
+                         Corregir la causa o aplicar solución temporal controlada; restaurar
+                         por etapas.
+                         Comprobar disponibilidad, alarmas, temperatura, energía y
+                         comunicaciones; emitir informe.
+
+                                                                                              P á g i n a 5 | 14
+Fase                   Acciones obligatorias                                                Resultado esperado
+7. Informes
+                       Se debe elaborar informes técnicos de los trabajos ejecutados,       Información adecuada de las
+8. Capacitación        tanto del personal técnico involucrado en las acciones tomadas       acciones tomadas frente a las
+                       frente a nivel de riesgo atentado, también se debe solicitarse       incidencias o atenciones
+                       informes a contratistas en caso existan terceros atención del        involucradas.
+                       vento.
+                       Se debe capacitar de forma constante al personal especializado,      Se mantiene una buena
+                       tomando como buena práctica de informa las acciones técnicas         capacidad de respuesta del
+                       que se ejecutaron en los incidentes atendidos y corregidos. Y en la  personal a cargo y soporte
+                       nueva infraestructura adquirida por parte de la institución          técnico oportuno.
+
+5. Escenarios de contingencia
+
+5.1 Falla eléctrica, UPS o distribución
+
+Aplica ante corte de alimentación, alarma de UPS/baterías, disparo de protección, olor a quemado,
+calentamiento anormal, sobretensión o falla de puesta a tierra.
+
+Momento                Acciones
+Inmediato
+0-15 min               No abrir tableros ni intervenir conductores energizados. Restringir acceso. Si existe riesgo eléctrico o
+15-60 min              humo, activar seguridad y emergencia institucional.
+Recuperación           Registrar alarmas UPS, carga, autonomía, voltaje y circuitos afectados. Confirmar si los servicios
+Prohibición            críticos están en respaldo. Informar N2/N3.
+                       Responsable eléctrico identifica el tramo afectado y aísla solo el circuito necesario. Responsable de
+                       sistemas prioriza apagado ordenado de cargas no críticas si la autonomía es insuficiente.
+                       Restaurar energía por etapas: alimentación, UPS, distribución, red, almacenamiento, servidores y
+                       aplicaciones. Verificar protecciones, puesta a tierra y parámetros antes de cerrar.
+                       No puentear protecciones, no energizar circuitos sin inspección y no conectar nuevas cargas
+                       durante la emergencia.
+
+5.2 Sobretemperatura o falla de climatización
+
+Aplica ante alarma ambiental, temperatura fuera del umbral definido, pérdida de un equipo HVAC,
+recirculación severa o hot spot identificado.
+
+Disparador             Respuesta
+Alerta ambiental
+Temperatura creciente  Confirmar lectura con sensor independiente; revisar puertas, obstrucciones, filtros, equipos
+Riesgo a equipos       HVAC y flujo de aire.
+Retorno                Notificar al responsable HVAC; retirar solo obstrucciones permitidas; mantener puertas
+                       cerradas y evitar ingreso innecesario.
+                       Priorizar el restablecimiento del HVAC. De persistir el incremento, aplicar apagado ordenado
+                       de cargas no críticas y luego de las críticas según decisión del Director de Crisis.
+                       Estabilizar condiciones ambientales durante un periodo definido por OTI antes de recuperar
+                       cargas; validar ausencia de alarmas y hot spots.
+
+      5.3 Pérdida de enlace, desconexión accidental o falla de
+comunicación
+
+Paso             Acción
+1. Contener      Suspender cambios en el gabinete afectado. No desconectar ni reconectar cables sin identificación y
+                 autorización.
+
+                                                                                            P á g i n a 6 | 14
+Paso             Acción
+2. Diagnosticar
+3. Restaurar     Usar matriz de puertos, inventario y monitoreo. Verificar energía, estado de puertos, transceptores,
+4. Corregir      fibra/cobre y rutas redundantes disponibles.
+                 Aplicar reconexión o ruta alternativa aprobada; documentar cada cambio y probar conectividad
+                 extremo a extremo.
+                 Actualizar etiquetas, planos y matriz de puertos. Si faltan documentos, generar registro provisional
+                 validado por dos técnicos.
+
+5.4 Incendio, humo, agua o daño físico
+
+Ante amenaza a personas, humo, fuego, inundación o ingreso no autorizado, se activa N3 de inmediato.
+
+• Evacuar y activar el protocolo de emergencia del campus. No combatir un incendio salvo personal
+        entrenado y bajo el procedimiento institucional.
+
+• Cortar o aislar energía únicamente si es seguro y conforme al procedimiento eléctrico autorizado.
+• No reingresar al ambiente hasta que Seguridad/Mantenimiento declare condiciones seguras.
+• Preservar evidencias, evaluar daños y activar la recuperación de servicios desde la alternativa
+
+        disponible.
+
+6. Priorización de servicios y recuperación
+
+La OTI debe completar y revisar trimestralmente la matriz de servicios críticos. La prioridad final en una
+emergencia será definida por el Director de Crisis considerando el impacto académico, administrativo y legal.
+
+Prioridad        Criterio                             Objetivo de               Servicios / responsables a
+P1 - Crítico                                          recuperación              completar
+                 Su interrupción paraliza funciones
+P2 - Alto        institucionales o compromete         Restaurar primero, bajo   [Completar catálogo, RTO, RPO
+P3 - Normal      seguridad/atención esencial.         RTO/RPO aprobados.        y dueño del servicio]
+                 Afecta procesos importantes, con
+                 alternativa temporal limitada.       Restaurar después de P1.  [Completar catálogo, RTO, RPO
+                 Tiene impacto acotado o alternativa                            y dueño del servicio]
+                 manual disponible.                   Restaurar al estabilizar  [Completar catálogo y dueño
+                                                      P1 y P2.                  del servicio]
+
+RTO: Objetivo de tiempo de recuperación (el tiempo máximo que el sistema puede estar caído tras una falla,
+antes
+
+      que los servicios sufran un impacto inaceptable.
+RPO: Objetivo de punto de recuperación (la cantidad máxima de datos que se permite perder, medida en
+tiempo
+
+      desde el ultimo respaldo de datos.
+
+Secuencia mínima de retorno
+
+1. Validar seguridad física, eléctrica y ambiental del ambiente.
+2. Validar alimentación, UPS, distribución y monitoreo antes de energizar cargas.
+3. Restaurar comunicaciones de gestión y red troncal.
+4. Restaurar almacenamiento, virtualización/servidores y dependencias de plataforma.
+5. Restaurar servicios P1, validar con sus dueños, y continuar con P2 y P3.
+6. Confirmar monitoreo, respaldos, alarmas y documentación actualizada antes del cierre.
+
+                                                                                        P á g i n a 7 | 14
+7. Comunicaciones, registro y escalamiento
+      Notificaciones mínimas
+
+Momento           Emisor              Destinatarios             Contenido mínimo
+Activación N2/N3  Coordinador DC
+                                      Jefatura OTI y equipo de  Qué ocurrió, hora, alcance, nivel, acción
+Actualización     Comunicaciones OTI  contingencia              inmediata y próximo reporte.
+                                      Autoridades y dueños de   Estado, servicios afectados, medidas en
+Cierre            Director de Crisis  servicios                 curso, riesgos y siguiente actualización.
+                                      Partes interesadas        Servicios recuperados, limitaciones, hora
+                                                                de cierre y acciones posteriores.
+
+        Bitácora obligatoria
+
+        La bitácora debe registrar: identificador del incidente, fecha/hora, detector, nivel, servicios y activos
+        afectados, lecturas de UPS/HVAC, decisiones, autorizaciones, intervenciones, comunicaciones, pruebas
+        de recuperación, causa preliminar, cierre y acciones correctivas.
+
+8. Preparación y mejoras para reducir el riesgo
+
+Horizonte         Acciones
+Inmediato
+Corto plazo       Normalizar puesta a tierra; reetiquetar gabinetes y cableado; optimizar el flujo de aire y eliminar hot
+Mediano plazo     spots; establecer directorio y bitácora.
+Continuo          Implementar monitoreo eléctrico y ambiental; actualizar diagramas unifilares, inventarios, planos y
+Capacitación      matrices de puertos; ordenar cableado; formalizar control de cambios.
+                  Modernizar distribución para una demanda mínima de 78 kVA con crecimiento; evaluar
+                  redundancia HVAC y capacidad adicional; realizar ejercicios de contingencia.
+                  Mantenimiento preventivo, revisión de UPS/baterías/HVAC, prueba de alarmas, actualización
+                  trimestral de contactos y revisión anual del plan.
+                  Mejora la capacidad del personal técnico de soporte para las atenciones inmediatas y criticas que se
+                  presenten en el desarrollo y operatividad del Data center.
+
+        Indicadores de seguimiento
+
+        • Disponibilidad de servicios P1 y duración de incidentes.
+        • Tiempo de detección, escalamiento y recuperación por tipo de evento.
+        • Número de alarmas ambientales/eléctricas y tiempo de atención.
+        • Porcentaje de gabinetes, enlaces y puertos etiquetados y documentados.
+        • Cumplimiento del mantenimiento preventivo y de los ejercicios programados.
+
+9. Pruebas, mantenimiento y revisión del plan
+
+Actividad                                       Frecuencia      Evidencia
+Validación de directorio de emergencia          Trimestral      Lista de contactos confirmada.
+Prueba de notificación y escalamiento           Semestral       Registro de tiempos y oportunidades
+                                                                de mejora.
+Ejercicio de mesa: energía/HVAC/comunicaciones  Semestral       Acta, bitácora y plan de acciones.
+
+                                                                             P á g i n a 8 | 14
+Actividad                                           Frecuencia                 Evidencia
+
+Simulacro técnico controlado                        Anual o tras cambio mayor  Resultados, reversión y aprobación.
+Revisión integral del plan                          Anual y tras N3            Versión aprobada y distribución
+                                                                               controlada.
+
+Toda prueba debe planificarse, evaluarse por riesgo, contar con ventana autorizada y disponer de un plan de
+reversión. No se efectuarán pruebas que comprometan la producción sin aprobación formal.
+
+10. Aprobación y control de cambios
+
+Rol                                    Nombre                                  Firma / fecha
+                                       [Completar]                             [Completar]
+Elaborado por - Coordinación del Data
+Center                                 [Completar]                             [Completar]
+Revisado por - Jefatura OTI            [Completar]                             [Completar]
+Aprobado por - Autoridad competente
+
+La versión aprobada debe mantenerse disponible para el equipo de contingencia, con copia controlada fuera del
+ambiente del Data Center y en el repositorio documental institucional.
+
+Anexo A. Directorio de emergencia
+
+Función                  Titular       Teléfono     Suplente                                  Teléfono
+                         [Completar]   [Completar]  [Completar]                               [Completar]
+Director de Crisis       [Completar]   [Completar]  [Completar]                               [Completar]
+Coordinador DC           [Completar]   [Completar]  [Completar]                               [Completar]
+Soporte Electrico / UPS  [Completar]   [Completar]  [Completar]                               [Completar]
+/ HVAC
+Administrador            [Completar]   [Completar]  [Completar]                               [Completar]
+Infraestructura de
+Redes de datos           [Completar]   [Completar]  [Completar]                               [Completar]
+Administrador de
+Servidores y
+Ciberseguridad
+Soporte /
+mantenimiento
+
+Anexo B. Lista de verificación de cierre
+
+• La causa fue identificada o se documentó la causa preliminar y el riesgo residual.
+• Los servicios recuperados fueron validados por sus dueños.
+• No hay alarmas activas eléctricas, de UPS, HVAC o monitoreo.
+• Se actualizaron bitácora, ticket, inventario, planos y matriz de puertos si correspondía.
+• El Director de Crisis autorizó el cierre y se programaron acciones correctivas.
+• Se realizó una revisión posterior al incidente dentro de los cinco días hábiles.
+
+                                                                                              P á g i n a 9 | 14
+PLAN DE ATENCIONES SLA
+
+1. Objetivo, alcance y principios
+
+El objetivo es estandarizar la atención de incidentes de infraestructura, asignando tiempos y responsabilidades
+según la criticidad establecida en el Plan de Contingencia. Busca reducir la indisponibilidad, asegurar la
+comunicación oportuna y dejar evidencia verificable de cada atención.
+
+Alcance
+
+• Energía, UPS, banco de baterías, tableros eléctrico general, de distribución y puesta a tierra vinculados
+        al Data Center.
+
+• Climatización, condiciones ambientales y riesgos de temperatura.
+• Gabinetes, conectividad, cableado, enlaces de fibra/cobre y equipos de red del Data Center.
+• Monitoreo, alertas, coordinación con proveedores y registro de incidentes.
+
+Principios de servicio
+
+• La seguridad de las personas prevalece sobre cualquier objetivo SLA.
+• El SLA mide atención y restauración del servicio; no autoriza intervenciones inseguras ni el puenteo de
+
+        protecciones.
+• Los servicios P1 se atienden 24x7; las demás prioridades se atienden en horario de soporte salvo
+
+        activación de contingencia.
+• El reloj del SLA se detiene únicamente por causas documentadas: espera de acceso autorizado,
+
+        información indispensable del solicitante, fuerza mayor o proveedor externo sin contrato de atención
+        comprometido.
+
+2. Modelo de criticidad
+
+La clasificación se determina por el impacto en los servicios institucionales, el alcance del componente afectado
+y la urgencia. Si existen criterios de dos niveles, se aplicará el nivel de mayor criticidad.
+
+Prioridad     Criterios de clasificación                       Ejemplos vinculados al Plan de Contingencia
+P1 - Crítica
+P2 - Alta     Indisponibilidad total o amenaza inmediata a     Falla eléctrica mayor; pérdida total del DC; temperatura
+P3 - Media    personas, infraestructura crítica o servicios    crítica sostenida; incendio, humo, agua; caída de red
+P4 - Baja     institucionales P1.                              troncal.
+              Indisponibilidad parcial relevante, pérdida de   Falla de UPS/HVAC sin impacto total; gabinete o enlace
+              redundancia o degradación con riesgo de          crítico afectado; hot spot localizado; alarma eléctrica
+              escalar a P1.                                    relevante.
+              Afectación acotada con alternativa operativa,    Falla no crítica de monitoreo; ordenamiento,
+              sin riesgo inmediato para continuidad.           etiquetado pendiente; incidencia de puerto no crítico;
+                                                               alerta ambiental estable.
+              Solicitud planificada o mejora que no afecta la  Actualización documental, inventario, consulta técnica,
+              operación.                                       mejora programada o requerimiento de cambio.
+
+                                                               P á g i n a 10 | 14
+3. Catálogo de atención SLA
+
+Los objetivos de restauración representan el tiempo máximo propuesto para recuperar la operación o aplicar
+una solución temporal aceptada. La solución definitiva puede requerir un plazo adicional con plan de acción y
+comunicación al solicitante.
+
+Nivel  Cobertura                           Acuse    Inicio de          Actualización  Restauración / solución temporal
+P1                                                  diagnóstico
+P2     24x7                                15 min                      Cada 30 min    4 horas
+       24x7 cuando amenace                 30 min   30 min             Cada 2 horas   8 horas
+P3     P1; de otro modo                             1 hora
+       horario de soporte
+P4     Horario de soporte                  4 horas  8 horas hábiles    Diaria o ante  2 días hábiles
+                                           hábiles                     cambio         5 días hábiles o fecha planificada
+       Horario de soporte                                              material
+                                           1 día hábil 2 días hábiles  Semanal o
+                                                                       según acuerdo
+
+       Definiciones operativas
+
+Término                     Definición
+Acuse de recibo
+Inicio de diagnóstico       Confirmación al reportante de que el incidente fue registrado, clasificado y asignado.
+Restauración                Inicio documentado de las acciones técnicas para verificar causa, alcance y alternativas.
+                            Recuperación comprobada del servicio o componente afectado; puede ser temporal si
+Resolución definitiva       elimina el impacto inmediato.
+                            Eliminación de la causa raíz o implementación de la corrección permanente,
+Cumplimiento SLA            documentada bajo control de cambios.
+                            Atención dentro de los objetivos aplicables, descontando pausas válidas registradas.
+
+4. Reglas de priorización por escenario
+
+Escenario                                  Prioridad inicial     Regla de ajuste
+Falla eléctrica, UPS, tableros o puesta a                        Subir a P1 ante autonomía insuficiente, calentamiento, humo,
+tierra                                     P1 si afecta          disparo de protecciones o afectación de varios gabinetes.
+                                           servicios críticos o
+HVAC, recirculación o hot spot             existe riesgo; P2 si  Subir a P1 si se requiere apagado de cargas críticas, falla el último
+                                           es                    equipo HVAC disponible o supera umbral aprobado.
+Pérdida de enlace o comunicaciones         redundante/aislada
+                                           .                     Subir por cantidad de usuarios/servicios afectados o pérdida de
+Documentación, etiquetado y                P1 ante               redundancia.
+ordenamiento                               temperatura crítica
+Incendio, humo, agua, intrusión o daño     o tendencia           Subir a P2 solo cuando impida recuperar un servicio o incremente
+físico                                     sostenida; P2 si es   un incidente activo.
+                                           localizada y          Aplicar el protocolo de emergencia y seguridad institucional; los
+                                           controlada.           objetivos SLA no sustituyen dicho protocolo.
+                                           P1 si interrumpe
+                                           red troncal o
+                                           servicios P1; P2 si
+                                           afecta segmento
+                                           crítico; P3 en caso
+                                           aislado.
+                                           P3 o P4.
+
+                                           P1 inmediato.
+
+                                                                                      P á g i n a 11 | 14
+5. Flujo de atención y escalamiento
+
+Paso           Responsable                  Acción y evidencia
+1. Registrar
+               Mesa de ayuda / técnico que  Crear ticket: hora, fuente, activos, servicios afectados, prioridad
+2. Clasificar  detecta                      preliminar y evidencias.
+               Coordinador del Data Center  Confirmar prioridad con criterios de impacto y activar el plan de
+3. Atender                                  contingencia para P1/P2 cuando corresponda.
+               Equipo técnico asignado      Diagnosticar, contener y restaurar. Registrar acciones, mediciones,
+4. Escalar                                  cambios, decisiones y tiempos.
+               Coordinador DC / Jefatura    Escalar a responsable eléctrico, HVAC, redes, proveedor o Director de
+5. Validar y   OTI                          Crisis según el escenario y tiempo consumido.
+cerrar         Dueño del servicio /         Confirmar recuperación, comunicar cierre, documentar causa preliminar y
+               Coordinador DC               acciones posteriores.
+
+       Escalamiento temporal obligatorio
+
+Nivel          Escalamiento técnico                                       Escalamiento de gestión
+P1
+P2             Inmediato al Coordinador DC y especialistas; proveedor     Director de Crisis/Jefatura OTI al inicio; aviso
+P3             en los primeros 30 min si se requiere.                     institucional según impacto.
+P4             Especialista o proveedor al consumir 50% del objetivo      Jefatura OTI al consumir 75% del objetivo o si
+               de restauración.                                           existe riesgo de P1.
+               Coordinador DC al consumir 75% del objetivo.               Jefatura OTI si supera el objetivo o se repite tres
+                                                                          veces en 30 días.
+               Responsable del servicio según planificación.              Jefatura OTI ante bloqueo, cambio de alcance o
+                                                                          incumplimiento planificado.
+
+6. Comunicación y reporte
+
+Prioridad      Primera comunicación    Contenido mínimo                                    Cierre
+P1             Dentro de 30 min de la  Impacto, servicios, acciones de contención,
+               detección.              responsable, siguiente actualización y riesgos.     Informe de incidente y
+P2                                                                                         revisión posterior en hasta 5
+               Dentro de 1 hora.       Impacto, prioridad, acción en curso, ETA o          días hábiles.
+P3                                     próxima actualización.                              Confirmación de
+P4             Dentro de 1 día hábil.                                                      recuperación y acciones
+                                       Registro, responsable, diagnóstico inicial y fecha  pendientes.
+               Según canal de          objetivo.                                           Confirmación mediante
+               solicitud.              Alcance, responsable y fecha planificada.           ticket.
+                                                                                           Cierre mediante ticket o
+                                                                                           control de cambios.
+
+Solo la Jefatura OTI o el rol de Comunicaciones OTI emitirá comunicaciones institucionales. Los mensajes
+técnicos no deben atribuir causas definitivas hasta contar con validación.
+
+7. Indicadores y control del SLA
+
+Indicador              Fórmula / criterio                                 Meta inicial propuesta     Frecuencia
+                                                                          >= 95% mensual             Mensual
+Cumplimiento de acuse  Tickets con acuse dentro del objetivo / tickets
+                       atendidos x 100.                                   >= 90% mensual; P1 >= 95%  Mensual /
+Cumplimiento de        Tickets restaurados dentro del objetivo / tickets  trimestral                 trimestral
+restauración           cerrados x 100.                                    Tendencia decreciente por  Mensual
+Tiempo medio de        Suma de tiempo de restauración / número de         prioridad
+restauración           incidentes restaurados.
+
+                                                                                                  P á g i n a 12 | 14
+Indicador                  Fórmula / criterio                                 Meta inicial propuesta     Frecuencia
+Incidentes repetitivos                                                                                   Mensual
+                           Número de incidentes con misma causa o activo      0 P1 repetidos; reducción
+Calidad de registro        en 30 días.                                        sostenida P2/P3            Mensual
+                           Tickets con bitácora, impacto, causa y validación  >= 95% mensual
+                           de cierre completos / tickets cerrados x 100.
+
+Tratamiento de incumplimientos
+
+• Todo incumplimiento P1 o P2 requiere análisis de causa, acción correctiva, responsable y fecha
+        compromiso.
+
+• Los incumplimientos por proveedor se consolidan como evidencia para revisar contratos, cobertura y
+        disponibilidad de repuestos.
+
+• Los objetivos podrán revisarse trimestralmente con base en mediciones, capacidad de soporte,
+        resultados de pruebas y cambios de infraestructura.
+
+8. Roles y matriz de responsabilidades
+
+Actividad                  Jefatura OTI             Coordinador DC            Especialistas /            Dueño del
+                                                                              proveedores                servicio
+Clasificar P1/P2           A                        R
+Atender y restaurar        I                        A                         C                          C
+Comunicar impacto          A                        R                         R                          C
+Validar recuperación       I                        R                         C                          I
+Revisión posterior P1      A                        R                         C                          A
+Actualizar SLA y métricas  A                        R                         C                          C
+                                                                              C                          I
+
+R = Responsable de ejecutar
+A = Aprueba / responde por el resultado
+C = Consultado
+I = Informado
+
+9. Aprobación y anexos
+
+Rol                                    Nombre                                 Firma / fecha
+                                       [Completar]                            [Completar]
+Elaborado por - Coordinación del Data
+Center                                 [Completar]                            [Completar]
+Revisado por - Jefatura OTI            [Completar]                            [Completar]
+Aprobado por - Autoridad competente
+
+                                                                                               P á g i n a 13 | 14
+ANEXOS RELACIONADOS
+
+        Anexo 1: Anexo_1_Matriz_de_Servicios_Criticos_Data_Center_UNSA_v 1.0
+        Anexo 2: Anexo_2_Dashbord_Cuadro_Control_Tickets_SLA_UNSA
+        Anexo 3: Anexo_3_control de tickes_SLA_UNSA
+        Anexo 4: Anexo_4_Resumen mensual de tickes_SLA_UNSA
+        Anexo 5: Anexo_5_parametros tickes_SLA_UNSA
+        Anexo 6: Anexo_6_Guia de uso de tickes_SLA_UNSA
+        Anexo 7: Anexo_7_Informe_Tecnico_EJEMPLO_15.07.2026
+        Anexo 8: Anexo_8_Formato_Control_Ingreso_Data_Center
+
+                                                                                               P á g i n a 14 | 14
+                                                                                                                                                                  OTI UNSA | Matriz de Servicios Críticos
+
+                                                          MATRIZ DE SERVICIOS CRÍTICOS
+
+                                                          Data Center institucional - Sede Facultad de Ingeniería Química
+
+Código                      1.0
+Versión                     22 de julio de 2026
+Fecha                       Plan_de_Contingencia_Data_Center_UNSA_v 1.0
+Documento base              Oficina de Tecnologías de la Información (OTI)
+Propietario                 Matriz propuesta para validación con dueños de servicios
+Estado
+
+1. Propósito y criterio de uso
+
+La matriz identifica los servicios y componentes que deben priorizarse durante un incidente del Data Center. Se fundamenta en la criticidad alta de energía, comunicaciones y HVAC identificada en el
+Plan de Contingencia. Los servicios funcionales propuestos deben confirmarse con sus dueños, pues el informe técnico evaluó infraestructura y no aplicaciones o bases de datos.
+
+Escala de prioridad
+
+Prioridad  Definición                                                               Tratamiento en contingencia                             RTO objetivo inicial  RPO objetivo inicial
+P1                                                                                  Restauración prioritaria; atención 24x7 y escalamiento  Hasta 4 horas         Según respaldo y validación del dueño
+P2         Crítica: paraliza funciones institucionales o compromete la continuidad  inmediato.                                              Hasta 8 horas         Según respaldo y validación del dueño
+P3         general.                                                                 Restaurar después de P1; atención acelerada.            Hasta 2 días hábiles  Según respaldo y validación del dueño
+           Alta: afecta procesos importantes o elimina redundancia; puede escalar
+           a P1.                                                                    Restaurar al estabilizar P1 y P2.
+           Media: afectación limitada con alternativa operativa disponible.
+
+RTO: tiempo objetivo máximo para restablecer el servicio. RPO: pérdida máxima de datos aceptable; debe ser aprobado por el dueño del servicio y verificarse contra la política de respaldos.
+
+2. Matriz de servicios críticos propuesta
+
+Los campos entre corchetes requieren confirmación institucional. La matriz debe revisarse antes de una contingencia real y cada vez que cambie la arquitectura o el catálogo de servicios.
+
+ID         Servicio /       Descripción y alcance                   Prioridad       Impacto si falla     Dependencias críticas       Dueño del servicio  RTO RPO  Estrategia de continuidad /                Estado de
+SC-01      componente                                               P1                                                               OTI / [Responsable           recuperación                               validación
+                            Alimentación, tableros, UPS, banco de                   Indisponibilidad     Red eléctrica, UPS,         eléctrico]
+           Infraestructura  baterías, transformador y distribución                  parcial o total de   baterías, protecciones,                         4 h No aplica Aislar falla; operar con UPS          Pendiente
+           eléctrica del    hacia gabinetes.                                        todos los servicios  puesta a tierra, proveedor  OTI / [Responsable
+           Data Center                                                              tecnológicos         eléctrico.                  HVAC]                        según autonomía; apagado
+                                                                                    alojados.
+                                                                                    Sobretemperatura,    Energía HVAC, equipos de                                 ordenado de cargas no críticas;
+                                                                                    hot spots,           aire acondicionado,
+                                                                                                                                                                  restablecer por etapas.
+
+SC-02 Climatización y Equipos HVAC, flujo de aire, sensores P1                                                                                           4 h No aplica Restablecer HVAC; eliminar            Pendiente
+                                                                                                                                                                                 obstrucciones autorizadas;
+           monitoreo        de temperatura y humedad del
+                                                                                                                                                                         OTI UNSA | Matriz de Servicios Críticos
+
+ID Servicio /           Descripción y alcance                     Prioridad  Impacto si falla       Dependencias críticas       Dueño del servicio    RTO RPO            Estrategia de continuidad /        Estado de
+       componente                                                                                                                                                        recuperación                       validación
+                                                                                                                                OTI / [Administrador  4 h No aplica                                         Pendiente
+       ambiental        ambiente.                                            degradación o          sensores, proveedor         de redes]                                priorizar carga; apagado           Pendiente
+                                                                             apagado de             HVAC.                                             4 h [Complet       controlado si persiste riesgo
+SC-03 Red troncal y     Conmutación/ruteo principal, enlaces P1              equipos de TI.                                     OTI / [Administrador           ar]       térmico.                           Pendiente
+                                                                                                    Energía, switches/routers,  de sistemas]                             Usar rutas redundantes
+       conectividad     de fibra/cobre y conectividad entre                  Pérdida de             fibra, patch panels,                              4 h [Complet       disponibles; restaurar enlaces     Pendiente
+                                                                             comunicación entre     configuración y enlaces de  OTI / [Administrador           ar]       de gestión y red troncal antes     Pendiente
+       del Data Center gabinetes.                                            servicios, usuarios y  proveedor.                  de almacenamiento]                       de servicios de aplicación.
+                                                                             componentes                                                              4 h [Complet                                          Pendiente
+SC-04 Plataforma de Servidores físicos, hipervisores y            P1         críticos.              Energía, HVAC, red,         OTI / [Administrador           ar]       Restaurar infraestructura base;    Pendiente
+                                                                                                    almacenamiento,             de infraestructura]                      iniciar cargas P1 según            Pendiente
+       cómputo y        recursos de cómputo que alojan                       Indisponibilidad       respaldos y licencias.                            [Co [Complet       secuencia aprobada; validar
+                                                                             simultánea de                                      [Dueño funcional] /   mpl ar]            con dueños de servicio.
+       virtualización servicios institucionales.                             múltiples              Energía, HVAC, red          OTI                   eta
+                                                                             aplicaciones o         SAN/LAN, respaldos,                               r]                 Verificar integridad; restaurar
+SC-05 Almacenamient Cabinas, discos, volúmenes, sistemas P1                  sistemas               administración de           OTI / [Responsable                       conectividad y volúmenes;
+                                                                             institucionales.       almacenamiento.             de respaldos]         8 h Según          recuperar desde respaldo
+       o y repositorios de archivos y repositorios                           Servicios no                                                                      política  según RPO aprobado.
+                                                                             pueden acceder a       Red troncal, cómputo,       OTI / [Responsable             de
+       de datos         institucionales.                                     datos; posible         almacenamiento,             de monitoreo]                  respaldo  Restaurar servicios de soporte
+                                                                             afectación de          configuración y respaldos.                                           antes de aplicaciones
+SC-06  Servicios de     Servicios de directorio, DNS, DHCP,       P1         integridad o                                       OTI / [Coordinador    8 h No aplica      dependientes; validar
+SC-07  identidad,       autenticación y sincronización de         P1/P2      disponibilidad.        Cómputo,                    DC]                                      resolución, autenticación y
+       nombres y        tiempo, si están alojados en el DC.                                         almacenamiento, red,                              8 h No aplica      hora.
+       direccionamien                                                        Usuarios y sistemas    identidad, bases de datos,                                           Recuperar según catálogo
+       to               Aplicaciones que soportan procesos                   no autentican,         respaldos.                                                           detallado, criticidad funcional,
+                        académicos, administrativos,                         resuelven nombres                                                                           RTO/RPO y secuencia de
+       Servicios        financieros y de atención institucional.             o reciben              Almacenamiento, red,                                                 dependencias.
+       institucionales                                                       conectividad.          software de respaldo,
+       académicos y                                                                                 repositorio externo,                                                 Verificar último respaldo
+       administrativos                                                       Interrupción de        credenciales.                                                        exitoso; proteger copias; iniciar
+                                                                             procesos                                                                                    restauración conforme a RPO y
+SC-08 Respaldos y       Plataforma, repositorios y                P1         institucionales;       Energía, red, plataforma                                             autorización del dueño.
+                                                                             impacto depende        de monitoreo, sensores y
+       recuperación procedimientos para copias de                            del servicio y         registros.                                                           Usar supervisión manual
+                                                                             calendario                                                                                  temporal; restablecer alertas,
+       de datos         seguridad y restauración.                            académico.             Repositorio documental,                                              telemetría y umbrales luego de
+                                                                                                    inventario, personal                                                 estabilizar P1.
+SC-09  Monitoreo,       Monitoreo de infraestructura              P2         Imposibilidad de       técnico y etiquetado
+       alertas y                                                             recuperar              ANSI/TIA-606.                                                        Usar copia controlada fuera del
+       registros        eléctrica, ambiental, servidores, red y              información o                                                                               DC; generar registro
+                                                                             servicios tras                                                                              provisional validado por dos
+                        alertas operativas.                                  incidente mayor.                                                                            técnicos si falta
+                                                                                                                                                                         documentación.
+SC-10 Documentación Diagramas unifilares, planos,                 P2         Menor capacidad
+                                                                             de detección y
+       técnica y        inventarios, matrices de puertos y                   diagnóstico;
+                                                                             aumenta el tiempo
+       administración etiquetado de gabinetes.                               de recuperación.
+
+       de cableado                                                           Aumenta la
+                                                                             probabilidad de
+                                                                             error y el tiempo
+                                                                             de
+                                                                             diagnóstico/recupe
+                                                                             ración.
+                                                                                                                                                                       OTI UNSA | Matriz de Servicios Críticos
+
+ID     Servicio /       Descripción y alcance               Prioridad    Impacto si falla  Dependencias críticas  Dueño del servicio  RTO RPO                          Estrategia de continuidad /      Estado de
+SC-11  componente                                           P2                                                                                                         recuperación                     validación
+                        Control de acceso, vigilancia,                   Riesgo de acceso  Seguridad del campus,  OTI / Seguridad
+       Acceso físico y  procedimientos de ingreso y                      no autorizado,    energía,               institucional       8 h No aplica Restringir acceso; activar                          Pendiente
+       seguridad del    coordinación de                                  daño físico o     cerraduras/controles,
+       ambiente         seguridad/mantenimiento.                         demora en la      personal autorizado.                                                        seguridad del campus; registrar
+                                                                         respuesta a
+                                                                         emergencia.                                                                                   ingresos y preservar
+
+                                                                                                                                                                       evidencias.
+
+3. Secuencia de recuperación sugerida
+
+Orden  Componente / servicio                                             Condición de avance
+
+1      Seguridad física, energía y condiciones ambientales               Ambiente seguro, sin alarmas críticas activas y alimentación validada.
+2      Red de gestión y red troncal                                      Conectividad de administración y enlaces principales operativos.
+3      Almacenamiento, cómputo e identidad                               Dependencias de plataforma estables y monitoreadas.
+4      Servicios institucionales P1                                      Validación técnica y funcional con el dueño de cada servicio.
+5      Servicios P2, monitoreo y documentación                           Servicios secundarios restaurados, registros actualizados y acciones pendientes programadas.
+
+4. Validación, control y aprobación
+
+La OTI debe completar el dueño funcional, RTO y RPO de cada servicio; verificar dependencias y respaldos; y realizar una prueba de recuperación de los servicios P1 al menos una vez al año o
+después de cambios mayores.
+
+Rol                                                         Nombre                                                Firma / fecha
+
+Elaborado por - Coordinación del Data Center                [Completar]                                           [Completar]
+Revisado por - Jefatura OTI                                 [Completar]                                           [Completar]
+Validado por - Dueños de servicios críticos                 [Completar]                                           [Completar]
+Aprobado por - Autoridad competente                         [Completar]                                           [Completar]
+                                                                          DASHBOARD DE CONTROL DE TICKETS SLA – DATA CENTER UNSA
+
+      Año                      2026           Mes                      7        Periodo                     Julio 2026
+
+                 TOTAL DE TICKETS                                         ABIERTOS / EN ATENCIÓN                                                      TICKETS P1                                 INCUMPLIMIENTOS SLA
+
+                       3                                                           2                                                                     1                                               1
+
+           CUMPLIMIENTO DE ACUSE                                       CUMPLIMIENTO DE RESTAURACIÓN                             TIEMPO MEDIO RESTAURACIÓN                                        CAMPOS MÍNIMOS COMPLETOS
+
+                66.7%                                                          100.0%                                                  0.42 h                                                          100.0%
+
+      Prioridad                Tickets        Abiertos          % acuse         % restauración              TMR (h)         Incumplimientos                      Estado                     Tickets
+P1                                         1                 1                                                        0.42                         1  Abierto                                            2
+P2                                         0                 0            0.0%                                                                     0  En diagnóstico                                     0
+P3                                         1                 0                                                                                     0  En atención                                        0
+P4                                         1                 1         100.0%                       100.0%                                         0  Restaurado                                         0
+                                                                       100.0%                                                                         Cerrado                                            1
+                                                            P2
+1.2                                                                                                                                                   Cerrado
+  1
+                                                                                                                                                      Restaurado
+0.8
+0.6                                                                                                                                                   En atención
+0.4
+0.2                                                                                                                                                   En diagnóstico
+
+  0                                                                                                                                                   Abierto
+                           P1
+                                                                                                P3                          P4                                        0                     0.5              1                    1.5                   2                   2.5
+                                                                       Tickets                                                                                                                                                         Noviembre           Diciembre
+                                                                                                                                                                                                                Tickets
+
+120%
+
+100%
+
+80%
+
+60%
+
+40%
+
+20%
+
+0%
+
+                 Enero               Febrero                    Marzo           Abril                       Mayo                Junio                 Julio              Agosto                  Septiembre              Octubre
+
+                                                                                                            Acuse           Restauración              Meta acuse         Meta restauración
+
+                                                                Metas iniciales: acuse ≥95% mensual; restauración ≥90% mensual; calidad de registro ≥95% mensual; restauración P1 ≥95% trimestral.
+                                                                                                                                                                                                                                                                                                                                                                         CUADRO DE CONTROL DE TICKETS DE ATENCIÓN SLA – DATA CENTER UNSA
+
+Complete los campos blancos. Las columnas celestes se calculan automáticamente. Las pausas del SLA deben estar sustentadas y registradas en observaciones.
+
+Código ticket  Estado   Fecha/hora detección Fecha/hora registro  Mes  Fuente / canal  Reportante  Servicio afectado                                        Activo       Gabinete / componente  Impacto / usuarios Prioridad  Alarmas / estado de enlaces  Responsable  Proveedor / especialista          Acciones ejecutadas          Autorizaciones    Comunicaciones  Pausa acuse (h)  Pausa diagnóstico (h)  Pausa restauración  Fecha/hora acuse  Inicio diagnóstico  Fecha/hora    Fecha/hora cierre  Validación dueño del              Causa preliminar                Acción correctiva  Fecha compromiso Tiempo acuse neto              Tiempo diagnóstico   Tiempo restauración  Objetivo acuse (h) Objetivo diagnóstico Objetivo restauración  Cumple acuse  Cumple diagnóstico         Cumple     Campos mínimos  Semáforo SLA  Observaciones
+                                                                                                                                                                                                                                                                                                                                                                                                                             (h)                                           restauración                               servicio                                                                                                              (h)           neto (h)             neto (h)          (h)         (h)                                                                                restauración       completos
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  se verifica si los equipos    Se corrige la configuracion
+SLA-1          Cerrado  ############# ############# Julio 2026 Monitoreo Administrador DC servidor storage servidor                                                      gabinete 6             Direccion de                  caida parcial del servidor Administrador DC no aplica                       se verifica de forma         Administrador de                  0.25             0.50                   1.00 ############# ############# ############# ############# Validado                                            HVAC estan en correcta        de los equipos HVAC para         ###########  0.42                                              0.25  0.42                 4.00       8.00        16.00 Sí                                              Sí                  Sí                Sí              Verde
+                                                                                                                                                                         gabinete 6             adminisiones P3                                                                                           presencial la causa del      DC                                                                                                                                                                                         configuracion y               mejorar la temperatura del                                                                                                                                                                                                                    Pendiente       Rojo
+                                                                                                                                                                         gabinete 3                                           caida parcial del servidor Administrador DC no aplica                       problema                                                                                                                                                                                                                operatividad                  gabinete                                                                                        0.25
+SLA-2          Abierto  ############# ############# Julio 2026 Monitoreo Administrador DC servidor storage servidor                                                                             Direccion de                                                                                proveedor de                               Administrador de                  0.25             0.50                   1.00 ############# ############# ############# ############# Validado                                            se verifica si los equipos    Se corrige la configuracion      ###########  0.42                                                    0.42                 0.25       0.50        4.00 No                                               Sí                  Sí                                              no se resolvio el problema
+                                                                                                                                                                                                adminisiones P1                                                                                           se verifica de forma         DC                                                                                                                                                                                         HVAC estan en correcta        de los equipos HVAC para                                                                        2.75                                                                                                                                                                        de temperatura del sistema
+                                                                                                                                                                                                                              caida de fuente principal Administrador DC Switch Core                      presencial la causa del                                                                                                                                                                                                 configuracion y               mejorar la temperatura del                                                                                                                                                                                                                                                  HVAC
+                                                                                                                                                                                                                                                                                                          problema                     Jefatura de OTI                                                                                                                                                                            operatividad                  gabinete
+                                                                                                                                                                                                Oficina de                                                                                                                                                                                                                                                                                                                                                      se retira la fuente para
+                                                                                                                                                                                                                                                                                                          Se verifica el correcto                                                                                                                                                                                                 Se verifica la fuente         cambio respectivo con el
+                                                                                                                                                                                                Tecnologia de                                                                                             funcionamiento de la fuente                                                                                                                                                                                             principal del switch core     proveedor, se deja solo
+                                                                                                                                                                                                                                                                                                          principal                                                                                                                                                                                                                                             con fuente back up
+SLA-3          Abierto  ############# ############# Julio 2026 Correo                  Administrador DC switch Core                                         Switch Core                         Informacion    P4                                                                                                                                                        1.00             1.00                   2.00 ############# ############# ############# ############# Pendiente                                                                                                          ###########  1.67                                                    2.42                 8.00       16.00       40.00 Sí                                              Sí                  Sí                Pendiente       Verde
+                                                               RESUMEN MENSUAL DE TICKETS SLA
+
+                                                        Los resultados corresponden al año seleccionado en el Dashboard.
+
+         Mes  Total       P1       P2       P3       P4 Abiertos  % acuse % diagnóstico % restauración  TMR (h)           % campos           Incumplimientos         Meta acuse Meta restauración
+                                                                                                                 0.42     completos
+Enero                  0        0        0        0  0  0                                                                                                     0.0%   95.0%  90.0%
+Febrero                0        0        0        0                                                                                  100.0%                   0.0%   95.0%  90.0%
+Marzo                  0        0        0        0  0  0                                                                                                      0.0%  95.0%  90.0%
+Abril                  0        0        0        0                                                                                                           0.0%   95.0%  90.0%
+Mayo                   0        0        0        0  0  0                                                                                                      0.0%  95.0%  90.0%
+Junio                  0        0        0        0                                                                                                           0.0%   95.0%  90.0%
+Julio                  3        1        0        1  0  0                                                                                                  100.0%    95.0%  90.0%
+Agosto                 0        0        0        0                                                                                                           0.0%   95.0%  90.0%
+Septiembre             0        0        0        0  0  0                                                                                                     0.0%   95.0%  90.0%
+Octubre                0        0        0        0                                                                                                            0.0%  95.0%  90.0%
+Noviembre              0        0        0        0  0  0                                                                                                     0.0%   95.0%  90.0%
+Diciembre              0        0        0        0                                                                                                           0.0%   95.0%  90.0%
+                                                     1  2         66.7%  100.0%  100.0%
+
+                                                     0  0
+
+                                                     0  0
+
+                                                     0  0
+
+                                                     0  0
+
+                                                     0  0
+                                    PARÁMETROS DEL PLAN DE ATENCIONES SLA – DATA CENTER UNSA
+
+                  Prioridad                                    Cobertura                              Acuse (h)          Diagnóstico (h)          Restauración (h)  Objetivo original                 Actualización        Estados         Fuente / canal  Prioridad  Validación   Sí / No  Año        Mes
+P1                                  24x7                                                                           0.25                     0.50                                            Cada 30 minutos                Abierto         Monitoreo       P1         Pendiente    Sí
+                                    24x7 si amenaza P1; de otro modo horario de                                                                   4.00 4 horas                                                                                                                                   2026       1
+P2                                  soporte                                                                        0.50                     1.00                                                                           En diagnóstico  Mesa de ayuda   P2         Validado     No
+P3                                  Horario de soporte                                                             4.00                     8.00   8.00 8 horas                             Cada 2 horas                   En atención     Correo          P3         No validado  N/A           2027       2
+P4                                  Horario de soporte                                                             8.00                    16.00  16.00 2 días hábiles                      Diaria o ante cambio material  Restaurado      Teléfono        P4
+                                                                                                                                                  40.00 5 días hábiles o fecha planificada  Semanal o según acuerdo        Cerrado         Proveedor                                             2028       3
+                                                                                                                                                                                                                                           Otro
+                                                                                                                                                                                                                                                                                                 2029       4
+
+                                                                                                                                                                                                                                                                                                 2030       5
+
+                                                                                                                                                                                                                                                                                                 2031       6
+
+CONFIGURACIÓN DE JORNADA Valor                                                                                                                                                                                                                                                                   2032       7
+
+Horas de soporte por día                                                         8                                                                                                                                                                                                               2033       8
+
+Acuse P4 equivalente (días)                                                      1                                                                                                                                                                                                               2034       9
+
+Diagnóstico P4 equivalente (días)                                                2                                                                                                                                                                                                               2035       10
+
+Restauración P4 equivalente (días)                                               5                                                                                                                                                                                                               2036       11
+
+                                                                                                                                                                                                                                                                                                 2037       12
+
+                  Indicador         Meta                                                     Frecuencia                           Criterio
+Cumplimiento de acuse                                                            95% Mensual                             Tickets con acuse
+Cumplimiento de restauración                                                     90% Mensual                             dentro del objetivo /
+                                                                                                                         tickets atendidos
+Cumplimiento de restauración P1                                                  95% Trimestral                          Tickets restaurados
+                                                                                                                         dentro del objetivo /
+Calidad del registro                                                             95% Mensual                             tickets cerrados
+Incidentes repetitivos P1                                                            0 Mensual                           Tickets P1
+                                                                                                                         restaurados dentro
+                                                                                                                         del objetivo / tickets
+                                                                                                                         P1 cerrados
+                                                                                                                         Tickets cerrados con
+                                                                                                                         campos mínimos
+                                                                                                                         completos / tickets
+                                                                                                                         cerrados
+                                                                                                                         Meta: cero P1
+                                                                                                                         repetidos
+
+FUENTE Y CRITERIO DE DISEÑO         Plan de Atenciones SLA del Data Center UNSA
+Documento base                      1.0
+Versión
+Fecha de emisión                                                                          22/07/2026
+                                    Código; detección y registro;
+Campos mínimos                      servicio/activo/componente; impacto/prioridad;
+                                    lecturas; responsables; acciones; autorizaciones;
+Nota                                comunicaciones; pausas; restauración; validación;
+                                    causa; acción correctiva.
+                                    Las equivalencias horarias de P3/P4 se calculan
+                                    con la jornada configurable. La fecha planificada de
+                                    P4 debe controlarse adicionalmente cuando
+                                    corresponda.
+                               GUÍA DE USO – CONTROL DE TICKETS SLA
+
+Paso                             Instrucción
+                                 Ingrese cada incidente en la hoja Control Tickets. El código se genera automáticamente cuando se registra la fecha/hora de
+                               1 detección.
+                                 Complete como mínimo detección, registro, servicio, activo, gabinete/componente, impacto, prioridad, lecturas relevantes,
+                               2 responsable, acciones, autorizaciones, comunicaciones y pausas.
+                               3 Registre acuse, inicio de diagnóstico, restauración y cierre con fecha y hora completas.
+                               4 Las pausas deben corresponder únicamente a causas válidas y quedar sustentadas en Observaciones.
+                               5 Al cerrar el ticket, complete validación del dueño del servicio, causa preliminar, acción correctiva y fecha compromiso.
+                               6 Revise el Semáforo SLA: Verde = dentro de objetivo; Rojo = incumplimiento; Pendiente = ticket aún no evaluable.
+                               7 En Dashboard seleccione año y mes. Los indicadores y gráficos se actualizarán automáticamente.
+                               8 Ajuste en Parámetros SLA las horas de la jornada de soporte si la OTI aprueba una equivalencia distinta.
+
+Campo mínimo del plan          Ubicación en el archivo
+Código, detección y registro   Columnas A, C y D
+Servicio, activo, gabinete o
+componente                     Columnas H, I y J
+Impacto y prioridad            Columnas K y L
+Lecturas UPS, temperatura,
+humedad, alarmas/enlaces       Columnas M a P
+Responsables, acciones y
+autorizaciones                 Columnas Q a T
+Comunicaciones y pausas SLA    Columnas U a X
+Restauración y validación del
+dueño del servicio             Columnas AA y AC
+Causa preliminar y acción
+correctiva                     Columnas AD y AE
+
+Documento base                 Plan de Atenciones SLA del Data Center UNSA, versión 1.0.
+Fecha de emisión                                                                                                                                                                      22/07/2026
+
+Advertencia                    Los objetivos propuestos deben validarse con la capacidad real de la OTI, proveedores y dueños de servicios antes de su
+                               aprobación.
+“TITULO DEL INFORME TECNICA DE MANTENIMIENTO O
+                     ATWENCION CORRECTIVA”
+
+FECHA                          15/07/2026
+LOCAL
+DIRECCION
+BREVE DESCRIPCION DEL TRABAJO
+PERSONAL DE CAMPO
+JEFE DE OFICINA
+                                                                                              2 (7)
+
+Preparado :                        No.
+Aprobado :
+                                   Nombre del archivo generado con fecha y descripción breve
+
+                       Revisado :  Fecha :                      Rev    Referencia
+
+                                   15/07/2025                   Rev A
+
+                                                                AA
+
+     1. Generalidades
+
+Ubicación asignada de la atención del usuario final – UNSA.
+
+                       Fig. 1.- Vista general de la ubicacion.
+
+2 |
+                                                                                                 3 (7)
+
+Preparado :                           No.
+Aprobado :
+                                      Nombre del archivo generado con fecha y descripción breve
+  2. ANTECEDENTES
+                          Revisado :  Fecha :     Rev    Referencia
+  1.
+                                      15/07/2025  Rev A
+  3. TRABAJOS REALIZADOS
+            •                                     AA
+
+  4. ANALISIS.
+            •
+
+3 |
+                                                                                                  4 (7)
+
+Preparado :              No.
+Aprobado :
+                         Nombre del archivo generado con fecha y descripción breve
+
+             Revisado :  Fecha :                            Rev                       Referencia
+
+                         15/07/2025                         Rev A
+
+                                                            AA
+
+5. REPORTE FOTOGRAFICO DE EQUIPOS DE RED DE DATOS ACTUALES
+
+             VERIFICACION DE LOS EQUIPOS EXISTENTES
+
+    6. REPORTE FOTOGRAFICO SISTEMA DE PUESTA A TIERRA
+
+                                            VERIFICACION DEL SISTEMA PUESTA A TIERRA
+
+4 |
+                                                                                    5 (7)
+
+Preparado :              No.
+
+                         Nombre del archivo generado con fecha y descripción breve
+
+Aprobado :   Revisado :  Fecha :                           Rev    Referencia
+
+                         15/07/2025                        Rev A
+                                                           AA
+
+     7. REPORTE FOTOGRAFICO INTERIOR Y EXTERIOR DE CASETA
+
+             VERIFICACION DE INTERIOR Y EXTERIOR DE CASETA
+
+5 |
+                                                                                        6 (7)
+
+Preparado :              No.
+Aprobado :
+                         Nombre del archivo generado con fecha y descripción breve
+
+             Revisado :  Fecha :     Rev    Referencia
+
+                         15/07/2025  Rev A
+
+                                     AA
+
+    8. REPORTE FOTOGRAFICO VERIFICACION SISTEMA ELECTRICO Y TEMPERATURA DEL AMBIENTE
+
+                VERIFICACION DE TOMAS ELECTRICAS COMERCIALES Y TEMPERATURA DE AMBIENTE
+
+6 |
+                                                                                              7 (7)
+
+Preparado :                        No.
+Aprobado :
+                                   Nombre del archivo generado con fecha y descripción breve
+  9. CONCLUSIONES
+  •                    Revisado :  Fecha :     Rev    Referencia
+
+  10. RECOMENDACIONES              15/07/2025  Rev A
+  •
+                                               AA
+
+7 |
+                                                                                                    REGISTRO DE INGRESO AL DATA CENTER
+
+N° Fecha  Hora de  Hora de  Nombre completo                                                         DNI  Área / Empresa  Motivo del ingreso  Quién autorizó  Firma del ingresante  Observaciones
+          ingreso   salida
+001
+002
+003
+004
+005
+006
+007
+008
+009
+010
+011
+012
+013
+014
+015
+016
+017
+018
+019
+020
+021
+022
+023
+024
+025
+026
+027
+028
+029
+030
+031
+032
+033
+034
+035
+036
+
+Nota: Todo ingreso al Data Center debe contar con autorización previa. Registrar ingreso y salida.
+
