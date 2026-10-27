@@ -1,0 +1,344 @@
+
+--- Pagina 1 ---
+SECRETARíA
+GENERAL
+RESOLUCIÓN DE CONSEJO UNIVERSITARIO NO 0153-2025
+Arequipa, 17 de marzo de 2025.
+VISTO el OfiCio NO 069-2025-UM-OPPM/UNSA de la Unidad de Modernización, mediante el
+cual remite ei proyecto de "DIRECTIVA NO 003-2025-UM-OTI REGULACIÓN DEL
+ALMACENAMIENTO DE INFORMACIÓN DE AULAS VIRTUALES".
+CONSIDERANDO:
+Que, la Universidad Nacional de San Agustín de Arequipa está constituida conforme a la
+Ley Universitaria NO 30220, y se rige por sus respectivos estatutos y reglamentos, siendo
+una comunidad-académicã orientada a la 'investigación y a la docencia, que brinda una
+formación humanista, ética, científica y tecnológica con una clara conciencia de nuestro país
+como realidad multicultural.
+Que, el artículo 80 de la Ley N? 30220, Ley Universitaria, concordante con el artículo 80 del
+Estatuto Universitario, referente a la autonomía universitaria establece 10, siguiente:
+"(...) La Universidad se rige con la autonomía inherente a las Universidades y se ejerce de
+conformidad con [o establecido en la Constitución, la Ley y demás normativas aplicables.
+Esta autonomía se manifiesta en Vos siguientes regímenes:' 8.1 Normativo, implica la
+potestad autodeterminativa para la creación de normas internas (Estatuto y Reglamentos)
+destinadas a regular la institucionalidad universitaria. 8.2. De gobierno, implica la potestad
+autodeterminativa para estructurar, organizar y conducir la institución universitaria, con
+atención a Su naturaleza, características y necesidades. Es fórmalmente dependiente del
+régimen normativo (...) 8.4 Administrativo, implica la potestad autodeterminativa para
+establecer los principios, técnicas y prácticas de sistemas de gestión, tendientes a facilitar
+la consecución de los fines de la institución universitaria, incluyendo la organización y
+administración del escalafón de su personal docente y administrativo".
+Que, asimismo, el artículo 590 de la Ley NO 30220, Ley Universitaria, en concordancia con
+el artículo 1510 del Estatuto de la Universidad Nacional de San Agustín de Arequipa,
+disponen que: "EI Consejo Universitario tiene las siguientes funciones: (...) 59.2 Dictar
+el reglamento general de la universidad, el reglamento de elecciones y otros reglamentos
+internos especiales, así-como vigilar su cumplimiento
+Que, mediante Oficio NO 069-2025-UM-OPPM/UNSA, la Unidad de Modernización remite el
+proyecto de "DIRECTIVA NO 003-2025-UM-OTI REGULACIÓN DEL ALMACENAMIENTO
+DE INFORMACIÓN DE AULAS VIRTUALES", elaborado por la Oficina de Tecnologías de
+la Información y revisado por su Unidad.
+ORAD'
+Que, el Consejo Universitario, en su sesión del 06 de marzo de 2025, acordó: «Aprobar
+la "DIRECTIVA NO 003-2025-UM-OTI REGULACIÓN DEL ALMACENAMIENTO DE
+*INFORMACIÓN DE AULAS VIRTUALES" de Universidad Nacional de san Agustín de
+Arequipa».
+Por estas consideraciones, estando a 10 acordado y conforme a -las atribuciones
+conferidas al Rectorado y al Consejo Universitario por la Ley Universitaria NO 30220,
+C GENERL O
+SE RESUELVE:
+1. APROBAR la "DIRECTIVA NO 003-2025-UM-OTI REGULACIÓN DEL
+ALMACENAMIENTO DE INFORMACIÓN DE AULAS VIRTUALES" de la Universidad
+Nacional de San Agustín de Arequipa; la misma que forma parte integrante de la presente
+Resolución.
+Santa Catalina 117 Cercado, Arequipa, Perú -Teléfono: (5154) 224903. E-mail: secgen@unsa.edu.pe
+
+--- Pagina 2 ---
+17/03/25
+RCU NO 0153-2025
+2. ENCARGAR al Jefe dela Oficina de Tecnologías de la Información, Funcionaho
+Responsable de la Elaboración y Actualización del Portal de Transparencia, la
+publicación dé la presente Resolución y' la Directiva, en el Portal Institucional; EN
+COORDINACIÓN don la Oficina de Comunicaciones e Imagen Institucional, para la
+difusión de la presente resolución, por,los canales digitales de la Uñiversidad.
+REÇíSTRESE, COMUNÍQUESE Y ARCHíV
+RECTORDÇQ.
+StcqETANA
+DR. HUGO JOSE ROJAS FLORES
+DRA. RU MARITZA CHIRINOS LAZ
+RECTOR
+SE RETARIA GENERAL
+C.C.: VRAC, OGC, OTI, UM, oca, y ARCHIVO.
+Exp: 1060251-2024.
+/jbzs
+
+--- Pagina 3 ---
+Versión
+1
+UNIDAD DE MODERNIZACIÓN
+Aprobado
+RCUNO 0153-2025
+17/03/2025
+DIRECTIVA No 003-2025-UM-OTI
+REGULACIÓN DEL ALMACENAMIENTO DE
+INFORMACIÓN DE AULAS VIRTUALES
+Dependencia
+Firma
+Nombres y Apellidos
+Fecha
+Oficina de
+Tecnologías de la
+Elaborado
+Ing. Álvaro Javier
+10/02/25
+Información
+Montes de Oca Beltrán
+por:
+Dr. Marco Antonio
+Camacho Zárate
+Revisado
+Unidad de
+12/02/25
+por:
+Modernización
+Abg. Gumermo Raúl
+Gonzáles Copara
+
+--- Pagina 4 ---
+1
+Versión
+DIRECTIVA NO 003-202S-UM-OT1
+OUNSA
+Página
+1 de 4
+REGULACI N DEL ALMACENAMIENTO DE
+NFORMACIÓN DE AULAS VIRTUALES
+1. OBJETIVO
+Establecer las normas de gestión, conservación y eliminación de la información académica
+producida en las aulas virtuales de la Universidad Nacional de San Agustín de Arequipa, en
+adelante UNSA.
+11. FINALDAD
+Confribuir a fortalecer la calidad de los servicios académicos para los estudiantes de la UNSA,
+mediante un documento normativo que regule el almacenamiento de las aulas virtuales utilizadas
+en el proceso de enseñanza-aprendizaje.
+m. BASE LEGAL
+A efecto de la emisión de la presente Directiva, se han considerado los textos vigentes de las
+normas legales, incluyendo sus respectivas modificatorias, ampliatorias y complementarias, que
+correspondan de ser el caso, las cuales señalamos a continuación:
+Ley Universitaria NO 30220 y Estatuto de la Universidad Nacional de San Agusfn de
+3.1.
+Arequipa.
+Decreto Legislativo NO 1412, aprueba la Ley de Gobierno
+3.2.
+Ley de Protección de Datos Personales NO 29733 y su Reglamento aprobado por Decreto
+3.3.
+Supremo NO 003-2013-JUS.
+Directiva NO 003-2023-AGNDDPA, Lineamientos para la valoración de documentos
+3.4.
+archivísticos digitales.
+Resolución de Consejo Universitario NO 0306-2022, aprueba el Reglamento de Organización
+3.5.
+y Funciones (ROF) y Organigrama de la UNSA; y, Resolución de Consejo Universitario NO
+096-2023 que resolvió dejar sin efecto la RCU NO 0442-2022.
+IV. GLOSARIO DE TÉRNANOS Y SIGLAS
+A efecto de facilitar la lectura, no se incluyen recursos como "@", "x", "alas" y/o "les". Se optó
+por usar el masculino genérico y se destaca que todas las menciones en tal género representan a
+varones, mujeres, personas de género no binario o no definido.
+Aula virtual: Entorno digital que soporta la interacción entre docentes y estudiantes,
+4.1.
+facilitando acceso a contenidos, evaluaciones y actividades académicas.
+RECTORAD'
+Información académica de Aula Virtual: Documentos del proceso de enseñanza —
+4.2.
+aprendizaje, que incluye materiales (presentaciones, videos, lecturas), datos de participación
+(foros, chats, entregas de tareas), registros de calificaciones, evaluaciones y cualquier ofro
+documento o archivo generado en dichos entomos.
+z
+Ciclo académico: Período de tiempo correspondiente a un semeúe de estudios.
+.3.
+a
+Siglas: Abreviaciones de denominaciones formadas por más de una palabra, a efecto de un
+.4.
+GENERAL o
+mejor entendimiento de la presente directiva:
+AGN
+4.4.1-
+: Archivo General de la Nación.
+OTI
+: Oficina de Tecnologías de la Información.
+4.43.
+SG
+: Secretaría General.
+4.4.4.
+: Unidad de Modemización.
+UNSA
+4.4.5.
+: Universidad Nacional de San Agustín de Arequipa.
+
+--- Pagina 5 ---
+DIRECTIVA NO 003-2025-UM-OTI
+Versión
+1
+OUNSA
+REGULACI N DEL ALMACENAMIENTO DE
+Página
+INFORMACIÓN DE AULAS VIRTUALES
+V. ALCANCE
+Las disposiciones contenidas en la presente directiva son de obligatorio cumplimiento para OTI,
+SG, órganos, unidades orgánicas y personal de la UNSA.
+VI. RESPONSABILIDAD
+La OTI es responsable de velar por el cumplimiento de las disposiciones contenidas en la presente
+directiva.
+VIT. DISPOSICIONES GENERALES
+7.1. Clasificación de la información
+La información de las aulas virtuales, se clasifican en las siguientes categorías:
+7.1.1. Material didáctico: Presentaciones, guías de estudio, lecturas, videos, planificaciones
+de clase. Posee un valor académico e institucional (reutilización en futuros cursos,
+evidencia de calidad).
+7.1.2. Datos académicos de estudiantes: Calificaciones, entregas de tareas, historiales de
+actividad, exámenes. Cuenta con un valor académico y legal.
+7.1.3. Datos administrativos: Reportes de asistencia, registros de acceso de plataforma, logs
+de sistema (archivo de registro). Tiene un valor de gestión interna, confrol de
+cumplimiento y seguridad de la infonnación.
+7.1.4. Otras evidencias: Comunicaciones internas (mensajes privados), material de foros
+colaborativos, repositorios de proyectos, etc. Conserva un valor académico y de
+investigación (análisis pedagógico), pero sujetas a restricciones de espacio y
+privacidad.
+7.2. Tiempos de retenciónl
+Tipo de información
+Periodo de
+Justificación
+retención
+Material didáctico
+3 años
+Reutilización en próximos ciclos, evidencia para
+acreditaciones.
+Posibles reclamaciones y control de calidad
+2 años
+Evaluaciones y
+calificaciones
+Análisis pedagógico o reclamos a corto plazo.
+Foros y Participación
+1 año
+Estudiantil
+RECTORAD'
+Registros de Sistema
+1 año
+Auditorías internas, incidentes de seguridad.
+(logs)
+G
+7.3. Responsables
+7.3.1. Oficina de Tecnologías de la Información - OTI
+SECRETARA
+a. Diseñar y mantener la infraestructura para el almacenamiento seguro.
+GENERAL O
+b. Ejecutar los planes de backup (respaldo), archivado y eliminación.
+c. Gestionar accesos y permisos en consonancia con la política de protección de datos.
+1 Plazos de carácter orientativo, pueden ajustarse según requerimientos intemos o disposiciones por procesos de acreditación
+u otros que requieran su retención.
+
+--- Pagina 6 ---
+1
+Versión
+DIRECTIVA NO 003-2025-UM-OTI
+OVINSA
+Página
+REGULACION DEL ALMACENAMIENTO DE
+INFORMACIÓN DE AULAS VIRTUALES
+7.3.2. Unidad de Sistemas de Información, Redes y Telecomunicaciones - USIRT
+a. Es la responsable de la configuración y supervisión operativa de cada aula virtual,
+asegurando el cumplimiento de los lineamientos establecidos para dicho fin.
+b. Brindar asistencia en la ejecución de las tareas de eliminación de información
+académica, asegurándose del cumplimiento de las medidas de seguridad requeridas.
+7.3.3. Decanatos
+a. Definir criterios de retención según la naturaleza de cada asignatura o programa de
+estudios.
+b. Solicitar copias de la información archivada cuando se requiera para fines académicos
+o de acreditación.
+7.3.4. Oficina de Asesoría Jurídica - OAJ
+a. Velar por el respeto a la Ley de Protección de Datos Personales y otras normas
+vigentes.
+b. Asesorar ante reclamos legales o auditorías en las que se requiere información legal
+sobre la materia.
+7.3.5. Docentes
+a. Mantener actualizada la información de sus asignaturas en los periodos activos.
+b. Solicitar a OTI la eliminación o archivo de material que ya no necesite, conforme a
+su política.
+7.4. Sobre el proceso de eliminación
+EI proceso de eliminación de información académica de los diferentes ciclos académicos debe
+tener observancia obligatoria a:
+7.4.1. La protección de datos personales: Se garantizará el cumplimiento de la Ley NO
+29733 y el respeto por la confidencialidad en el tratamiento de los datos personales,
+estableciendo medidas para su eliminación segura.
+7.4.2. La transparencia en los procedimientos: La eliminación de infon•nación académica
+es pública y trazable, asegurando que la comunidad universitaria tenga acceso a los
+criterios y procedimientos adoptados.
+7.4.3. La confidencialidad y seguridad de la información académica: La eliminación de
+información académica incluirá protocolos que garanticen la protección confra
+accesos no autorizados y la imposibilidad de recuperación de datos.
+. DISPOSICIONES ESPECÍFICAS
+.1. Almacenamiento activo y archivo
+8.1.1.
+Durante el período en que el curso está en ejecución y hasta un (1) semestre después
+z
+de su finalización, la información se mantiene en los servidores principales para
+ETANA
+facilitar consultas, reclamos o revisión académica.
+GENERA O
+A1 finalizar ese período, el aula virtual pasa a un estado de archivo en un servidor o
+8.1.2.
+sistema de almacenamiento secundario (on-premise o nube), con acceso restringido
+al personal autorizado por OTI.
+
+--- Pagina 7 ---
+Versión
+1
+DIRECTIVA NO 003-2025-UM-OTI
+Página
+4 de 4
+REGULACION DEL ALMACENAMIENTO DE
+INFORMACIÓN DE AULAS VIRTUALES
+8.1 EI acceso a esta información, mientras esté archivada,
+se gestiona mediante
+solicitudes formales de las áreas académicas o de control.
+8.2. Eliminación de Información Académica del Aula Virtual
+8.2.1.
+Se realizará un cronograma de eliminación diseñado por la OTI, conforme a las
+disposiciones generales.
+8.2.2.
+Antes de proceder con la eliminación efectiva se realizará un informe con las
+siguientes características:
+a. Evaluación de la información académica sujeta a eliminación conforme la
+normativa vigente dispuesta por el AGN para el tratamiento de estos datos,
+priorizando los que no tengan valor administrativo, legal o fiscal.
+b. Metodología para la eliminación que aseguren la destrucción completa de los
+documentos mediante métodos seguros, respetuosos con el medio ambiente, de
+conformidad con las normas vigentes.
+c. Reporte de la existencia de respaldos adecuados (cuando corresponda), asegurando
+que no se comprometa la integridad institucional.
+Dicho informe será elevado a SG, la cual evaluará el correcto seguimiento y
+8.2.3.
+observancia a la norrnativa vigente y procederá a dar conformidad. En caso de
+observaciones, el informe será devuelto para subsanación.
+8.2.4.
+Una vez recibida la autorización, se procede por el personal técnico especializado a la
+eliminación de la información, que será supervisada directamente por la OTI y
+documentada mediante actas de verificación.
+Cuando sea posible, los procesos de eliminación se automatizarán usando
+8.2.5.
+herramientas tecnológicas que cumplan con los estándares de seguridad establecidos
+por la OTI.
+8,3. Backups y plan de recuperación
+8.3.1. Todo contenido alojado en las aulas virtuales deberá tener copias de seguridad
+periódicas.
+8.3.2. Se establecerá un Plan de Recuperación de Desastres (disaster recovery) para restaurar
+la información en caso de fallas graves.
+DISPOSICIONES FINALES
+Primera.- Queda derogada toda disposición que se oponga a la presente Directiva.
+d.
+Segunda.- La presente Directiva entra en vigencia a partir de la emisión y notificación de la
+resolución de aprobación por Consejo Universitario.
+Tercera.- Los casos no previstos serán resueltos en primera instancia por la Oficina de
+Tecnologías de la Información y en segunda por Secretaría General.
+z
+ada en sesión de Consejo Universitario de fecha 06 de marzo de 2025.
+aborada por la Oficina de Tecnologías de la Información y revisada por la Unidad de Modernización
+Arequipa, 24 de enero de 2025.
+MACZ/grgc/pnts
