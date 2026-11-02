@@ -9,6 +9,8 @@ Fuentes:
   3. datos/expedientes_guia.json   -> expedientes D01-D37 y su relacion con cada requisito.
   4. datos/programa_seguridad_6_1_3c.json -> controles 27001 sin equivalente A.3: van al
                                      programa de seguridad de 6.1.3 c) (expediente D16).
+  5. datos/requisitos_brecha_gestitel.json -> los 69 requisitos de las clausulas 4-10 del
+                                     analisis de brecha de GESTITEL (core_gaprequirement).
 
 Antes de cargar verifica contra Entregable-1/ISOS/texto/ISO 27701-2025.md que cada
 referencia de la guia y de la skill existe en la norma y que los 15 temas de
@@ -34,6 +36,7 @@ GUIA_JSON = os.path.join(AQUI, "datos", "expedientes_guia.json")
 SKILL_JSON = os.path.join(RAIZ, "Entregable-1", "02-skill", "evidencia-auditoria-pims",
                           "references", "controles_27701.json")
 
+BRECHA_JSON = os.path.join(AQUI, "datos", "requisitos_brecha_gestitel.json")
 PROGRAMA_JSON = os.path.join(AQUI, "datos", "programa_seguridad_6_1_3c.json")
 NORMA_MD = os.path.join(RAIZ, "Entregable-1", "ISOS", "texto", "ISO 27701-2025.md")
 
@@ -67,6 +70,16 @@ def leer_soa(ruta):
             continue
         datos.append({enc[j]: f[j] for j in range(len(enc))})
     return datos
+
+
+def clausula_de(codigo, clausulas):
+    """'4.2.a' -> '4.2', '9.2.1' -> '9.2', '9.3.2.a' -> '9.3': la clausula del catalogo que lo contiene."""
+    partes = codigo.split(".")
+    while partes:
+        if ".".join(partes) in clausulas:
+            return ".".join(partes)
+        partes.pop()
+    return None
 
 
 def si_no(valor):
@@ -193,6 +206,23 @@ def main():
                 "ev_esperada": c.get("evidencia_esperada"), "ev_minima": c.get("minimo"),
             })
 
+        # 4b) Requisitos de brecha de GESTITEL (clausulas desglosadas)
+        clausulas = {cod for cod, c in skill.items() if c.get("grupo") == "clausula"}
+        brecha = json.load(open(BRECHA_JSON, encoding="utf-8"))["requisitos"]
+        sin_clausula = [b["codigo"] for b in brecha if not clausula_de(b["codigo"], clausulas)]
+        if sin_clausula:
+            sys.exit("Requisitos de brecha sin cláusula en el catálogo: %s" % sin_clausula)
+        cur.execute("DELETE FROM requisitos_brecha WHERE codigo <> ALL(%s)", ([b["codigo"] for b in brecha],))
+        for b in brecha:
+            cur.execute(
+                """INSERT INTO requisitos_brecha (codigo, gestitel_id, clausula_soa, titulo, descripcion, requisito)
+                   VALUES (%s, %s, %s, %s, %s, %s)
+                   ON CONFLICT (codigo) DO UPDATE SET gestitel_id = EXCLUDED.gestitel_id,
+                       clausula_soa = EXCLUDED.clausula_soa, titulo = EXCLUDED.titulo,
+                       descripcion = EXCLUDED.descripcion, requisito = EXCLUDED.requisito""",
+                (b["codigo"], b["gestitel_id"], b["clausula_soa"], b["titulo"], b["descripcion"],
+                 clausula_de(b["codigo"], clausulas)))
+
         # 5) Requisito -> expediente
         cur.execute("DELETE FROM requisito_expediente")
         sql_rel = "INSERT INTO requisito_expediente VALUES (%s, %s, %s, %s) ON CONFLICT DO NOTHING"
@@ -228,7 +258,7 @@ def main():
         rel_res = cur.fetchall()
 
     faltan_a3 = sorted(set(f"A.3.{i}" for i in range(3, 32)) - set(a3), key=lambda s: int(s.split(".")[2]))
-    print(f"Expedientes: {len(guia['expedientes'])}")
+    print(f"Expedientes: {len(guia['expedientes'])} | requisitos de brecha GESTITEL: {len(brecha)}")
     print(f"Controles en la SOA de GESTITEL: {len(soa)} | A.3 por equivalencia: {len(a3)} | cláusulas: {n_cla}")
     for r in resumen:
         print(f"  {r['norma']:<20} {r['tipo']:<9} {r['n']}")

@@ -6,7 +6,8 @@
 --     (93 de ISO/IEC 27001:2022 + 49 de las tablas A.1-A.2 de ISO/IEC 27701:2025);
 --     los 29 controles A.3 se guardan con su equivalencia 27001 ("Cubre A.3.x").
 --   * auditorias / checklist / hallazgos / acciones = su modulo "Auditorias"
---     (mismos campos y estados que su "Exportar Excel").
+--     (mismos campos que su "Exportar Excel"; estados con sus codigos de una letra).
+--   * requisitos_brecha = los 69 requisitos de clausulas 4-10 de su analisis de brecha.
 --   * expedientes D01-D37 = "Guia de documentos ISO 27701:2025" (Yauli, rev. 2).
 -- Lo que agrega el agente sobre GESTITEL: evidencias reales con hash SHA-256,
 -- cadena de custodia encadenada, revisiones de pertinencia y bitacoras.
@@ -67,6 +68,43 @@ CREATE TABLE requisito_expediente (
     fundamento  TEXT,
     PRIMARY KEY (requisito, expediente)
 );
+
+-- Requisitos de las clausulas 4-10 tal como los desglosa GESTITEL en su analisis de
+-- brecha (core_gaprequirement: 69 filas, '4.2.a', '6.1.3.c', '9.2.1'...). Su checklist de
+-- auditoria apunta a estos codigos ("Requisito de origen"). 'requisito' es la clausula de
+-- nuestro catalogo que lo contiene ('4.2.a' -> '4.2', '9.3.2.a' -> '9.3').
+CREATE TABLE requisitos_brecha (
+    codigo        VARCHAR(10) PRIMARY KEY,           -- source_requirement_code en GESTITEL
+    gestitel_id   INTEGER UNIQUE,
+    clausula_soa  VARCHAR(5) NOT NULL,               -- '4' ... '10'
+    titulo        TEXT NOT NULL,
+    descripcion   TEXT NOT NULL,
+    requisito     VARCHAR(12) NOT NULL REFERENCES requisitos(codigo)
+);
+CREATE INDEX ix_requisitos_brecha_requisito ON requisitos_brecha (requisito);
+
+-- Codigos de una letra con que GESTITEL guarda los estados (varchar(1) en su BD) y que su
+-- "Exportar Excel" escribe tal cual. codigo NULL = aun no confirmado con el ingeniero:
+-- la exportacion deja el texto y avisa.
+CREATE TABLE gestitel_codigos (
+    dominio  VARCHAR(20) NOT NULL,                   -- tipo_auditoria, estado_auditoria, clasificacion, estado_accion
+    valor    TEXT NOT NULL,                          -- el texto que usamos en nuestras tablas
+    codigo   CHAR(1),
+    fuente   TEXT,
+    PRIMARY KEY (dominio, valor)
+);
+INSERT INTO gestitel_codigos VALUES
+    ('tipo_auditoria',   'Interna',               'I', 'Export real de GESTITEL (formato_auditorias_gestitel.xlsx)'),
+    ('tipo_auditoria',   'Externa',               NULL, NULL),
+    ('estado_auditoria', 'Planificada',           NULL, NULL),
+    ('estado_auditoria', 'En curso',              NULL, NULL),
+    ('estado_auditoria', 'Cerrada',               'C', 'Export real de GESTITEL (auditoria "CLOSED" con estado C)'),
+    ('clasificacion',    'No conformidad',        'N', 'Export real de GESTITEL (formato_auditorias_gestitel.xlsx)'),
+    ('clasificacion',    'Observación',           NULL, NULL),
+    ('clasificacion',    'Oportunidad de mejora', NULL, NULL),
+    ('estado_accion',    'Abierta',               'O', 'Export real de GESTITEL (formato_auditorias_gestitel.xlsx)'),
+    ('estado_accion',    'En progreso',           NULL, NULL),
+    ('estado_accion',    'Cerrada',               NULL, NULL);
 
 -- -----------------------------------------------------------------------------
 -- 2. PROYECTO Y SOA
@@ -172,7 +210,7 @@ CREATE TABLE revisiones_pertinencia (
 CREATE TABLE auditorias (
     id                BIGSERIAL PRIMARY KEY,
     proyecto          VARCHAR(60) NOT NULL REFERENCES proyectos(id) ON DELETE CASCADE,
-    codigo            VARCHAR(80) NOT NULL UNIQUE,   -- 'AUD-2026-001'
+    codigo            VARCHAR(20) NOT NULL UNIQUE,   -- 'AUD-2026-001' (audit_code de GESTITEL: max. 20)
     tipo              VARCHAR(8) NOT NULL DEFAULT 'Interna' CHECK (tipo IN ('Interna', 'Externa')),
     nombre            TEXT NOT NULL,
     alcance           TEXT,
@@ -184,7 +222,7 @@ CREATE TABLE auditorias (
     areas             TEXT[] NOT NULL DEFAULT '{}',
     estado            VARCHAR(12) NOT NULL DEFAULT 'Planificada'
                       CHECK (estado IN ('Planificada', 'En curso', 'Cerrada')),
-    ejecucion_agente  VARCHAR(80),                   -- id de la ejecucion LangGraph (AUD-2026...-xxxx)
+    ejecucion_agente  VARCHAR(80) UNIQUE,            -- id de la ejecucion LangGraph (AUD-2026...-xxxx)
     informe_ruta      TEXT,
     creado            TIMESTAMPTZ NOT NULL DEFAULT now(),
     CHECK (fecha_fin IS NULL OR fecha_inicio IS NULL OR fecha_fin >= fecha_inicio)
@@ -194,7 +232,7 @@ CREATE TABLE checklist_items (
     id                 BIGSERIAL PRIMARY KEY,
     auditoria_id       BIGINT NOT NULL REFERENCES auditorias(id) ON DELETE CASCADE,
     requisito          VARCHAR(12) REFERENCES requisitos(codigo),
-    requisito_origen   TEXT,                          -- p. ej. 'Brecha' (importado de la SOA)
+    requisito_origen   VARCHAR(10) REFERENCES requisitos_brecha(codigo), -- source_requirement_code ('4.2.a')
     proceso            TEXT,
     norma              TEXT,
     evidencia_textual  TEXT,
@@ -349,8 +387,9 @@ GROUP BY a.id, a.codigo, a.estado;
 
 -- Filas con las mismas columnas que "Exportar Excel" del modulo Auditorias de GESTITEL.
 CREATE VIEW v_export_auditorias_gestitel AS
+-- Los estados salen con el codigo de una letra de GESTITEL (tabla gestitel_codigos).
 SELECT a.codigo                       AS "Código de auditoría",
-       a.tipo                         AS "Tipo",
+       COALESCE(gt.codigo, a.tipo)    AS "Tipo",
        a.nombre                       AS "Nombre",
        a.alcance                      AS "Alcance",
        a.objetivo                     AS "Objetivo",
@@ -359,23 +398,27 @@ SELECT a.codigo                       AS "Código de auditoría",
        a.lider                        AS "Líder de auditoría",
        array_to_string(a.equipo_auditor, ', ') AS "Equipo auditor",
        array_to_string(a.areas, ', ')          AS "Áreas involucradas",
-       a.estado                       AS "Estado",
+       COALESCE(ge.codigo, a.estado)  AS "Estado",
        v.avance_pct                   AS "Avance (%)",
        c.requisito_origen             AS "Requisito de origen (checklist)",
        c.proceso                      AS "Proceso (checklist)",
        c.norma                        AS "Norma (checklist)",
        c.requisito                    AS "Requisito (checklist)",
        c.evidencia_textual            AS "Evidencia textual (checklist)",
-       h.clasificacion                AS "Clasificación (hallazgo)",
+       COALESCE(gc.codigo, h.clasificacion) AS "Clasificación (hallazgo)",
        h.descripcion                  AS "Descripción (hallazgo)",
        h.evidencia_texto              AS "Evidencia (hallazgo)",
        ac.descripcion                 AS "Plan de acción",
        ac.responsable                 AS "Responsable (acción)",
        ac.fecha_compromiso            AS "Fecha compromiso (acción)",
-       ac.estado                      AS "Estado (acción)",
+       COALESCE(ga.codigo, ac.estado) AS "Estado (acción)",
        ac.avance                      AS "Avance (acción)"
 FROM auditorias a
 JOIN v_auditoria_avance v ON v.id = a.id
 LEFT JOIN hallazgos h ON h.auditoria_id = a.id
 LEFT JOIN checklist_items c ON c.id = h.checklist_item_id
-LEFT JOIN acciones ac ON ac.hallazgo_id = h.id;
+LEFT JOIN acciones ac ON ac.hallazgo_id = h.id
+LEFT JOIN gestitel_codigos gt ON gt.dominio = 'tipo_auditoria'   AND gt.valor = a.tipo
+LEFT JOIN gestitel_codigos ge ON ge.dominio = 'estado_auditoria' AND ge.valor = a.estado
+LEFT JOIN gestitel_codigos gc ON gc.dominio = 'clasificacion'    AND gc.valor = h.clasificacion
+LEFT JOIN gestitel_codigos ga ON ga.dominio = 'estado_accion'    AND ga.valor = ac.estado;

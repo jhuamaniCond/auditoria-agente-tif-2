@@ -1,0 +1,488 @@
+{
+ "fuente": "GESTITEL (unsa.27k.pe), tabla core_gaprequirement del volcado gestitel_base_de_datos.sql del docente",
+ "requisitos": [
+  {
+   "gestitel_id": 1,
+   "clausula_soa": "4",
+   "titulo": "Contexto organizacional interno y externo",
+   "codigo": "4.1",
+   "descripcion": "Determinación de factores internos y externos relevantes para el propósito del SGSI."
+  },
+  {
+   "gestitel_id": 2,
+   "clausula_soa": "4",
+   "titulo": "Identificación de partes interesadas",
+   "codigo": "4.2.a",
+   "descripcion": "Identificar las partes interesadas relevantes para el SGSI."
+  },
+  {
+   "gestitel_id": 3,
+   "clausula_soa": "4",
+   "titulo": "Requisitos de partes interesadas",
+   "codigo": "4.2.b",
+   "descripcion": "Determinar los requisitos relevantes de las partes interesadas."
+  },
+  {
+   "gestitel_id": 4,
+   "clausula_soa": "4",
+   "titulo": "Requisitos convertidos en controles",
+   "codigo": "4.2.c",
+   "descripcion": "Requisitos de partes interesadas que serán abordados mediante el SGSI."
+  },
+  {
+   "gestitel_id": 5,
+   "clausula_soa": "4",
+   "titulo": "Límites y aplicabilidad del SGSI",
+   "codigo": "4.3.a",
+   "descripcion": "Determinar los límites y la aplicabilidad del SGSI."
+  },
+  {
+   "gestitel_id": 6,
+   "clausula_soa": "4",
+   "titulo": "Interfaces y dependencias",
+   "codigo": "4.3.b",
+   "descripcion": "Considerar interfaces y dependencias entre actividades propias y de otras organizaciones."
+  },
+  {
+   "gestitel_id": 7,
+   "clausula_soa": "4",
+   "titulo": "Documentación del alcance",
+   "codigo": "4.3.c",
+   "descripcion": "El alcance debe estar disponible como información documentada."
+  },
+  {
+   "gestitel_id": 8,
+   "clausula_soa": "4",
+   "titulo": "Establecimiento del SGSI",
+   "codigo": "4.4",
+   "descripcion": "Establecer, implementar, mantener y mejorar continuamente el SGSI."
+  },
+  {
+   "gestitel_id": 9,
+   "clausula_soa": "5",
+   "titulo": "Política de seguridad de la información",
+   "codigo": "5.1.a",
+   "descripcion": "La alta dirección debe establecer la política de SI compatible con el contexto de la organización."
+  },
+  {
+   "gestitel_id": 10,
+   "clausula_soa": "5",
+   "titulo": "Objetivos del SGSI alineados a la estrategia",
+   "codigo": "5.1.b",
+   "descripcion": "Asegurar que los objetivos del SGSI están alineados con la dirección estratégica."
+  },
+  {
+   "gestitel_id": 11,
+   "clausula_soa": "5",
+   "titulo": "Recursos para el SGSI",
+   "codigo": "5.1.c",
+   "descripcion": "Garantizar la disponibilidad de recursos para el SGSI."
+  },
+  {
+   "gestitel_id": 12,
+   "clausula_soa": "5",
+   "titulo": "Comunicación interna de la importancia del SGSI",
+   "codigo": "5.1.d",
+   "descripcion": "Comunicar la importancia de la gestión eficaz de la SI."
+  },
+  {
+   "gestitel_id": 13,
+   "clausula_soa": "5",
+   "titulo": "Apoyo activo de la dirección",
+   "codigo": "5.1.e",
+   "descripcion": "Dirigir a las personas para contribuir a la eficacia del SGSI."
+  },
+  {
+   "gestitel_id": 14,
+   "clausula_soa": "5",
+   "titulo": "Mejora continua promovida por la dirección",
+   "codigo": "5.1.f",
+   "descripcion": "Promover la mejora continua del SGSI."
+  },
+  {
+   "gestitel_id": 15,
+   "clausula_soa": "5",
+   "titulo": "Apoyo a otros roles de gestión",
+   "codigo": "5.1.g",
+   "descripcion": "Apoyar a otros roles de gestión relevantes en el ámbito del SGSI."
+  },
+  {
+   "gestitel_id": 16,
+   "clausula_soa": "5",
+   "titulo": "Contenido de la política de SI",
+   "codigo": "5.2.a",
+   "descripcion": "La política debe incluir objetivos de SI o un marco para establecerlos."
+  },
+  {
+   "gestitel_id": 17,
+   "clausula_soa": "5",
+   "titulo": "Disponibilidad de la política",
+   "codigo": "5.2.b",
+   "descripcion": "La política debe estar disponible como información documentada."
+  },
+  {
+   "gestitel_id": 18,
+   "clausula_soa": "5",
+   "titulo": "Comunicación de la política",
+   "codigo": "5.2.c",
+   "descripcion": "La política debe comunicarse dentro de la organización."
+  },
+  {
+   "gestitel_id": 19,
+   "clausula_soa": "5",
+   "titulo": "Disponibilidad para partes interesadas",
+   "codigo": "5.2.d",
+   "descripcion": "La política debe estar disponible para las partes interesadas según proceda."
+  },
+  {
+   "gestitel_id": 20,
+   "clausula_soa": "5",
+   "titulo": "Asignación de responsabilidades del SGSI",
+   "codigo": "5.3.a",
+   "descripcion": "Asignar responsabilidades y autoridades para roles relevantes."
+  },
+  {
+   "gestitel_id": 21,
+   "clausula_soa": "5",
+   "titulo": "CISO / Responsable de SI designado",
+   "codigo": "5.3.b",
+   "descripcion": "Designar responsable de asegurar el cumplimiento con la norma."
+  },
+  {
+   "gestitel_id": 22,
+   "clausula_soa": "5",
+   "titulo": "Reporte a la dirección del desempeño del SGSI",
+   "codigo": "5.3.c",
+   "descripcion": "Responsable de reportar el desempeño del SGSI a la alta dirección."
+  },
+  {
+   "gestitel_id": 23,
+   "clausula_soa": "6",
+   "titulo": "Generalidades – riesgos y oportunidades",
+   "codigo": "6.1.1",
+   "descripcion": "Determinar riesgos y oportunidades al planificar el SGSI."
+  },
+  {
+   "gestitel_id": 24,
+   "clausula_soa": "6",
+   "titulo": "Proceso de valoración de riesgos de SI – criterios",
+   "codigo": "6.1.2.a",
+   "descripcion": "Definir y aplicar criterios de riesgo incluyendo criterios de aceptación."
+  },
+  {
+   "gestitel_id": 25,
+   "clausula_soa": "6",
+   "titulo": "Identificación de riesgos de SI",
+   "codigo": "6.1.2.b",
+   "descripcion": "Identificar riesgos asociados a la pérdida de C-I-D de la información."
+  },
+  {
+   "gestitel_id": 26,
+   "clausula_soa": "6",
+   "titulo": "Análisis de riesgos de SI",
+   "codigo": "6.1.2.c",
+   "descripcion": "Analizar y evaluar las consecuencias y probabilidades de los riesgos."
+  },
+  {
+   "gestitel_id": 27,
+   "clausula_soa": "6",
+   "titulo": "Evaluación y priorización de riesgos",
+   "codigo": "6.1.2.d",
+   "descripcion": "Comparar los resultados del análisis con los criterios de riesgo y priorizar."
+  },
+  {
+   "gestitel_id": 28,
+   "clausula_soa": "6",
+   "titulo": "Tratamiento de riesgos – opciones",
+   "codigo": "6.1.3.a",
+   "descripcion": "Seleccionar opciones apropiadas de tratamiento de riesgos."
+  },
+  {
+   "gestitel_id": 29,
+   "clausula_soa": "6",
+   "titulo": "Controles necesarios para el tratamiento",
+   "codigo": "6.1.3.b",
+   "descripcion": "Determinar todos los controles necesarios para implementar las opciones seleccionadas."
+  },
+  {
+   "gestitel_id": 30,
+   "clausula_soa": "6",
+   "titulo": "Comparación con controles del Anexo A",
+   "codigo": "6.1.3.c",
+   "descripcion": "Comparar controles con el Anexo A para verificar que no se han omitido controles necesarios."
+  },
+  {
+   "gestitel_id": 31,
+   "clausula_soa": "6",
+   "titulo": "Declaración de Aplicabilidad (SoA)",
+   "codigo": "6.1.3.d",
+   "descripcion": "Elaborar la SoA con controles justificados, incluidos e implementados."
+  },
+  {
+   "gestitel_id": 32,
+   "clausula_soa": "6",
+   "titulo": "Plan de tratamiento de riesgos",
+   "codigo": "6.1.3.e",
+   "descripcion": "Formular e implementar el plan de tratamiento de riesgos."
+  },
+  {
+   "gestitel_id": 33,
+   "clausula_soa": "6",
+   "titulo": "Aprobación del plan de tratamiento y riesgo residual",
+   "codigo": "6.1.3.f",
+   "descripcion": "Obtener aprobación del plan y aceptación del riesgo residual."
+  },
+  {
+   "gestitel_id": 34,
+   "clausula_soa": "6",
+   "titulo": "Objetivos de SI consistentes con la política",
+   "codigo": "6.2.a",
+   "descripcion": "Establecer objetivos de SI coherentes con la política de SI."
+  },
+  {
+   "gestitel_id": 35,
+   "clausula_soa": "6",
+   "titulo": "Objetivos medibles y monitoreados",
+   "codigo": "6.2.b",
+   "descripcion": "Los objetivos deben ser medibles y monitoreados cuando sea factible."
+  },
+  {
+   "gestitel_id": 36,
+   "clausula_soa": "6",
+   "titulo": "Planificación para lograr los objetivos",
+   "codigo": "6.2.c",
+   "descripcion": "Determinar qué se hará, con qué recursos, quién será responsable y cuándo."
+  },
+  {
+   "gestitel_id": 37,
+   "clausula_soa": "6",
+   "titulo": "Gestión de cambios planificados en el SGSI",
+   "codigo": "6.3",
+   "descripcion": "Los cambios en el SGSI deben realizarse de forma planificada."
+  },
+  {
+   "gestitel_id": 38,
+   "clausula_soa": "7",
+   "titulo": "Determinación y provisión de recursos",
+   "codigo": "7.1",
+   "descripcion": "Determinar y proporcionar los recursos necesarios para el SGSI."
+  },
+  {
+   "gestitel_id": 39,
+   "clausula_soa": "7",
+   "titulo": "Determinación de competencias necesarias",
+   "codigo": "7.2.a",
+   "descripcion": "Determinar las competencias necesarias del personal que trabaja en el SGSI."
+  },
+  {
+   "gestitel_id": 40,
+   "clausula_soa": "7",
+   "titulo": "Acciones para adquirir competencias",
+   "codigo": "7.2.b",
+   "descripcion": "Asegurar que las personas son competentes mediante educación, formación o experiencia."
+  },
+  {
+   "gestitel_id": 41,
+   "clausula_soa": "7",
+   "titulo": "Registro de evidencia de competencia",
+   "codigo": "7.2.c",
+   "descripcion": "Conservar información documentada apropiada como evidencia de competencias."
+  },
+  {
+   "gestitel_id": 42,
+   "clausula_soa": "7",
+   "titulo": "Concienciación de la política de SI",
+   "codigo": "7.3.a",
+   "descripcion": "El personal debe ser consciente de la política de seguridad de la información."
+  },
+  {
+   "gestitel_id": 43,
+   "clausula_soa": "7",
+   "titulo": "Contribución a la eficacia del SGSI",
+   "codigo": "7.3.b",
+   "descripcion": "Comprender cómo contribuyen a la eficacia del SGSI."
+  },
+  {
+   "gestitel_id": 44,
+   "clausula_soa": "7",
+   "titulo": "Implicaciones del incumplimiento",
+   "codigo": "7.3.c",
+   "descripcion": "Ser conscientes de las implicaciones del incumplimiento."
+  },
+  {
+   "gestitel_id": 45,
+   "clausula_soa": "7",
+   "titulo": "Comunicación interna y externa",
+   "codigo": "7.4",
+   "descripcion": "Determinar qué, cuándo, a quién y cómo comunicar aspectos del SGSI."
+  },
+  {
+   "gestitel_id": 46,
+   "clausula_soa": "7",
+   "titulo": "Documentación requerida por la norma",
+   "codigo": "7.5.1",
+   "descripcion": "El SGSI debe incluir toda la información documentada requerida por ISO 27001."
+  },
+  {
+   "gestitel_id": 47,
+   "clausula_soa": "7",
+   "titulo": "Control de documentos – creación y actualización",
+   "codigo": "7.5.2",
+   "descripcion": "Controlar la identificación, formato, revisión y aprobación de documentos."
+  },
+  {
+   "gestitel_id": 48,
+   "clausula_soa": "7",
+   "titulo": "Control de documentos – distribución y acceso",
+   "codigo": "7.5.3",
+   "descripcion": "Controlar distribución, acceso, recuperación, uso, almacenamiento y disposición."
+  },
+  {
+   "gestitel_id": 49,
+   "clausula_soa": "8",
+   "titulo": "Planificación y control de procesos del SGSI",
+   "codigo": "8.1.a",
+   "descripcion": "Planificar, implementar, controlar y mantener los procesos necesarios."
+  },
+  {
+   "gestitel_id": 50,
+   "clausula_soa": "8",
+   "titulo": "Control de cambios planificados",
+   "codigo": "8.1.b",
+   "descripcion": "Controlar los cambios planificados y revisar las consecuencias de cambios no intencionados."
+  },
+  {
+   "gestitel_id": 51,
+   "clausula_soa": "8",
+   "titulo": "Control de procesos externalizados",
+   "codigo": "8.1.c",
+   "descripcion": "Asegurar que los procesos externalizados están determinados y controlados."
+  },
+  {
+   "gestitel_id": 52,
+   "clausula_soa": "8",
+   "titulo": "Ejecución periódica de la valoración de riesgos",
+   "codigo": "8.2",
+   "descripcion": "Realizar valoraciones de riesgo a intervalos planificados o ante cambios significativos."
+  },
+  {
+   "gestitel_id": 53,
+   "clausula_soa": "8",
+   "titulo": "Implementación del plan de tratamiento de riesgos",
+   "codigo": "8.3",
+   "descripcion": "Implementar el plan de tratamiento de riesgos e información documentada."
+  },
+  {
+   "gestitel_id": 54,
+   "clausula_soa": "9",
+   "titulo": "Determinación de qué monitorear y medir",
+   "codigo": "9.1.a",
+   "descripcion": "Determinar qué aspectos del SGSI deben seguirse y medirse."
+  },
+  {
+   "gestitel_id": 55,
+   "clausula_soa": "9",
+   "titulo": "Métodos de monitoreo y medición",
+   "codigo": "9.1.b",
+   "descripcion": "Definir métodos para garantizar resultados válidos y comparables."
+  },
+  {
+   "gestitel_id": 56,
+   "clausula_soa": "9",
+   "titulo": "Análisis y evaluación de resultados",
+   "codigo": "9.1.c",
+   "descripcion": "Analizar y evaluar los resultados del monitoreo y la medición."
+  },
+  {
+   "gestitel_id": 57,
+   "clausula_soa": "9",
+   "titulo": "Programa de auditorías internas",
+   "codigo": "9.2.1",
+   "descripcion": "Planificar, implementar y mantener un programa de auditorías internas."
+  },
+  {
+   "gestitel_id": 58,
+   "clausula_soa": "9",
+   "titulo": "Criterios y objetividad de la auditoría",
+   "codigo": "9.2.2",
+   "descripcion": "Definir criterios y alcance; asegurar objetividad e imparcialidad."
+  },
+  {
+   "gestitel_id": 59,
+   "clausula_soa": "9",
+   "titulo": "Reporte de resultados de auditoría",
+   "codigo": "9.2.3",
+   "descripcion": "Reportar resultados a la dirección y conservar información documentada."
+  },
+  {
+   "gestitel_id": 60,
+   "clausula_soa": "9",
+   "titulo": "Generalidades – revisión por la dirección",
+   "codigo": "9.3.1",
+   "descripcion": "La alta dirección debe revisar el SGSI a intervalos planificados."
+  },
+  {
+   "gestitel_id": 61,
+   "clausula_soa": "9",
+   "titulo": "Estado de acciones de revisiones anteriores",
+   "codigo": "9.3.2.a",
+   "descripcion": "Incluir el estado de las acciones tomadas en revisiones anteriores."
+  },
+  {
+   "gestitel_id": 62,
+   "clausula_soa": "9",
+   "titulo": "Cambios en el contexto del SGSI",
+   "codigo": "9.3.2.b",
+   "descripcion": "Considerar cambios internos y externos relevantes para el SGSI."
+  },
+  {
+   "gestitel_id": 63,
+   "clausula_soa": "9",
+   "titulo": "Retroalimentación del desempeño del SGSI",
+   "codigo": "9.3.2.c",
+   "descripcion": "Evaluar tendencias en no conformidades, auditorías y métricas de objetivos."
+  },
+  {
+   "gestitel_id": 64,
+   "clausula_soa": "9",
+   "titulo": "Resultados y decisiones de la revisión",
+   "codigo": "9.3.3",
+   "descripcion": "La revisión debe producir decisiones sobre mejora continua y cambios en el SGSI."
+  },
+  {
+   "gestitel_id": 65,
+   "clausula_soa": "10",
+   "titulo": "Mejora continua del SGSI",
+   "codigo": "10.1",
+   "descripcion": "Mejorar continuamente la conveniencia, adecuación y eficacia del SGSI."
+  },
+  {
+   "gestitel_id": 66,
+   "clausula_soa": "10",
+   "titulo": "Reacción ante no conformidades",
+   "codigo": "10.2.a",
+   "descripcion": "Tomar acciones para controlar y corregir la no conformidad y abordar sus consecuencias."
+  },
+  {
+   "gestitel_id": 67,
+   "clausula_soa": "10",
+   "titulo": "Análisis de causa raíz",
+   "codigo": "10.2.b",
+   "descripcion": "Evaluar la necesidad de acciones para eliminar causas de no conformidades."
+  },
+  {
+   "gestitel_id": 68,
+   "clausula_soa": "10",
+   "titulo": "Implementación de acciones correctivas",
+   "codigo": "10.2.c",
+   "descripcion": "Implementar las acciones correctivas necesarias y revisar su eficacia."
+  },
+  {
+   "gestitel_id": 69,
+   "clausula_soa": "10",
+   "titulo": "Información documentada de no conformidades",
+   "codigo": "10.2.d",
+   "descripcion": "Mantener información documentada sobre no conformidades y acciones correctivas."
+  }
+ ]
+}

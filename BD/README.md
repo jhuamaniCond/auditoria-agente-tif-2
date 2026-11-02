@@ -8,6 +8,8 @@ guarda en **PostgreSQL 16**, como pidió el delegado. Se ve en el navegador con
 | En GESTITEL | En esta BD |
 |---|---|
 | Análisis de brecha · SOA (142 controles: 93 de 27001:2022 + 49 de 27701:2025 A.1–A.2) | `requisitos` (+ 29 controles A.3 con `cubierto_por` y 25 cláusulas) y `soa_evaluaciones` |
+| Análisis de brecha · Cláusulas 4–10 (69 requisitos: `4.2.a`, `6.1.3.c`, `9.2.1`…) | `requisitos_brecha` (cada uno apunta a su cláusula en `requisitos`) |
+| Estados de una letra (`I`, `C`, `N`, `O`…) | `gestitel_codigos` (los no confirmados quedan en NULL) |
 | Auditorías → General / Checklist / Hallazgos / Seguimiento | `auditorias`, `checklist_items`, `hallazgos`, `acciones`, vista `v_auditoria_avance` |
 | "Exportar / Importar Excel" de Auditorías | vista `v_export_auditorias_gestitel` + `exportar_gestitel.py` (mismo formato) |
 | Evidencia (solo texto) | `evidencias` con SHA-256, `evidencia_requisito`, `hallazgo_evidencia`, `cadena_custodia` |
@@ -31,6 +33,8 @@ al modo anterior con archivos: `PIMS_BACKEND=archivos`.
 - **Conexión directa**: `localhost:5432`, base `pims_auditoria`, usuario `agente`,
   clave `agente_local` (solo desarrollo local). Variables `PIMS_DB_*` o `PIMS_DATABASE_URL`.
 - **Empezar de cero**: `docker compose down -v && docker compose up -d` y volver a cargar.
+  Es necesario si la BD se creó antes de que existieran `requisitos_brecha` y `gestitel_codigos`
+  (`schema.sql` solo se aplica al crear el volumen).
 - Sin Docker: instalar PostgreSQL 16, `psql -f schema.sql` y definir `PIMS_DB_*`.
 
 ## Archivos
@@ -88,12 +92,24 @@ clasificación del grupo (según los dominios de ISO/IEC 27002), documentada en
 
 ```bash
 python exportar_gestitel.py                          # todas las auditorías de unsa
-python exportar_gestitel.py --auditoria AUD-20261027-161721-i9jw --salida mi.xlsx
+python exportar_gestitel.py --auditoria AUD-2026-001 --salida mi.xlsx   # o el id de la ejecución
 ```
 
 También como herramienta del agente: `herramientas.exportar_gestitel(proyecto, auditoria)`.
 Genera la hoja "Auditorías" con la misma cabecera y las mismas 25 columnas que el
-"Exportar Excel" de GESTITEL, lista para "Importar Excel".
+"Exportar Excel" de GESTITEL, lista para "Importar Excel". Respeta los límites de su BD
+(`gestitel_base_de_datos.sql`):
+
+- **Código de auditoría** `AUD-AAAA-NNN` (`audit_code` admite 20 caracteres); el id de la
+  ejecución del agente queda en `auditorias.ejecucion_agente`.
+- **Requisito de origen** = código de `requisitos_brecha` (`source_requirement_code`, 10
+  caracteres): el mismo código de la cláusula, o el único en que se desglosa; si se desglosa
+  en varios (p. ej. 9.2 → 9.2.1/9.2.2/9.2.3) queda vacío.
+- **Tipo, Estado, Clasificación, Estado (acción)** con el código de una letra de
+  `gestitel_codigos`. Confirmados por su export real: `I` Interna, `C` Cerrada,
+  `N` No conformidad, `O` Abierta. El resto (Observación, Oportunidad de mejora, En curso,
+  En progreso…) está pendiente de confirmar con el ingeniero: sale como texto y el script
+  avisa. Al confirmarlos: `UPDATE gestitel_codigos SET codigo = 'X' WHERE dominio = '…' AND valor = '…';`
 
 ## Consultas útiles
 

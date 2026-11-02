@@ -7,9 +7,13 @@ cuatro lineas de cabecera, una linea en blanco, los 25 encabezados y una fila po
 auditoria + item de checklist + hallazgo + accion. Ese archivo es el que se sube
 con "Importar Excel" en la plataforma.
 
+Los estados van con el codigo de una letra de GESTITEL (I, C, N, O...; tabla
+gestitel_codigos). Los que aun no estan confirmados salen como texto y se avisa.
+
 Uso:
   python exportar_gestitel.py                         # todas las auditorias del proyecto unsa
-  python exportar_gestitel.py --auditoria AUD-20261027-161721-i9jw --salida mi.xlsx
+  python exportar_gestitel.py --auditoria AUD-2026-001 --salida mi.xlsx
+  (--auditoria acepta el codigo GESTITEL o el id de la ejecucion del agente)
 """
 
 import argparse
@@ -31,6 +35,15 @@ COLUMNAS = [
     "Evidencia (hallazgo)", "Plan de acción", "Responsable (acción)", "Fecha compromiso (acción)",
     "Estado (acción)", "Avance (acción)",
 ]
+
+# Columnas que GESTITEL guarda como codigo de una letra
+COLUMNAS_CODIGO = ["Tipo", "Estado", "Clasificación (hallazgo)", "Estado (acción)"]
+
+
+def sin_codigo(filas):
+    """Valores de las columnas de estado que no se pudieron pasar a codigo de GESTITEL."""
+    return sorted({"%s=%s" % (col, f[col]) for f in filas for col in COLUMNAS_CODIGO
+                   if f.get(col) is not None and len(str(f[col])) > 1})
 
 
 def exportar(almacen, ruta=None, auditoria=None, proyecto="unsa", empresa="UNSA",
@@ -63,7 +76,8 @@ def exportar(almacen, ruta=None, auditoria=None, proyecto="unsa", empresa="UNSA"
     ws.freeze_panes = "A7"
     wb.save(ruta)
     return {"ruta": ruta, "filas": len(filas),
-            "auditorias": sorted({f["Código de auditoría"] for f in filas})}
+            "auditorias": sorted({f["Código de auditoría"] for f in filas}),
+            "sin_codigo_gestitel": sin_codigo(filas)}
 
 
 def main():
@@ -77,6 +91,9 @@ def main():
     r = exportar(AlmacenPG(), args.salida, args.auditoria, args.proyecto)
     print("Excel GESTITEL: %s (%d filas, auditorías: %s)"
           % (r["ruta"], r["filas"], ", ".join(r["auditorias"]) or "ninguna"))
+    if r["sin_codigo_gestitel"]:
+        print("AVISO: sin código GESTITEL confirmado (salen como texto; confirmar con el ingeniero y "
+              "completar la tabla gestitel_codigos): %s" % ", ".join(r["sin_codigo_gestitel"]))
 
 
 if __name__ == "__main__":

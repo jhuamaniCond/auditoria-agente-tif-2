@@ -388,14 +388,34 @@ class AlmacenPG(object):
         aprob = res.get("aprobacion") or {}
         cur.execute("SELECT codigo FROM requisitos")
         catalogo = {r["codigo"] for r in cur.fetchall()}
-        cur.execute("DELETE FROM auditorias WHERE codigo = %s", (ej["id"],))
+        # "Requisito de origen" de GESTITEL: el requisito de brecha que corresponde al hallazgo
+        # (mismo codigo, o el unico en que se desglosa la clausula; si hay varios, ninguno).
+        cur.execute("SELECT codigo, requisito FROM requisitos_brecha")
+        brecha = {}
+        for r in cur.fetchall():
+            brecha.setdefault(r["requisito"], []).append(r["codigo"])
+        origen = {req: (req if req in cods else cods[0] if len(cods) == 1 else None)
+                  for req, cods in brecha.items()}
+        # Codigo corto 'AUD-AAAA-NNN' (audit_code de GESTITEL admite 20 caracteres); al rehacer
+        # una auditoria se conserva el que ya tenia.
+        cur.execute("SELECT pg_advisory_xact_lock(hashtext('auditorias.codigo'))")
+        cur.execute("SELECT codigo FROM auditorias WHERE ejecucion_agente = %s", (ej["id"],))
+        previa = cur.fetchone()
+        if previa:
+            codigo = previa["codigo"]
+        else:
+            anio = str(ej["creado"])[:4]
+            cur.execute(r"""SELECT COALESCE(MAX(substring(codigo FROM '^AUD-\d{4}-(\d+)$')::int), 0) + 1 AS n
+                           FROM auditorias WHERE codigo LIKE %s""", ("AUD-%s-%%" % anio,))
+            codigo = "AUD-%s-%03d" % (anio, cur.fetchone()["n"])
+        cur.execute("DELETE FROM auditorias WHERE ejecucion_agente = %s", (ej["id"],))
         cur.execute(
             """INSERT INTO auditorias (proyecto, codigo, tipo, nombre, alcance, objetivo, fecha_inicio,
                                        fecha_fin, lider, equipo_auditor, areas, estado,
                                        ejecucion_agente, informe_ruta, creado)
                VALUES (%s, %s, 'Interna', %s, %s, %s, %s::timestamptz::date, %s::timestamptz::date,
                        %s, %s, %s, 'Cerrada', %s, %s, %s) RETURNING id""",
-            (pid, ej["id"], "Auditoría interna PIMS - %s" % plan.get("organizacion", pid),
+            (pid, codigo, "Auditoría interna PIMS - %s" % plan.get("organizacion", pid),
              plan.get("alcance"), plan.get("objetivo"), ej["creado"], ej.get("actualizado") or ej["creado"],
              aprob.get("auditor"), ["agente-evidencia"] + ([aprob["auditor"]] if aprob.get("auditor") else []),
              [], ej["id"], os.path.basename(res["informe"]) if res.get("informe") else None, ej["creado"]))
@@ -407,8 +427,8 @@ class AlmacenPG(object):
             cur.execute(
                 """INSERT INTO checklist_items (auditoria_id, requisito, requisito_origen, norma,
                                                 evidencia_textual, resultado)
-                   VALUES (%s, %s, 'Matriz de cobertura del agente', 'ISO/IEC 27701:2025', %s, %s) RETURNING id""",
-                (aud_id, ref, h.get("estado"), h.get("estado")))
+                   VALUES (%s, %s, %s, 'ISO/IEC 27701:2025', %s, %s) RETURNING id""",
+                (aud_id, ref, origen.get(ref), h.get("estado"), h.get("estado")))
             item = cur.fetchone()["id"]
             cur.execute(
                 """INSERT INTO hallazgos (auditoria_id, checklist_item_id, requisito, clasificacion,
@@ -437,7 +457,7 @@ class AlmacenPG(object):
         with self._cx() as cur:
             cur.execute("""SELECT v.* FROM v_export_auditorias_gestitel v
                            JOIN auditorias a ON a.codigo = v."Código de auditoría"
-                           WHERE (%(c)s::text IS NULL OR a.codigo = %(c)s)
+                           WHERE (%(c)s::text IS NULL OR a.codigo = %(c)s OR a.ejecucion_agente = %(c)s)
                              AND (%(p)s::text IS NULL OR a.proyecto = %(p)s)
                            ORDER BY a.creado, v."Requisito (checklist)" """, {"c": codigo, "p": proyecto})
             return [dict(r) for r in cur.fetchall()]

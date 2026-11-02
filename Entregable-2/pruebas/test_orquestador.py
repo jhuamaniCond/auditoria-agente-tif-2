@@ -262,9 +262,14 @@ class PruebasOrquestador(unittest.TestCase):
         cod = completadas[0]["id"]
         filas = almacen.filas_export_auditorias(cod, self.pid)
         self.assertEqual(len(filas), len(completadas[0]["aprobacion"]["hallazgos"]))
+        # Estados con el codigo de una letra de GESTITEL (N = No conformidad, C = Cerrada, I = Interna)
         self.assertTrue(all(f["Clasificación (hallazgo)"] in
-                            ("No conformidad", "Observación", "Oportunidad de mejora") for f in filas))
-        self.assertTrue(all(f["Estado"] == "Cerrada" for f in filas))
+                            ("N", "Observación", "Oportunidad de mejora") for f in filas))
+        self.assertTrue(all(f["Estado"] == "C" and f["Tipo"] == "I" for f in filas))
+        # El codigo cabe en audit_code (20) y el requisito de origen en source_requirement_code (10)
+        cod_gestitel = filas[0]["Código de auditoría"]
+        self.assertRegex(cod_gestitel, r"^AUD-\d{4}-\d{3}$")
+        self.assertTrue(all(len(f["Requisito de origen (checklist)"] or "") <= 10 for f in filas))
         # Excel con el formato de GESTITEL
         x = herramientas.exportar_gestitel(self.pid, cod)
         self.__class__.excel = [x["ruta"]]
@@ -274,7 +279,7 @@ class PruebasOrquestador(unittest.TestCase):
         self.assertEqual(ws["A6"].value, "Código de auditoría")
         self.assertEqual(ws.cell(6, 25).value, "Avance (acción)")
         self.assertEqual(ws.max_row, 6 + len(filas))
-        self.assertEqual(ws["A7"].value, cod)
+        self.assertEqual(ws["A7"].value, cod_gestitel)
 
 
 if __name__ == "__main__":
