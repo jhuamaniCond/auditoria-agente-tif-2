@@ -5,3 +5,9 @@ langgraph
 mcp
 pypdf
 requests
+
+# PostgreSQL (PIMS_BACKEND=postgres, por defecto; ver BD/README.md)
+psycopg[binary]>=3.2
+psycopg-pool>=3.2
+langgraph-checkpoint-postgres
+openpyxl

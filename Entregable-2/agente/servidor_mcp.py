@@ -144,6 +144,9 @@ def _hash(contenido, anterior):
 def _anotar(entrada):
     """Anade una linea a la bitacora (append-only, encadenada por SHA-256)."""
     try:
+        if nucleo.ALMACEN is not None:      # PostgreSQL: bloqueo de BD en lugar del .lock
+            nucleo.ALMACEN.anotar_mcp(entrada)
+            return
         with _cerrojo():
             n, anterior = _ultima_linea()
             contenido = dict(n=n + 1, **entrada)
@@ -156,6 +159,8 @@ def _anotar(entrada):
 
 def verificar_bitacora():
     """Recorre la bitacora y devuelve los problemas de encadenado encontrados."""
+    if nucleo.ALMACEN is not None:
+        return nucleo.ALMACEN.verificar_mcp()
     problemas, anterior, n = [], GENESIS, 0
     if not os.path.exists(BITACORA):
         return {"entradas": 0, "problemas": [], "integra": True}

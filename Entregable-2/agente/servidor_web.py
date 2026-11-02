@@ -269,6 +269,23 @@ def api_aprobar(id_):
     return jsonify(_publica(e))
 
 
+@bp.route("/api/agente/ejecuciones/<id_>/cancelar", methods=["POST"])
+def api_cancelar(id_):
+    d = _json()
+    actor = (d.get("actor") or "").strip()
+    if not actor:
+        return _error("Indica quien cancela la ejecucion")
+    if not orquestador.obtener(id_):
+        return _error("Ejecucion no encontrada", 404)
+    if not hasattr(orquestador, "cancelar"):
+        return _error("El orquestador no permite cancelar ejecuciones")
+    try:
+        e = orquestador.cancelar(id_, actor, (d.get("motivo") or "").strip())
+    except (nucleo.ErrorAgente, ValueError, KeyError) as ex:
+        return _error(str(ex))
+    return jsonify(_publica(e))
+
+
 @bp.route("/api/agente/incidente", methods=["POST"])
 def api_incidente():
     descripcion = (_json().get("descripcion") or "").strip()
@@ -349,6 +366,12 @@ def api_bitacora():
     tipo = request.args.get("tipo", "decisiones")
     if tipo not in BITACORAS:
         return _error("tipo: decisiones | mcp | eventos")
+    almacen = nucleo.ALMACEN
+    if almacen is not None:     # PostgreSQL: lo mas reciente primero, como _ultimas_lineas
+        registros = {"decisiones": lambda: almacen.leer_decisiones(n=100)[::-1],
+                     "mcp": lambda: almacen.leer_mcp(100)[::-1],
+                     "eventos": lambda: almacen.leer_eventos(100)}[tipo]()
+        return jsonify({"tipo": tipo, "registros": registros, "origen": almacen.descripcion()})
     return jsonify({"tipo": tipo, "registros": _ultimas_lineas(BITACORAS[tipo])})
 
 

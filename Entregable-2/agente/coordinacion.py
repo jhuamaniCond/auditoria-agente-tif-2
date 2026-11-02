@@ -86,6 +86,9 @@ def publicar(evento):
         except Exception as e:              # noqa: BLE001
             entregas.append({"suscriptor": nombre, "error": "%s: %s" % (type(e).__name__, e)})
     evento["entregas"] = json.loads(json.dumps(entregas, default=str))
+    if nucleo.ALMACEN is not None:
+        nucleo.ALMACEN.guardar_evento(evento)
+        return evento
     with _CANDADO:
         with open(EVENTOS, "a", encoding="utf-8") as f:
             f.write(json.dumps(evento, ensure_ascii=False) + "\n")
@@ -94,6 +97,8 @@ def publicar(evento):
 
 def leer_eventos(n=50, tipo=None):
     """Ultimos n eventos (mas recientes primero)."""
+    if nucleo.ALMACEN is not None:
+        return nucleo.ALMACEN.leer_eventos(n, tipo)
     if not os.path.exists(EVENTOS):
         return []
     with open(EVENTOS, encoding="utf-8") as f:

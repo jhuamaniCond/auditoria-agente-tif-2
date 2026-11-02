@@ -1,0 +1,14 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "PIMS G6 - pims_auditoria",
+      "Group": "Agente de Evidencia y Auditoria",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "pims_auditoria",
+      "Username": "agente",
+      "PassFile": "/tmp/pgpass",
+      "SSLMode": "prefer"
+    }
+  }
+}

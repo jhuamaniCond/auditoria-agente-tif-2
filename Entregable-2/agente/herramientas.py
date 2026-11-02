@@ -8,7 +8,8 @@ muestra. Cada herramienta recibe y devuelve solo tipos JSON (dict, list, str,
 int, bool) para que valgan igual por MCP, por HTTP o desde Python.
 
 Deterministas (sin IA):  listar_proyectos, estado_expediente, registrar,
-                         verificar_integridad, matriz_cobertura, generar_informe
+                         verificar_integridad, matriz_cobertura, generar_informe,
+                         exportar_gestitel
 Con IA local (Ollama):   clasificar, buscar, evaluar_pertinencia,
                          redactar_hallazgo, preguntar
 """
@@ -149,6 +150,17 @@ def generar_informe(proyecto="unsa", hallazgos=None, aprobado_por=None, comentar
     return {"ruta": ruta, "controles_con_hallazgo": len(pendientes)}
 
 
+def exportar_gestitel(proyecto="unsa", auditoria=None):
+    """Excel de Auditorias con el formato de GESTITEL (para 'Importar Excel' en unsa.27k.pe).
+
+    Sale de las tablas auditorias/hallazgos/acciones de PostgreSQL; requiere PIMS_BACKEND=postgres."""
+    if nucleo.ALMACEN is None:
+        raise ErrorAgente("exportar_gestitel necesita PostgreSQL (PIMS_BACKEND=postgres)")
+    import exportar_gestitel as xg      # BD/ esta en sys.path cuando el backend es postgres
+    _p(proyecto)
+    return xg.exportar(nucleo.ALMACEN, auditoria=auditoria, proyecto=proyecto)
+
+
 # ---------------------------------------------------------------- con IA local
 
 def clasificar(ruta_archivo, proyecto="unsa"):
@@ -218,6 +230,7 @@ HERRAMIENTAS = {
     "verificar_integridad": verificar_integridad,
     "matriz_cobertura": matriz_cobertura,
     "generar_informe": generar_informe,
+    "exportar_gestitel": exportar_gestitel,
     "clasificar": clasificar,
     "buscar": buscar,
     "evaluar_pertinencia": evaluar_pertinencia,

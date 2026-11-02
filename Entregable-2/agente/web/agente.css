@@ -31,6 +31,8 @@ label.radio input { margin: 0; }
 .x-completada, .x-ok { background: var(--ok-fondo); color: var(--ok); }
 .x-rechazada, .x-error { background: var(--grave-fondo); color: var(--grave); }
 .x-pendiente, .x-omitido { background: var(--neutro-fondo); color: var(--neutro); }
+.x-interrumpida, .x-interrumpido, .x-cancelada, .x-cancelado { background: var(--neutro-fondo); color: var(--grave); }
+.cancelar-ej { margin-top: 12px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 
 /* --------------------------------------------------------- linea de tiempo */
 .linea-tiempo { list-style: none; margin: 12px 0; padding: 0 0 0 4px; }

@@ -5,7 +5,9 @@ const $ = (sel) => document.querySelector(sel);
 const estado = { ejecuciones: [], seleccionada: null, firma: "", temporizador: null, bitacora: "decisiones" };
 const ORDEN = ["Cubierto", "Parcial", "Desactualizada", "Comprometida", "Sin evidencia", "No aplica"];
 const NOMBRES_ESTADO = { en_curso: "En curso", esperando_aprobacion: "Esperando aprobación", completada: "Completada",
-  rechazada: "Rechazada", error: "Error", pendiente: "Pendiente", ok: "OK", omitido: "Omitido" };
+  rechazada: "Rechazada", error: "Error", pendiente: "Pendiente", ok: "OK", omitido: "Omitido",
+  interrumpida: "Interrumpida", interrumpido: "Interrumpido", cancelada: "Cancelada", cancelado: "Cancelado" };
+const ABIERTAS = ["en_curso", "esperando_aprobacion"];
 const TIPOS = { auditoria_interna: "Auditoría interna", incidente: "Incidente", bandeja: "Bandeja de entrada" };
 /* Flujo de referencia si aún no hay ninguna ejecución de auditoría interna. */
 const FLUJO_POR_DEFECTO = [
@@ -154,13 +156,46 @@ function pintarDetalle(e) {
         ${p.inicio ? `<small>${esc(fecha(p.inicio))}${p.fin ? " → " + esc(fecha(p.fin)) : ""}</small>` : ""}
       </li>`).join("")}</ol>`;
   if (e.error) html += `<div class="alerta error-ej">Error: ${esc(e.error)}</div>`;
+  if (e.interrupcion) html += `<div class="alerta error-ej">Interrumpida el ${esc(fecha(e.interrupcion.fecha))} por ${esc(e.interrupcion.actor)}: ${esc(e.interrupcion.motivo)}</div>`;
+  if (e.cancelacion) html += `<div class="alerta error-ej">Cancelada el ${esc(fecha(e.cancelacion.fecha))} por ${esc(e.cancelacion.actor)}: ${esc(e.cancelacion.motivo)}. Se descartó: no genera informe ni plan de acción.</div>`;
+  if (ABIERTAS.includes(e.estado)) html += `<div class="acciones cancelar-ej">
+      <button class="boton rechazar" type="button" id="btn-cancelar-ej">Cancelar ${e.tipo === "auditoria_interna" ? "auditoría" : "ejecución"}</button>
+      <small class="nota">Descarta la ejecución: no genera informe ni plan de acción. Lo ya hecho queda como historial.</small>
+    </div>`;
   if (e.estado === "esperando_aprobacion" && e.aprobacion) html += panelHitl(e);
   else if (e.aprobacion && (e.aprobacion.hallazgos || []).length && e.estado !== "completada") html += listaHallazgos(e.aprobacion.hallazgos);
   if (e.resultado) html += resultado(e);
   const cont = $("#detalle");
   cont.innerHTML = html;
   if (e.estado === "esperando_aprobacion") conectarHitl(e);
+  if (ABIERTAS.includes(e.estado)) conectarCancelar(e);
   if (e.informe_nombre) cargarInforme(e.informe_nombre);
+}
+
+function conectarCancelar(e) {
+  const boton = $("#btn-cancelar-ej");
+  if (!boton) return;
+  boton.addEventListener("click", async () => {
+    let actor = "";
+    try { actor = localStorage.getItem("agente.auditor") || ""; } catch (_) { /* sin almacenamiento */ }
+    const campo = $("#hitl-auditor");
+    if (campo && campo.value.trim()) actor = campo.value.trim();
+    actor = (prompt("¿Quién cancela esta ejecución?", actor) || "").trim();
+    if (!actor) return;
+    const motivo = prompt("Motivo de la cancelación (opcional):", "") ?? null;
+    if (motivo === null) return;
+    if (!confirm(`¿Cancelar y descartar ${e.id}? No se podrá reanudar.`)) return;
+    try { localStorage.setItem("agente.auditor", actor); } catch (_) { /* sin almacenamiento */ }
+    boton.disabled = true;
+    try {
+      await api(`/api/agente/ejecuciones/${encodeURIComponent(e.id)}/cancelar`, json({ actor, motivo: motivo.trim() }));
+      await seleccionar(e.id, true);
+      cargarResumen().catch(() => {});
+    } catch (err) {
+      boton.disabled = false;
+      aviso(err);
+    }
+  });
 }
 
 function listaHallazgos(hallazgos) {

@@ -76,11 +76,22 @@ class TestServidorMCP(unittest.TestCase):
         cls.r = asyncio.run(asyncio.wait_for(_sesion_completa(), timeout=180))
 
     @staticmethod
-    def _lineas_bitacora():
+    def _entradas_bitacora():
+        """Entradas de la bitacora MCP, de PostgreSQL o del archivo segun PIMS_BACKEND."""
+        if os.environ.get("PIMS_BACKEND", "postgres").lower() == "postgres":
+            bd = os.path.join(os.path.dirname(os.path.dirname(PRUEBAS)), "BD")
+            if bd not in sys.path:
+                sys.path.insert(0, bd)
+            from almacen_pg import AlmacenPG
+            return AlmacenPG().leer_mcp()
         if not os.path.exists(BITACORA):
-            return 0
+            return []
         with open(BITACORA, encoding="utf-8") as f:
-            return sum(1 for l in f if l.strip())
+            return [json.loads(l) for l in f if l.strip()]
+
+    @classmethod
+    def _lineas_bitacora(cls):
+        return len(cls._entradas_bitacora())
 
     def test_nombre_servidor(self):
         self.assertEqual(_campo(self.r["init"], "server_info", "serverInfo").name,
@@ -128,9 +139,9 @@ class TestServidorMCP(unittest.TestCase):
         self.assertNotIn("Traceback", texto)
 
     def test_bitacora_registra_llamadas(self):
-        self.assertGreaterEqual(self._lineas_bitacora(), self.n_bitacora + 2)
-        with open(BITACORA, encoding="utf-8") as f:
-            ultimas = [json.loads(l) for l in f if l.strip()][-2:]
+        entradas = self._entradas_bitacora()
+        self.assertGreaterEqual(len(entradas), self.n_bitacora + 2)
+        ultimas = entradas[-2:]
         for e in ultimas:
             for campo in ("fecha", "tool", "argumentos", "resultado", "duracion_ms",
                           "hash_anterior", "hash"):

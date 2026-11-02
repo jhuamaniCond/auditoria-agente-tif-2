@@ -46,6 +46,11 @@ ORDEN_ESTADOS = ("Cubierto", "Parcial", "Desactualizada", "Comprometida",
 
 GENESIS = "0" * 64
 
+# Almacen opcional. None = archivos del expediente (uso normal de la skill por linea
+# de comandos). El Agente del Entregable 2 asigna aqui un AlmacenPG (BD/almacen_pg.py)
+# y entonces indice, cadena de custodia y SoA se leen y escriben en PostgreSQL.
+ALMACEN = None
+
 
 # --------------------------------------------------------------------------
 # Utilidades
@@ -63,6 +68,8 @@ def ahora():
 
 
 def leer_indice(expediente):
+    if ALMACEN is not None:
+        return ALMACEN.leer_indice(expediente)
     ruta = os.path.join(expediente, INDICE)
     if not os.path.exists(ruta):
         return {"norma": "ISO/IEC 27701:2025", "evidencias": []}
@@ -71,6 +78,8 @@ def leer_indice(expediente):
 
 
 def guardar_indice(expediente, indice):
+    if ALMACEN is not None:
+        return ALMACEN.guardar_indice(expediente, indice)
     ruta = os.path.join(expediente, INDICE)
     temporal = ruta + ".tmp"
     with open(temporal, "w", encoding="utf-8") as f:
@@ -79,6 +88,8 @@ def guardar_indice(expediente, indice):
 
 
 def leer_cadena(expediente):
+    if ALMACEN is not None:
+        return ALMACEN.leer_cadena(expediente)
     ruta = os.path.join(expediente, CADENA)
     if not os.path.exists(ruta):
         return []
@@ -101,6 +112,9 @@ def anotar_custodia(expediente, accion, responsable, **datos):
     linea = dict(contenido)
     linea["hash_anterior"] = anterior
     linea["hash_linea"] = _hash_linea(contenido, anterior)
+    if ALMACEN is not None:
+        ALMACEN.agregar_custodia(expediente, linea)
+        return linea
     with open(os.path.join(expediente, CADENA), "a", encoding="utf-8") as f:
         f.write(json.dumps(linea, ensure_ascii=False) + "\n")
     return linea
@@ -113,6 +127,8 @@ def leer_catalogo(ruta):
 
 def leer_soa(expediente):
     """Devuelve {control_ref: (aplicable, justificacion)} o {} si no hay SoA."""
+    if ALMACEN is not None:
+        return ALMACEN.leer_soa(expediente)
     ruta = os.path.join(expediente, SOA)
     if not os.path.exists(ruta):
         return {}

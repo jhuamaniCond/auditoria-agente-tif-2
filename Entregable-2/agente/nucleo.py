@@ -34,6 +34,31 @@ if APP_E1 not in sys.path:
 for _c in (DATOS, DOCUMENTOS_UNSA, BANDEJA, SALIDAS, EJECUCIONES):
     os.makedirs(_c, exist_ok=True)
 
+# ---------------------------------------------------------------- almacenamiento
+# PIMS_BACKEND=postgres (por defecto): expediente, custodia, revisiones, proyectos,
+# ejecuciones, eventos y bitacoras viven en PostgreSQL (carpeta BD/ del repositorio).
+# PIMS_BACKEND=archivos: modo anterior con JSON/JSONL en Entregable-2/datos.
+# Los archivos de evidencia y los indices FAISS siguen en disco en ambos modos.
+BD = os.path.join(REPO, "BD")
+BACKEND = os.environ.get("PIMS_BACKEND", "postgres").strip().lower()
+ALMACEN = None
+if BACKEND == "postgres":
+    if BD not in sys.path:
+        sys.path.insert(0, BD)
+    import evidencia_api  # noqa: E402,F401  (pone scripts/ de la skill en sys.path)
+    import evidencia  # noqa: E402
+    try:
+        from almacen_pg import AlmacenPG  # noqa: E402
+        ALMACEN = AlmacenPG()
+    except Exception as _e:  # noqa: BLE001
+        raise RuntimeError(
+            "No se pudo usar PostgreSQL (%s: %s). Levante la BD con 'docker compose up -d' en BD/ "
+            "y cargue el catalogo (BD/README.md), o use PIMS_BACKEND=archivos."
+            % (type(_e).__name__, _e)) from _e
+    evidencia.ALMACEN = ALMACEN
+elif BACKEND != "archivos":
+    raise RuntimeError("PIMS_BACKEND debe ser 'postgres' o 'archivos', no %r" % BACKEND)
+
 import app as app_e1  # noqa: E402  (Flask app del Entregable 1, con todo cargado)
 import asistente  # noqa: E402,F401
 import llm_local  # noqa: E402,F401
@@ -64,18 +89,7 @@ def asegurar_unsa():
     p = PROYECTOS.obtener("unsa")
     if p:
         return p
-    creado = PROYECTOS.crear(UNSA["nombre"], UNSA["rol"], UNSA["descripcion"])
-    if creado.id != "unsa":     # el slug sale del nombre; se fija el id corto
-        os.rename(creado.carpeta, os.path.join(PROYECTOS.carpeta, "unsa"))
-        import json
-        ruta = os.path.join(PROYECTOS.carpeta, "unsa", "proyecto.json")
-        with open(ruta, encoding="utf-8") as f:
-            datos = json.load(f)
-        datos["id"] = "unsa"
-        with open(ruta, "w", encoding="utf-8") as f:
-            json.dump(datos, f, ensure_ascii=False, indent=2)
-        PROYECTOS._cache.clear()
-    return PROYECTOS.obtener("unsa")
+    return PROYECTOS.crear(UNSA["nombre"], UNSA["rol"], UNSA["descripcion"], id_="unsa")
 
 
 def proyecto(id_="unsa"):

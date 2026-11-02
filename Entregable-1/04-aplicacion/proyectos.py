@@ -66,7 +66,17 @@ class Proyectos(object):
         self._candado = threading.Lock()
         os.makedirs(self.carpeta, exist_ok=True)
 
+    @staticmethod
+    def _almacen():
+        """AlmacenPG si el Agente del Entregable 2 lo activo; None = archivos."""
+        import evidencia_api  # noqa: F401  (pone scripts/ de la skill en sys.path)
+        import evidencia
+        return evidencia.ALMACEN
+
     def _leer(self, id_):
+        almacen = self._almacen()
+        if almacen is not None:
+            return almacen.leer_proyecto(id_)
         ruta = os.path.join(self.carpeta, id_, "proyecto.json")
         if not os.path.isfile(ruta):
             return None
@@ -74,7 +84,11 @@ class Proyectos(object):
             return json.load(f)
 
     def listar(self):
-        ids = sorted(d for d in os.listdir(self.carpeta) if self._leer(d))
+        almacen = self._almacen()
+        if almacen is not None:
+            ids = almacen.listar_proyectos()
+        else:
+            ids = sorted(d for d in os.listdir(self.carpeta) if self._leer(d))
         return [self.obtener(i) for i in ids]
 
     def obtener(self, id_):
@@ -82,36 +96,52 @@ class Proyectos(object):
         if not id_ or not re.fullmatch(r"[a-z0-9-]{1,60}", id_):
             return None
         with self._candado:
-            if id_ not in self._cache:
-                datos = self._leer(id_)
-                if not datos:
-                    return None
-                self._cache[id_] = Proyecto(os.path.join(self.carpeta, id_), datos,
-                                            self.conocimiento)
-            return self._cache[id_]
+            return self._obtener_sin_candado(id_)
 
-    def crear(self, nombre, rol="responsable", descripcion="", excluidos=()):
-        """excluidos: [{"ref", "justificacion"}] -> soa.csv (controles que no aplican)."""
+    def _obtener_sin_candado(self, id_):
+        if id_ not in self._cache:
+            datos = self._leer(id_)
+            if not datos:
+                return None
+            carpeta = os.path.join(self.carpeta, id_)
+            os.makedirs(os.path.join(carpeta, "expediente"), exist_ok=True)
+            self._cache[id_] = Proyecto(carpeta, datos, self.conocimiento)
+        return self._cache[id_]
+
+    def crear(self, nombre, rol="responsable", descripcion="", excluidos=(), id_=None):
+        """excluidos: [{"ref", "justificacion"}] -> soa.csv (controles que no aplican).
+        id_: identificador fijo (si no, se deriva del nombre)."""
         nombre = (nombre or "").strip()
         if not nombre:
             raise ErrorProyecto("Escribe el nombre de la organizacion")
         if rol not in ROLES:
             raise ErrorProyecto("Rol no valido: %s" % rol)
+        if id_ is not None and not re.fullmatch(r"[a-z0-9-]{1,60}", id_):
+            raise ErrorProyecto("Identificador no valido: %s" % id_)
         for e in excluidos:
             if not (e.get("justificacion") or "").strip():
                 raise ErrorProyecto("Justifica por que %s no aplica" % e.get("ref"))
+        almacen = self._almacen()
         with self._candado:
-            base = _slug(nombre) or "proyecto"
+            base = id_ or _slug(nombre) or "proyecto"
             id_, n = base, 2
-            while os.path.exists(os.path.join(self.carpeta, id_)):
+            def ocupado(i):
+                if almacen is not None:     # con BD manda la tabla proyectos
+                    return almacen.leer_proyecto(i) is not None
+                return os.path.exists(os.path.join(self.carpeta, i))
+            while ocupado(id_):
                 id_, n = "%s-%d" % (base, n), n + 1
             carpeta = os.path.join(self.carpeta, id_)
-            os.makedirs(os.path.join(carpeta, "expediente"))
+            # La carpeta guarda siempre los archivos de evidencia y el indice FAISS
+            os.makedirs(os.path.join(carpeta, "expediente"), exist_ok=almacen is not None)
+            datos = {"id": id_, "nombre": nombre, "rol": rol,
+                     "descripcion": (descripcion or "").strip(),
+                     "creado": dt.datetime.now().astimezone().isoformat(timespec="seconds")}
+            if almacen is not None:
+                almacen.crear_proyecto(datos, excluidos)
+                return self._obtener_sin_candado(id_)
             with open(os.path.join(carpeta, "proyecto.json"), "w", encoding="utf-8") as f:
-                json.dump({"id": id_, "nombre": nombre, "rol": rol,
-                           "descripcion": (descripcion or "").strip(),
-                           "creado": dt.datetime.now().astimezone().isoformat(timespec="seconds")},
-                          f, ensure_ascii=False, indent=2)
+                json.dump(datos, f, ensure_ascii=False, indent=2)
             if excluidos:
                 with open(os.path.join(carpeta, "expediente", "soa.csv"), "w",
                           encoding="utf-8", newline="") as f:

@@ -57,6 +57,17 @@ Trazabilidad: `datos/bitacora_mcp.jsonl` (llamadas MCP),
 
 ## Puesta en marcha
 
+**Forma rápida (Windows):** un solo script levanta Docker (PostgreSQL + pgAdmin),
+carga el catálogo y migra los datos si faltan, arranca Ollama, prepara los modelos
+(si hay varios qwen pregunta cuál usar) e inicia la web:
+
+```powershell
+cd Entregable-2/agente
+powershell -ExecutionPolicy Bypass -File .\ejecutar.ps1     # -Puerto N, -SinNavegador, -SinIA, -SoloPreparar
+```
+
+Paso a paso:
+
 ```bash
 # Modelos locales (una vez)
 ollama pull nomic-embed-text
@@ -64,6 +75,10 @@ ollama pull qwen2.5:3b
 
 # Dependencias (desde la raíz del repositorio)
 pip install -r Entregable-2/requirements.txt
+
+# Base de datos PostgreSQL + pgAdmin (http://localhost:5050) — ver BD/README.md
+cd BD && docker compose up -d && python cargar_catalogo.py && python migrar_datos_agente.py && cd ..
+# (PIMS_BACKEND=archivos vuelve al modo anterior con JSON en Entregable-2/datos)
 
 # Panel del agente
 cd Entregable-2/agente

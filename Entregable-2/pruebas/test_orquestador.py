@@ -65,6 +65,11 @@ class PruebasOrquestador(unittest.TestCase):
         shutil.rmtree(cls.p.carpeta, ignore_errors=True)
         nucleo.PROYECTOS._cache.pop(cls.pid, None)
         shutil.rmtree(cls.tmp, ignore_errors=True)
+        if nucleo.ALMACEN is not None:      # PostgreSQL: borra proyecto, custodia, ejecuciones...
+            nucleo.ALMACEN.borrar_proyecto(cls.pid)
+            for ruta in getattr(cls, "excel", []):
+                if os.path.exists(ruta):
+                    os.remove(ruta)
 
     # ------------------------------------------------------------ utilidades
     def _iniciar(self, tipo, parametros=None):
@@ -96,8 +101,12 @@ class PruebasOrquestador(unittest.TestCase):
         pasos = {p["nodo"]: p["estado"] for p in ej["pasos"]}
         self.assertEqual(pasos["alerta_integridad"], "omitido")
         self.assertEqual(pasos["redactar_hallazgos"], "ok")
-        # El estado sobrevive en disco
-        self.assertTrue(os.path.exists(os.path.join(nucleo.EJECUCIONES, ej["id"] + ".json")))
+        # El estado sobrevive fuera del proceso (PostgreSQL o disco)
+        if nucleo.ALMACEN is not None:
+            self.assertEqual(nucleo.ALMACEN.obtener_ejecucion(ej["id"])["estado"], "esperando_aprobacion")
+            self.assertEqual(orquestador.TIPO_CHECKPOINTER, "PostgresSaver")
+        else:
+            self.assertTrue(os.path.exists(os.path.join(nucleo.EJECUCIONES, ej["id"] + ".json")))
 
         ref = a["propuestas"][0]["ref"]
         orquestador.aprobar(ej["id"], "aprobada", "Auditor de Prueba", "Conforme",
@@ -205,6 +214,67 @@ class PruebasOrquestador(unittest.TestCase):
         self.assertIn("aprobacion_auditor", d["nodos"])
         lista = orquestador.listar()
         self.assertEqual(lista, sorted(lista, key=lambda e: (e["creado"], e["id"]), reverse=True))
+
+    def test_8_cancelar_auditoria(self):
+        # 1) Cancelar en la puerta HITL: se descarta sin informe y ya no admite aprobacion
+        ej = self._esperar(self._iniciar("auditoria_interna", {"max_pertinencia": 0})["id"])
+        self.assertEqual(ej["estado"], "esperando_aprobacion")
+        with self.assertRaises(nucleo.ErrorAgente):
+            orquestador.cancelar(ej["id"], "  ")                 # quien cancela es obligatorio
+        ej = orquestador.cancelar(ej["id"], "Auditor de Prueba", "Prueba de cancelacion")
+        self.assertEqual(ej["estado"], "cancelada")
+        self.assertEqual(ej["cancelacion"]["estado_previo"], "esperando_aprobacion")
+        self.assertFalse(ej["aprobacion"]["pendiente"])
+        self.assertNotIn("informe", ej["resultado"])
+        with self.assertRaises(nucleo.ErrorAgente):
+            orquestador.aprobar(ej["id"], "aprobada", "Auditor de Prueba")
+        with self.assertRaises(nucleo.ErrorAgente):
+            orquestador.cancelar(ej["id"], "Auditor de Prueba")  # ya cerrada
+        dec = [x for x in orquestador.leer_bitacora(ej["id"]) if x["decision"] == "cancelada"]
+        self.assertEqual(dec[0]["actor"], "Auditor de Prueba")
+        self.assertEqual(dec[0]["origen"], "humano")
+
+        # 2) Cancelar mientras el hilo trabaja: se detiene y el estado no se sobrescribe
+        ej = self._iniciar("auditoria_interna", {"max_pertinencia": 0})
+        orquestador.cancelar(ej["id"], "Auditor de Prueba", "Cancelada en curso")
+        hilo = orquestador._HILOS.get(ej["id"])
+        if hilo:
+            hilo.join(ESPERA)
+        final = orquestador.obtener(ej["id"])
+        self.assertEqual(final["estado"], "cancelada")
+        self.assertIsNone(final.get("aprobacion"))
+        self.assertTrue(all(p["estado"] in ("ok", "omitido", "cancelado") for p in final["pasos"]))
+        if nucleo.ALMACEN is not None:      # una auditoria cancelada no se vuelca a GESTITEL
+            self.assertEqual(nucleo.ALMACEN.filas_export_auditorias(ej["id"], self.pid), [])
+
+    @unittest.skipIf(nucleo.ALMACEN is None, "solo con PIMS_BACKEND=postgres")
+    def test_7_postgres_auditoria_y_excel_gestitel(self):
+        import herramientas
+        import openpyxl
+        almacen = nucleo.ALMACEN
+        # La cadena de custodia guardada en la BD valida con el codigo de la skill
+        r = herramientas.verificar_integridad(self.pid)
+        self.assertEqual(r["problemas_cadena"], [])
+        # Una auditoria completada queda en las tablas del modulo Auditorias de GESTITEL
+        completadas = [e for e in orquestador.listar(self.pid)
+                       if e["tipo"] == "auditoria_interna" and e["estado"] == "completada"]
+        self.assertTrue(completadas, "test_1 debe dejar una auditoria completada")
+        cod = completadas[0]["id"]
+        filas = almacen.filas_export_auditorias(cod, self.pid)
+        self.assertEqual(len(filas), len(completadas[0]["aprobacion"]["hallazgos"]))
+        self.assertTrue(all(f["Clasificación (hallazgo)"] in
+                            ("No conformidad", "Observación", "Oportunidad de mejora") for f in filas))
+        self.assertTrue(all(f["Estado"] == "Cerrada" for f in filas))
+        # Excel con el formato de GESTITEL
+        x = herramientas.exportar_gestitel(self.pid, cod)
+        self.__class__.excel = [x["ruta"]]
+        ws = openpyxl.load_workbook(x["ruta"]).active
+        self.assertEqual(ws.title, "Auditorías")
+        self.assertEqual(ws["A1"].value, "REPORTE AUDITORÍAS")
+        self.assertEqual(ws["A6"].value, "Código de auditoría")
+        self.assertEqual(ws.cell(6, 25).value, "Avance (acción)")
+        self.assertEqual(ws.max_row, 6 + len(filas))
+        self.assertEqual(ws["A7"].value, cod)
 
 
 if __name__ == "__main__":

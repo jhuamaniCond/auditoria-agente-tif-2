@@ -36,11 +36,15 @@ parametros (todos opcionales):
     evento / descripcion            (incidente)
     archivos, auto_registrar        (bandeja)
 
-Cada ejecucion se guarda en datos/ejecuciones/<id>.json tras cada paso; el
-estado del grafo vive en el checkpointer de LangGraph (SqliteSaver en
-datos/ejecuciones/checkpoints.sqlite) para reanudar tras la aprobacion aunque
-el proceso se haya reiniciado. Toda decision del agente y del humano queda en
-datos/bitacora_decisiones.jsonl (registro de decisiones).
+Cada ejecucion se guarda tras cada paso; el estado del grafo vive en el
+checkpointer de LangGraph para reanudar tras la aprobacion aunque el proceso se
+haya reiniciado. Toda decision del agente y del humano queda en el registro de
+decisiones. Con PIMS_BACKEND=postgres (por defecto) todo va a PostgreSQL:
+tablas ejecuciones, ejecucion_instantaneas, decisiones_humanas y las tablas
+checkpoints* de PostgresSaver. Con PIMS_BACKEND=archivos se usa el modo
+anterior: datos/ejecuciones/*.json, SqliteSaver y datos/bitacora_decisiones.jsonl.
+Al completarse una auditoria interna se vuelca tambien a las tablas auditorias,
+hallazgos y acciones (modelo del modulo Auditorias de GESTITEL).
 """
 
 import datetime as dt
@@ -80,10 +84,31 @@ def _ahora():
     return dt.datetime.now().astimezone().isoformat(timespec="seconds")
 
 
+def _ubicacion(registro):
+    """Donde queda cada registro, para citarlo en los informes."""
+    if nucleo.ALMACEN is not None:
+        tabla = {"decisiones": "decisiones_humanas", "custodia": "cadena_custodia"}[registro]
+        return "tabla `%s` (%s)" % (tabla, nucleo.ALMACEN.descripcion())
+    return {"decisiones": "`datos/bitacora_decisiones.jsonl`",
+            "custodia": "`expediente/cadena_custodia.log`"}[registro]
+
+
 # =====================================================================
 # Checkpointer (SqliteSaver si esta instalado; si no, memoria + JSON)
 # =====================================================================
 def _crear_checkpointer():
+    if nucleo.ALMACEN is not None:
+        # PostgreSQL: el estado del grafo queda en las tablas checkpoints* de la misma BD
+        from db import dsn
+        from langgraph.checkpoint.postgres import PostgresSaver
+        from psycopg.rows import dict_row
+        from psycopg_pool import ConnectionPool
+        pool = ConnectionPool(dsn(), min_size=1, max_size=4, open=True,
+                              kwargs={"autocommit": True, "prepare_threshold": 0,
+                                      "row_factory": dict_row})
+        saver = PostgresSaver(pool)
+        saver.setup()
+        return saver, "PostgresSaver"
     try:
         import sqlite3
         from langgraph.checkpoint.sqlite import SqliteSaver
@@ -110,6 +135,9 @@ def registrar_decision(ejecucion, nodo, decision, actor=ACTOR, humano=False, det
     linea = {"fecha": _ahora(), "ejecucion": ejecucion, "flujo": tipo, "proyecto": proyecto,
              "nodo": nodo, "actor": actor, "origen": "humano" if humano else "agente",
              "decision": decision, "detalle": detalle or {}}
+    if nucleo.ALMACEN is not None:
+        nucleo.ALMACEN.guardar_decision(linea)
+        return linea
     with _CANDADO_BITACORA:
         with open(BITACORA, "a", encoding="utf-8") as f:
             f.write(json.dumps(linea, ensure_ascii=False, default=str) + "\n")
@@ -117,6 +145,8 @@ def registrar_decision(ejecucion, nodo, decision, actor=ACTOR, humano=False, det
 
 
 def leer_bitacora(ejecucion=None, n=500):
+    if nucleo.ALMACEN is not None:
+        return nucleo.ALMACEN.leer_decisiones(ejecucion, n)
     if not os.path.exists(BITACORA):
         return []
     with open(BITACORA, encoding="utf-8") as f:
@@ -169,6 +199,10 @@ def _escribir_json(ruta, datos):
 def _guardar(ej):
     ej["actualizado"] = _ahora()
     with _CANDADO:
+        if nucleo.ALMACEN is not None:
+            _ruta(ej["id"])                   # valida el identificador
+            nucleo.ALMACEN.guardar_ejecucion(ej)
+            return
         _escribir_json(_ruta(ej["id"]), ej)
 
 
@@ -178,6 +212,8 @@ def obtener(id_):
         ruta = _ruta(id_)
     except ErrorAgente:
         return None
+    if nucleo.ALMACEN is not None:
+        return nucleo.ALMACEN.obtener_ejecucion(id_)
     if not os.path.exists(ruta):
         return None
     for intento in range(5):
@@ -191,6 +227,8 @@ def obtener(id_):
 
 def listar(proyecto=None):
     """Ejecuciones (mas recientes primero), opcionalmente de un proyecto."""
+    if nucleo.ALMACEN is not None:
+        return nucleo.ALMACEN.listar_ejecuciones(proyecto)
     salida = []
     for nombre in os.listdir(nucleo.EJECUCIONES):
         if not nombre.endswith(".json") or nombre.startswith("_"):
@@ -214,6 +252,8 @@ def _modificar(id_, fn):
 
 def _marcar_paso(id_, nodo, estado, resumen=None, resultado=None):
     def fn(ej):
+        if ej["estado"] == "cancelada":     # la cancelacion manda sobre el hilo que sigue vivo
+            return
         for p in ej["pasos"]:
             if p["nodo"] != nodo:
                 continue
@@ -232,10 +272,14 @@ def _marcar_paso(id_, nodo, estado, resumen=None, resultado=None):
 
 
 def _guardar_instantanea(estado):
+    if nucleo.ALMACEN is not None:
+        return nucleo.ALMACEN.guardar_instantanea(estado)
     _escribir_json(os.path.join(INSTANTANEAS, estado["ejecucion"] + ".json"), estado)
 
 
 def _leer_instantanea(id_):
+    if nucleo.ALMACEN is not None:
+        return nucleo.ALMACEN.leer_instantanea(id_)
     ruta = os.path.join(INSTANTANEAS, id_ + ".json")
     if not os.path.exists(ruta):
         return None
@@ -290,18 +334,37 @@ def _entero(estado, clave, defecto):
         return defecto
 
 
+class EjecucionCancelada(Exception):
+    """El usuario cancelo la ejecucion: el grafo se detiene antes del siguiente paso."""
+
+
+_CANCELADAS = set()
+
+
+def _cancelada(id_):
+    if id_ in _CANCELADAS:
+        return True
+    return (obtener(id_) or {}).get("estado") == "cancelada"
+
+
 def _nodo(nombre, fn):
     """Envuelve un nodo: marca el paso en la ejecucion y guarda el JSON tras cada paso."""
     def envoltura(estado):
         id_ = estado["ejecucion"]
+        if _cancelada(id_):
+            raise EjecucionCancelada(id_)
         _marcar_paso(id_, nombre, "en_curso")
         try:
             salida = fn(estado) or {}
         except GraphBubbleUp:               # interrupt() de la puerta HITL: no es error
             raise
         except Exception as e:              # noqa: BLE001
+            if _cancelada(id_):
+                raise EjecucionCancelada(id_) from e
             _marcar_paso(id_, nombre, "error", resumen="%s: %s" % (type(e).__name__, e))
             raise
+        if _cancelada(id_):                 # se cancelo mientras corria este paso
+            raise EjecucionCancelada(id_)
         resumen = salida.pop("_resumen", "")
         omitido = salida.pop("_omitido", False)
         _marcar_paso(id_, nombre, "omitido" if omitido else "ok", resumen,
@@ -757,8 +820,8 @@ def n_plan_accion(estado):
         lin += ["", "## 9. Trazabilidad", "",
                 "- Ejecucion del orquestador: `%s` (%s, checkpointer %s)" % (
                     estado["ejecucion"], MOTOR, TIPO_CHECKPOINTER),
-                "- Registro de decisiones: `datos/bitacora_decisiones.jsonl`",
-                "- Cadena de custodia del expediente: `expediente/cadena_custodia.jsonl`"]
+                "- Registro de decisiones: %s" % _ubicacion("decisiones"),
+                "- Cadena de custodia del expediente: %s" % _ubicacion("custodia")]
         with open(ruta, "a", encoding="utf-8") as f:
             f.write("\n" + "\n".join(lin) + "\n")
     _decidir(estado, "plan_accion", "plan de accion propuesto", acciones=len(plan))
@@ -970,7 +1033,7 @@ def n_informe_incidente(estado):
         lin.append("| %s | %s | %d h |" % (a["accion"], a["responsable"], a["plazo_horas"]))
     lin += ["", "## 6. Trazabilidad", "", "- Ejecucion `%s`, evento `%s`" % (
         estado["ejecucion"], ev.get("evento_id")),
-        "- Registro de decisiones: `datos/bitacora_decisiones.jsonl`"]
+        "- Registro de decisiones: %s" % _ubicacion("decisiones")]
     ruta = os.path.join(nucleo.SALIDAS, "informe_incidente_%s_%s_%s.md" % (
         estado["proyecto"], re.sub(r"[^A-Za-z0-9-]+", "_", inc["id"]),
         ahora.strftime("%Y%m%d_%H%M%S")))
@@ -1305,17 +1368,91 @@ def _cerrar(ej, estado, error=None):
             p["estado"] = "omitido" if not error or p["estado"] == "pendiente" else "error"
 
 
+def marcar_interrumpida(id_, motivo, actor="usuario"):
+    """Cierra una ejecucion que quedo abierta sin proceso que la continue (p. ej. se cerro el
+    programa a mitad de un paso). Conserva lo hecho como historial y registra la decision."""
+    ej = obtener(id_)
+    if ej is None:
+        raise ErrorAgente("No existe la ejecucion %r" % id_)
+    if ej["estado"] not in ESTADOS_ABIERTOS:
+        raise ErrorAgente("La ejecucion %s ya esta cerrada (%s)" % (id_, ej["estado"]))
+    paso = ej.get("paso_actual")
+
+    def fn(e):
+        e["estado"] = "interrumpida"
+        e["paso_actual"] = None
+        e["interrupcion"] = {"motivo": motivo, "actor": actor, "fecha": _ahora(), "paso": paso}
+        for p in e["pasos"]:
+            if p["estado"] == "en_curso":
+                p["estado"] = "interrumpido"
+                p["fin"] = _ahora()
+                p["resumen"] = "Interrumpido: %s" % motivo
+            elif p["estado"] == "pendiente":
+                p["estado"] = "omitido"
+    ej = _modificar(id_, fn)
+    registrar_decision(id_, "interrupcion", "interrumpida", actor=actor, humano=True,
+                       detalle={"motivo": motivo, "paso": paso}, tipo=ej.get("tipo"),
+                       proyecto=ej.get("proyecto"))
+    return ej
+
+
+def cancelar(id_, actor, motivo=""):
+    """Descarta una ejecucion abierta (en curso o esperando aprobacion).
+
+    No genera informe ni plan de accion y no se vuelca a las tablas de auditorias. Lo ya
+    hecho queda como historial y la cancelacion se registra como decision humana. Si un
+    hilo esta trabajando, se detiene al terminar el paso actual (no se puede cortar una
+    llamada al LLM a la mitad) y nada de lo que haga despues cambia el estado."""
+    actor = (actor or "").strip()
+    if not actor:
+        raise ErrorAgente("Indica quien cancela la ejecucion")
+    motivo = (motivo or "").strip() or "Cancelada por el usuario"
+    with _CANDADO:
+        ej = obtener(id_)
+        if ej is None:
+            raise ErrorAgente("No existe la ejecucion %s" % id_)
+        if ej["estado"] not in ESTADOS_ABIERTOS:
+            raise ErrorAgente("La ejecucion %s ya esta cerrada (%s): no se puede cancelar"
+                              % (id_, ej["estado"]))
+        _CANCELADAS.add(id_)
+        paso, estado_previo = ej.get("paso_actual"), ej["estado"]
+        ej["estado"] = "cancelada"
+        ej["paso_actual"] = None
+        if ej.get("aprobacion"):
+            ej["aprobacion"] = dict(ej["aprobacion"], pendiente=False)
+        ej["cancelacion"] = {"actor": actor, "motivo": motivo, "fecha": _ahora(),
+                             "paso": paso, "estado_previo": estado_previo}
+        for p in ej["pasos"]:
+            if p["estado"] == "en_curso":
+                p["estado"] = "cancelado"
+                p["fin"] = _ahora()
+                p["resumen"] = "Cancelado por %s: %s" % (actor, motivo)
+            elif p["estado"] == "pendiente":
+                p["estado"] = "omitido"
+        _guardar(ej)
+    registrar_decision(id_, paso, "cancelada", actor=actor, humano=True,
+                       detalle={"motivo": motivo, "estado_previo": estado_previo},
+                       tipo=ej.get("tipo"), proyecto=ej.get("proyecto"))
+    _publicar("ejecucion.cancelada", ejecucion=id_, flujo=ej.get("tipo"),
+              proyecto=ej.get("proyecto"), actor=actor, motivo=motivo)
+    return ej
+
+
 def _ejecutar(id_, tipo, entrada):
     grafo = GRAFOS[tipo]
     config = _config(id_)
     try:
         grafo.invoke(entrada, config)
+        if _cancelada(id_):
+            raise EjecucionCancelada(id_)
         snap = grafo.get_state(config)
         interrupciones = [i for t in snap.tasks for i in (t.interrupts or ())]
         if interrupciones:
             payload = interrupciones[0].value
 
             def fn(ej):
+                if ej["estado"] == "cancelada":
+                    return
                 ej["estado"] = "esperando_aprobacion"
                 ej["aprobacion"] = dict(payload, pendiente=True, solicitada=_ahora())
                 for p in ej["pasos"]:
@@ -1335,12 +1472,19 @@ def _ejecutar(id_, tipo, entrada):
         final = final if final in ("completada", "rechazada") else "completada"
 
         def fin(ej):
+            if ej["estado"] == "cancelada":
+                return
             ej["resultado"] = dict(ej.get("resultado") or {}, **(valores.get("resultado") or {}))
             _cerrar(ej, final)
         _modificar(id_, fin)
         registrar_decision(id_, None, "ejecucion %s" % final, tipo=tipo,
                            proyecto=valores.get("proyecto"))
     except Exception as e:                  # noqa: BLE001
+        if isinstance(e, EjecucionCancelada) or _cancelada(id_):
+            # La cancelacion ya quedo guardada: el hilo solo deja constancia de que paro
+            registrar_decision(id_, None, "hilo detenido tras la cancelacion", tipo=tipo,
+                               proyecto=(obtener(id_) or {}).get("proyecto"))
+            return
         mensaje = "%s: %s" % (type(e).__name__, e)
         _modificar(id_, lambda ej: _cerrar(ej, "error", mensaje))
         registrar_decision(id_, None, "ejecucion con error", tipo=tipo,

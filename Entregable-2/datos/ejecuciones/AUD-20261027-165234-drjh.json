@@ -1,113 +1,125 @@
 {
   "id": "AUD-20261027-165234-drjh",
   "tipo": "auditoria_interna",
-  "proyecto": "unsa",
-  "parametros": {
-    "modo_rapido": false,
-    "max_hallazgos": 3,
-    "max_pertinencia": 2
-  },
-  "estado": "en_curso",
-  "creado": "2026-10-27T16:52:34-05:00",
-  "actualizado": "2026-10-27T16:57:36-05:00",
-  "paso_actual": "redactar_hallazgos",
+  "error": null,
+  "motor": "LangGraph + SqliteSaver",
   "pasos": [
     {
+      "fin": "2026-10-27T16:52:34-05:00",
       "nodo": "planificar",
-      "titulo": "Planificar (alcance, rol, periodo)",
       "estado": "ok",
       "inicio": "2026-10-27T16:52:34-05:00",
-      "fin": "2026-10-27T16:52:34-05:00",
+      "titulo": "Planificar (alcance, rol, periodo)",
       "resumen": "Alcance: PIMS completo segun ISO/IEC 27701:2025 (clausulas 4 a 10 y Anexo A segun el rol). Rol responsable, corte 2026-10-27, vigencia 365 dias, 14 evidencias."
     },
     {
+      "fin": "2026-10-27T16:52:34-05:00",
       "nodo": "verificar_integridad",
-      "titulo": "Verificar integridad (SHA-256 y cadena de custodia)",
       "estado": "ok",
       "inicio": "2026-10-27T16:52:34-05:00",
-      "fin": "2026-10-27T16:52:34-05:00",
+      "titulo": "Verificar integridad (SHA-256 y cadena de custodia)",
       "resumen": "14 evidencias: OK 14, alteradas 0, faltantes 0; cadena integra."
     },
     {
+      "fin": "2026-10-27T16:52:34-05:00",
       "nodo": "alerta_integridad",
-      "titulo": "Alerta de integridad",
       "estado": "omitido",
       "inicio": "2026-10-27T16:52:34-05:00",
-      "fin": "2026-10-27T16:52:34-05:00",
+      "titulo": "Alerta de integridad",
       "resumen": "Expediente integro: no hay alerta."
     },
     {
+      "fin": "2026-10-27T16:52:34-05:00",
       "nodo": "matriz_cobertura",
-      "titulo": "Matriz de cobertura",
       "estado": "ok",
       "inicio": "2026-10-27T16:52:34-05:00",
-      "fin": "2026-10-27T16:52:34-05:00",
+      "titulo": "Matriz de cobertura",
       "resumen": "Cobertura 7.9% (3 de 38 aplicables cubiertos). Cubierto 3, Desactualizada 11, Sin evidencia 24"
     },
     {
+      "fin": "2026-10-27T16:57:36-05:00",
       "nodo": "evaluar_pertinencia",
-      "titulo": "Evaluar pertinencia de la evidencia",
       "estado": "ok",
       "inicio": "2026-10-27T16:52:34-05:00",
-      "fin": "2026-10-27T16:57:36-05:00",
+      "titulo": "Evaluar pertinencia de la evidencia",
       "resumen": "2 de 3 controles evaluables revisados (IA): A.3.11=no_cumple, 5.3=no_cumple"
     },
     {
+      "fin": "2026-10-27T16:57:36-05:00",
       "nodo": "priorizar",
-      "titulo": "Priorizar hallazgos",
       "estado": "ok",
       "inicio": "2026-10-27T16:57:36-05:00",
-      "fin": "2026-10-27T16:57:36-05:00",
+      "titulo": "Priorizar hallazgos",
       "resumen": "35 hallazgos (18 no conformidades mayores). Primeros: 6.1.2 (Sin evidencia), 6.1.3 (Sin evidencia), 9.2 (Sin evidencia), 9.3 (Sin evidencia), A.1.2.6 (Sin evidencia)"
     },
     {
+      "fin": "2026-11-01T21:29:54-05:00",
       "nodo": "redactar_hallazgos",
-      "titulo": "Redactar hallazgos",
-      "estado": "en_curso",
+      "estado": "interrumpido",
       "inicio": "2026-10-27T16:57:36-05:00",
-      "fin": null,
-      "resumen": ""
+      "titulo": "Redactar hallazgos",
+      "resumen": "Interrumpido: El proceso se cerro durante el paso redactar_hallazgos (27/10/2026, otra PC); su estado de LangGraph quedo en un SqliteSaver no migrable y no puede reanudarse."
     },
     {
+      "fin": null,
       "nodo": "aprobacion_auditor",
+      "estado": "omitido",
+      "inicio": null,
       "titulo": "Aprobacion del auditor (HITL)",
-      "estado": "pendiente",
-      "inicio": null,
-      "fin": null,
       "resumen": ""
     },
     {
+      "fin": null,
       "nodo": "generar_informe",
-      "titulo": "Generar informe de auditoria",
-      "estado": "pendiente",
+      "estado": "omitido",
       "inicio": null,
-      "fin": null,
+      "titulo": "Generar informe de auditoria",
       "resumen": ""
     },
     {
-      "nodo": "plan_accion",
-      "titulo": "Plan de accion correctiva",
-      "estado": "pendiente",
-      "inicio": null,
       "fin": null,
+      "nodo": "plan_accion",
+      "estado": "omitido",
+      "inicio": null,
+      "titulo": "Plan de accion correctiva",
       "resumen": ""
     }
   ],
-  "aprobacion": null,
+  "creado": "2026-10-27T16:52:34-05:00",
+  "estado": "interrumpida",
+  "proyecto": "unsa",
   "resultado": {
     "plan": {
-      "organizacion": "Universidad Nacional de San Agustin de Arequipa (UNSA)",
-      "objetivo": "Determinar si el PIMS es conforme con los requisitos de la organizacion y de la norma, y si se implementa y mantiene eficazmente (clausula 9.2).",
-      "alcance": "PIMS completo segun ISO/IEC 27701:2025 (clausulas 4 a 10 y Anexo A segun el rol)",
-      "criterios": "ISO/IEC 27701:2025; criterios de evidencia del Entregable 1; Ley N.o 29733",
       "rol": "responsable",
-      "vigencia_dias": 365,
-      "fecha_corte": "2026-10-27",
-      "evidencias_en_expediente": 14,
       "modo": "con IA local (qwen2.5:3b)",
-      "max_pertinencia": 2,
+      "alcance": "PIMS completo segun ISO/IEC 27701:2025 (clausulas 4 a 10 y Anexo A segun el rol)",
+      "objetivo": "Determinar si el PIMS es conforme con los requisitos de la organizacion y de la norma, y si se implementa y mantiene eficazmente (clausula 9.2).",
+      "criterios": "ISO/IEC 27701:2025; criterios de evidencia del Entregable 1; Ley N.o 29733",
+      "fecha_corte": "2026-10-27",
+      "organizacion": "Universidad Nacional de San Agustin de Arequipa (UNSA)",
       "max_hallazgos": 3,
-      "solicitado_por": "orquestador"
+      "vigencia_dias": 365,
+      "solicitado_por": "orquestador",
+      "max_pertinencia": 2,
+      "evidencias_en_expediente": 14
+    },
+    "cobertura": {
+      "rol": "responsable",
+      "norma": "ISO/IEC 27701:2025",
+      "fecha_corte": "2026-10-27",
+      "vigencia_dias": 365,
+      "conteo_estados": {
+        "Parcial": 0,
+        "Cubierto": 3,
+        "No aplica": 0,
+        "Comprometida": 0,
+        "Sin evidencia": 24,
+        "Desactualizada": 11
+      },
+      "total_evidencias": 14,
+      "controles_evaluados": 38,
+      "controles_aplicables": 38,
+      "porcentaje_cobertura": 7.9
     },
     "integridad": {
       "integro": true,
@@ -133,46 +145,40 @@
       },
       "problemas_cadena": []
     },
-    "cobertura": {
-      "norma": "ISO/IEC 27701:2025",
-      "fecha_corte": "2026-10-27",
-      "rol": "responsable",
-      "vigencia_dias": 365,
-      "total_evidencias": 14,
-      "controles_evaluados": 38,
-      "controles_aplicables": 38,
-      "porcentaje_cobertura": 7.9,
-      "conteo_estados": {
-        "Cubierto": 3,
-        "Parcial": 0,
-        "Desactualizada": 11,
-        "Comprometida": 0,
-        "Sin evidencia": 24,
-        "No aplica": 0
-      }
-    },
+    "errores_pertinencia": [],
     "propuestas_pertinencia": [
       {
         "ref": "A.3.11",
-        "estado": "Cubierto",
-        "veredicto": "no_cumple",
-        "justificacion": "Las evidencias proporcionadas no demuestran el requisito de la norma A.3.11. La evidencia esperada era un procedimiento de gestión de incidentes y brechas de PII, pero las evidencias proporcionadas son una acta de conformación de un equipo de respuestas a incidentes de seguridad digital y dos planes de contingencia. Estas evidencias no cumplen con el requisito de la norma que solicita un procedimiento de gestión de incidentes y brechas de PII.",
-        "falta": "un procedimiento de gestión de incidentes y brechas de PII",
         "citas": [],
-        "origen": "ia"
+        "falta": "un procedimiento de gestión de incidentes y brechas de PII",
+        "estado": "Cubierto",
+        "origen": "ia",
+        "veredicto": "no_cumple",
+        "justificacion": "Las evidencias proporcionadas no demuestran el requisito de la norma A.3.11. La evidencia esperada era un procedimiento de gestión de incidentes y brechas de PII, pero las evidencias proporcionadas son una acta de conformación de un equipo de respuestas a incidentes de seguridad digital y dos planes de contingencia. Estas evidencias no cumplen con el requisito de la norma que solicita un procedimiento de gestión de incidentes y brechas de PII."
       },
       {
         "ref": "5.3",
-        "estado": "Cubierto",
-        "veredicto": "no_cumple",
-        "justificacion": "Las evidencias no mencionan la designación formal del DPO o del oficial de privacidad. No demuestran el requisito de asignar responsabilidades y autoridades para roles relevantes.",
-        "falta": "La designación formal del DPO o del oficial de privacidad.",
         "citas": [],
-        "origen": "ia"
+        "falta": "La designación formal del DPO o del oficial de privacidad.",
+        "estado": "Cubierto",
+        "origen": "ia",
+        "veredicto": "no_cumple",
+        "justificacion": "Las evidencias no mencionan la designación formal del DPO o del oficial de privacidad. No demuestran el requisito de asignar responsabilidades y autoridades para roles relevantes."
       }
-    ],
-    "errores_pertinencia": []
+    ]
   },
-  "error": null,
-  "motor": "LangGraph + SqliteSaver"
+  "aprobacion": null,
+  "parametros": {
+    "modo_rapido": false,
+    "max_hallazgos": 3,
+    "max_pertinencia": 2
+  },
+  "actualizado": "2026-11-01T21:29:54-05:00",
+  "paso_actual": null,
+  "interrupcion": {
+    "motivo": "El proceso se cerro durante el paso redactar_hallazgos (27/10/2026, otra PC); su estado de LangGraph quedo en un SqliteSaver no migrable y no puede reanudarse.",
+    "actor": "jhuamaniCond",
+    "fecha": "2026-11-01T21:29:54-05:00",
+    "paso": "redactar_hallazgos"
+  }
 }

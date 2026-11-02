@@ -21,6 +21,7 @@ import json
 import os
 
 from evidencia_api import ORDEN_ESTADOS, ahora, anotar_custodia
+import evidencia  # noqa: E402  (en sys.path gracias a evidencia_api; trae el ALMACEN opcional)
 
 ARCHIVO = "revisiones_pertinencia.json"
 VEREDICTOS = ("cumple", "cumple_parcialmente", "no_cumple")
@@ -28,6 +29,8 @@ EVALUABLES = ("Cubierto", "Parcial")
 
 
 def leer(expediente):
+    if evidencia.ALMACEN is not None:
+        return evidencia.ALMACEN.leer_revisiones(expediente)
     ruta = os.path.join(expediente, ARCHIVO)
     if not os.path.exists(ruta):
         return {}
@@ -36,6 +39,8 @@ def leer(expediente):
 
 
 def _guardar(expediente, revisiones):
+    if evidencia.ALMACEN is not None:
+        return evidencia.ALMACEN.guardar_revisiones(expediente, revisiones)
     with open(os.path.join(expediente, ARCHIVO), "w", encoding="utf-8") as f:
         json.dump({"revisiones": revisiones}, f, ensure_ascii=False, indent=2)
 
