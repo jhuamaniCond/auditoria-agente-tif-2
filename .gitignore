@@ -1,2 +1,4 @@
 *.pyc
 Mensaje
+# Respaldos de la base (contienen datos)
+BD/respaldos/

@@ -8,6 +8,7 @@ o bien una sola PIMS_DATABASE_URL=postgresql://usuario:clave@host:puerto/base
 """
 
 import os
+import time
 
 import psycopg
 from psycopg.rows import dict_row
@@ -26,6 +27,15 @@ def dsn():
     )
 
 
-def conectar():
-    """Conexion con filas como diccionarios. Usar con `with conectar() as cx:`."""
-    return psycopg.connect(dsn(), row_factory=dict_row)
+def conectar(intentos=4):
+    """Conexion con filas como diccionarios. Usar con `with conectar() as cx:`.
+
+    Reintenta unas veces: PostgreSQL en Docker puede tardar o cerrar conexiones un momento
+    mientras escribe a disco (laptop sin GPU con el LLM local cargado)."""
+    for n in range(1, intentos + 1):
+        try:
+            return psycopg.connect(dsn(), row_factory=dict_row, connect_timeout=10)
+        except psycopg.OperationalError:
+            if n == intentos:
+                raise
+            time.sleep(0.6 * n)

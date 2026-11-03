@@ -29,6 +29,7 @@ import os
 import threading
 import weakref
 
+import psycopg
 from psycopg.types.json import Jsonb
 
 from db import conectar, dsn
@@ -79,7 +80,7 @@ class AlmacenPG(object):
     # ------------------------------------------------------------------ conexion
     def conexion(self):
         cx = getattr(self._local, "cx", None)
-        if cx is None or cx.closed:
+        if cx is None or cx.closed or cx.broken:
             cx = conectar()
             cx.autocommit = True
             self._local.cx = cx
@@ -88,7 +89,11 @@ class AlmacenPG(object):
         return cx
 
     def _cx(self):
-        return self.conexion().cursor()
+        try:
+            return self.conexion().cursor()
+        except psycopg.OperationalError:     # la conexion de este hilo se cayo: se abre otra
+            self._local.cx = None
+            return self.conexion().cursor()
 
     def descripcion(self):
         partes = dict(p.split("=", 1) for p in dsn().split() if "=" in p)
@@ -135,6 +140,54 @@ class AlmacenPG(object):
             cur.execute("DELETE FROM decisiones_humanas WHERE proyecto = %s", (id_,))
             cur.execute("DELETE FROM eventos_agentes WHERE proyecto = %s", (id_,))
             cur.execute("DELETE FROM proyectos WHERE id = %s", (id_,))
+
+    # Datos del agente (todo lo que genera o recibe). El catalogo de la norma y de GESTITEL
+    # (expedientes, requisitos, requisitos_brecha, gestitel_codigos...) no se toca.
+    TABLAS_DATOS = ("documento_paginas", "documentos", "ejecucion_instantaneas", "ejecuciones", "hallazgo_evidencia", "acciones",
+                    "hallazgos", "checklist_items", "auditorias", "revisiones_pertinencia",
+                    "evidencia_requisito", "cadena_custodia", "evidencias", "soa_evaluaciones",
+                    "decisiones_humanas", "eventos_agentes", "bitacora_mcp", "proyectos")
+    TABLAS_CHECKPOINT = ("checkpoint_writes", "checkpoint_blobs", "checkpoints")
+
+    def texto_documento(self, sha256, limite=None):
+        """Texto (por paginas) de un documento cargado con cargar_documentos.py, buscado por su
+        SHA-256. Cadena vacia si ese archivo no esta en la tabla `documentos`."""
+        with self._cx() as cur:
+            cur.execute("""SELECT string_agg(p.texto, E'
+
+' ORDER BY p.pagina) AS t
+                           FROM documento_paginas p
+                           WHERE p.documento_id = (SELECT min(id) FROM documentos WHERE sha256 = %s)""",
+                        (sha256,))
+            t = cur.fetchone()["t"] or ""
+        return t[:limite] if limite else t
+
+    def contar_datos(self):
+        """Filas de cada tabla de datos (para mostrar que se va a borrar)."""
+        cuentas = {}
+        with self._cx() as cur:
+            for t in self.TABLAS_DATOS + self.TABLAS_CHECKPOINT:
+                cur.execute("SELECT to_regclass(%s) AS t", (t,))
+                if cur.fetchone()["t"]:
+                    cur.execute("SELECT count(*) AS n FROM %s" % t)
+                    cuentas[t] = cur.fetchone()["n"]
+        return cuentas
+
+    def vaciar_datos(self):
+        """Vacia todas las tablas de datos y reinicia sus secuencias. Devuelve las filas borradas.
+
+        TRUNCATE no dispara los triggers de solo insercion (son por fila), asi que tambien
+        se vacian la cadena de custodia y la bitacora MCP."""
+        antes = self.contar_datos()
+        cx = self.conexion()
+        with cx.transaction(), cx.cursor() as cur:
+            tablas = list(self.TABLAS_DATOS)
+            for t in self.TABLAS_CHECKPOINT:
+                cur.execute("SELECT to_regclass(%s) AS t", (t,))
+                if cur.fetchone()["t"]:
+                    tablas.append(t)
+            cur.execute("TRUNCATE TABLE %s RESTART IDENTITY CASCADE" % ", ".join(tablas))
+        return antes
 
     # =============================================================== EXPEDIENTE
     def leer_indice(self, expediente):

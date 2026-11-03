@@ -75,7 +75,8 @@ INCIDENTES = os.path.join(nucleo.SALIDAS, "incidentes")
 for _c in (INSTANTANEAS, INCIDENTES):
     os.makedirs(_c, exist_ok=True)
 
-ESTADOS_ABIERTOS = ("en_curso", "esperando_aprobacion")
+ESTADOS_ABIERTOS = ("en_curso", "esperando_aprobacion", "pausada")
+ESTADOS_REANUDABLES = ("pausada", "interrumpida", "error")   # se continua desde el ultimo paso guardado
 REFS = {c["ref"]: c for c in CATALOGO}
 ACTOR = herramientas.RESPONSABLE           # "agente-evidencia"
 
@@ -338,7 +339,12 @@ class EjecucionCancelada(Exception):
     """El usuario cancelo la ejecucion: el grafo se detiene antes del siguiente paso."""
 
 
+class EjecucionPausada(Exception):
+    """El usuario pauso la ejecucion: el grafo se detiene antes del siguiente paso."""
+
+
 _CANCELADAS = set()
+_PAUSAS = set()
 
 
 def _cancelada(id_):
@@ -353,6 +359,8 @@ def _nodo(nombre, fn):
         id_ = estado["ejecucion"]
         if _cancelada(id_):
             raise EjecucionCancelada(id_)
+        if id_ in _PAUSAS:                  # se pauso entre dos pasos: el checkpoint queda intacto
+            raise EjecucionPausada(id_)
         _marcar_paso(id_, nombre, "en_curso")
         try:
             salida = fn(estado) or {}
@@ -1411,10 +1419,11 @@ def cancelar(id_, actor, motivo=""):
         ej = obtener(id_)
         if ej is None:
             raise ErrorAgente("No existe la ejecucion %s" % id_)
-        if ej["estado"] not in ESTADOS_ABIERTOS:
+        if ej["estado"] not in ESTADOS_ABIERTOS + ("interrumpida", "error"):
             raise ErrorAgente("La ejecucion %s ya esta cerrada (%s): no se puede cancelar"
                               % (id_, ej["estado"]))
         _CANCELADAS.add(id_)
+        _PAUSAS.discard(id_)
         paso, estado_previo = ej.get("paso_actual"), ej["estado"]
         ej["estado"] = "cancelada"
         ej["paso_actual"] = None
@@ -1480,6 +1489,9 @@ def _ejecutar(id_, tipo, entrada):
         registrar_decision(id_, None, "ejecucion %s" % final, tipo=tipo,
                            proyecto=valores.get("proyecto"))
     except Exception as e:                  # noqa: BLE001
+        if isinstance(e, EjecucionPausada) and not _cancelada(id_):
+            _confirmar_pausa(id_, tipo)
+            return
         if isinstance(e, EjecucionCancelada) or _cancelada(id_):
             # La cancelacion ya quedo guardada: el hilo solo deja constancia de que paro
             registrar_decision(id_, None, "hilo detenido tras la cancelacion", tipo=tipo,
@@ -1581,6 +1593,125 @@ def aprobar(id_, decision, auditor, comentario="", decisiones_controles=None):
         _guardar(ej)
     _lanzar(id_, _reanudar, id_, ej["tipo"], respuesta)
     return ej
+
+
+def _hilo_vivo(id_):
+    h = _HILOS.get(id_)
+    return bool(h and h.is_alive())
+
+
+def _confirmar_pausa(id_, tipo):
+    """El hilo llego a un limite de paso con la pausa pedida: deja la ejecucion en 'pausada'."""
+    paso = (obtener(id_) or {}).get("paso_actual")
+    solicitud = {}
+
+    def fn(ej):
+        if ej["estado"] == "cancelada":
+            return
+        solicitud.update(ej.get("pausa_solicitada") or {})
+        siguiente = next((p for p in ej["pasos"] if p["estado"] == "pendiente"), None)
+        ej["estado"] = "pausada"
+        ej["paso_actual"] = None
+        ej["pausa"] = dict(solicitud, fecha=_ahora(),
+                           siguiente_paso=siguiente["nodo"] if siguiente else None)
+        ej.pop("pausa_solicitada", None)
+    ej = _modificar(id_, fn)
+    registrar_decision(id_, paso, "pausada", actor=solicitud.get("actor") or ACTOR, humano=True,
+                       detalle={"motivo": solicitud.get("motivo", ""),
+                                "siguiente_paso": (ej or {}).get("pausa", {}).get("siguiente_paso")},
+                       tipo=tipo, proyecto=(ej or {}).get("proyecto"))
+    _publicar("ejecucion.pausada", ejecucion=id_, flujo=tipo, proyecto=(ej or {}).get("proyecto"))
+
+
+def pausar(id_, actor, motivo=""):
+    """Pide detener una ejecucion en curso. Se detiene al terminar el paso actual (una llamada
+    al LLM no se corta a la mitad); el estado del grafo queda guardado y se continua con
+    reanudar(). Si ya no hay un hilo trabajando, queda pausada de inmediato."""
+    actor = (actor or "").strip()
+    if not actor:
+        raise ErrorAgente("Indica quien pausa la ejecucion")
+    motivo = (motivo or "").strip() or "Pausada por el usuario"
+    with _CANDADO:
+        ej = obtener(id_)
+        if ej is None:
+            raise ErrorAgente("No existe la ejecucion %s" % id_)
+        if ej["estado"] != "en_curso":
+            raise ErrorAgente("Solo se puede pausar una ejecucion en curso (esta %s)" % ej["estado"])
+        if ej.get("pausa_solicitada"):
+            return ej
+        ej["pausa_solicitada"] = {"actor": actor, "motivo": motivo, "fecha": _ahora()}
+        _guardar(ej)
+        viva = _hilo_vivo(id_)
+        if viva:
+            _PAUSAS.add(id_)
+    if not viva:
+        _confirmar_pausa(id_, ej["tipo"])
+    else:
+        registrar_decision(id_, ej.get("paso_actual"), "pausa solicitada", actor=actor, humano=True,
+                           detalle={"motivo": motivo}, tipo=ej["tipo"], proyecto=ej["proyecto"])
+    return obtener(id_)
+
+
+def _continuar(id_, tipo):
+    """Reanuda el grafo desde su ultimo checkpoint; sin checkpoint, lo relanza desde el inicio."""
+    ej = obtener(id_)
+    grafo = GRAFOS[tipo]
+    config = _config(id_)
+    try:
+        snap = grafo.get_state(config)
+        retomar = bool(snap.next) or bool(snap.values)
+    except Exception:                       # noqa: BLE001
+        retomar = False
+    entrada = None if retomar else {"ejecucion": id_, "tipo": tipo, "proyecto": ej["proyecto"],
+                                    "parametros": ej.get("parametros") or {}, "resultado": {}}
+    _ejecutar(id_, tipo, entrada)
+
+
+def reanudar(id_, actor):
+    """Continua una ejecucion pausada, interrumpida o con error desde el paso donde quedo,
+    sin repetir lo ya hecho (el estado del grafo esta en los checkpoints de PostgreSQL)."""
+    actor = (actor or "").strip()
+    if not actor:
+        raise ErrorAgente("Indica quien reanuda la ejecucion")
+    with _CANDADO:
+        ej = obtener(id_)
+        if ej is None:
+            raise ErrorAgente("No existe la ejecucion %s" % id_)
+        if ej["estado"] not in ESTADOS_REANUDABLES:
+            raise ErrorAgente("La ejecucion %s no se puede reanudar (estado %s)" % (id_, ej["estado"]))
+        if _hilo_vivo(id_):
+            raise ErrorAgente("La ejecucion %s todavia tiene un paso en marcha" % id_)
+        estado_previo = ej["estado"]
+        _PAUSAS.discard(id_)
+        _CANCELADAS.discard(id_)
+        ej["estado"] = "en_curso"
+        ej["error"] = None
+        for k in ("pausa", "pausa_solicitada", "interrupcion"):
+            ej.pop(k, None)
+        for p in ej["pasos"]:               # los pasos que no llegaron a terminar vuelven a pendiente
+            if p["estado"] in ("error", "interrumpido") or (p["estado"] == "omitido" and not p.get("inicio")):
+                p.update(estado="pendiente", inicio=None, fin=None, resumen="")
+        ej.setdefault("reanudaciones", []).append({"actor": actor, "fecha": _ahora(),
+                                                   "desde": estado_previo})
+        _guardar(ej)
+    registrar_decision(id_, None, "reanudada", actor=actor, humano=True,
+                       detalle={"desde": estado_previo}, tipo=ej["tipo"], proyecto=ej["proyecto"])
+    _publicar("ejecucion.reanudada", ejecucion=id_, flujo=ej["tipo"], proyecto=ej["proyecto"],
+              actor=actor)
+    _lanzar(id_, _continuar, id_, ej["tipo"])
+    return obtener(id_)
+
+
+def recuperar_huerfanas():
+    """Al arrancar el programa: las ejecuciones que figuran 'en curso' ya no tienen hilo.
+    Se marcan como interrumpidas para poder reanudarlas desde su ultimo paso."""
+    recuperadas = []
+    for ej in listar():
+        if ej["estado"] == "en_curso" and not _hilo_vivo(ej["id"]):
+            marcar_interrumpida(ej["id"], "El programa se reinicio con la ejecucion en curso",
+                                actor="sistema")
+            recuperadas.append(ej["id"])
+    return recuperadas
 
 
 def esperar(id_, timeout=None, intervalo=0.5):

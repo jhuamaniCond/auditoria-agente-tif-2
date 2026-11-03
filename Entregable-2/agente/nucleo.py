@@ -65,7 +65,45 @@ import llm_local  # noqa: E402,F401
 import revisiones  # noqa: E402,F401
 from evidencia_api import (TIPOS, ErrorEvidencia, leer_indice,  # noqa: E402,F401
                            registrar_evidencia, verificar_expediente)
+import rag  # noqa: E402
 from rag import leer_texto  # noqa: E402,F401
+
+# El texto de los documentos sale de PostgreSQL (tablas documentos / documento_paginas, cargadas
+# con BD/cargar_documentos.py, OCR incluido): el agente deja de leer los PDF. Si el archivo no
+# esta cargado en la BD, se usa el lector de archivos del Entregable 1 (solo formatos de texto).
+_leer_texto_archivo = rag.leer_texto
+_SHA_ARCHIVO = {}
+
+
+def _leer_texto_bd(ruta, limite=20000):
+    if ALMACEN is not None and os.path.isfile(ruta):
+        marca = (ruta, os.path.getmtime(ruta))
+        sha = _SHA_ARCHIVO.get(marca)
+        if sha is None:
+            import hashlib
+            with open(ruta, "rb") as f:
+                sha = _SHA_ARCHIVO[marca] = hashlib.sha256(f.read()).hexdigest()
+        texto = ALMACEN.texto_documento(sha, limite)
+        if texto:
+            return texto
+    return _leer_texto_archivo(ruta, limite)
+
+
+# Con texto real cada documento da decenas de fragmentos: se mandan a Ollama en lotes pequenos
+# (una sola peticion con todos hacia caer el modelo de embeddings en una laptop sin GPU).
+_embeber_original = llm_local.embeber
+
+
+def _embeber_por_lotes(textos, lote=6):
+    vectores = []
+    for i in range(0, len(textos), lote):
+        vectores.extend(_embeber_original(textos[i:i + lote]))
+    return vectores
+
+
+llm_local.embeber = _embeber_por_lotes
+rag.leer_texto = leer_texto = _leer_texto_bd
+app_e1.leer_texto = _leer_texto_bd
 
 CATALOGO = app_e1.CATALOGO
 PROYECTOS = app_e1.PROYECTOS
@@ -99,6 +137,38 @@ def proyecto(id_="unsa"):
     if not p:
         raise ErrorAgente("No existe el proyecto %r" % id_)
     return p
+
+
+def vaciar_datos():
+    """Borra todo lo que el agente guarda sobre las organizaciones auditadas y deja el proyecto
+    'unsa' vacio. Conserva el catalogo de la norma y de GESTITEL, `documentos_unsa/` (originales
+    descargados) y el codigo. Devuelve un resumen de lo que se borro."""
+    import shutil
+    resumen = {"filas": ALMACEN.vaciar_datos() if ALMACEN is not None else {}, "carpetas": []}
+    destinos = [os.path.join(DATOS, "proyectos"), SALIDAS, BANDEJA, EJECUCIONES]
+    if ALMACEN is None:     # modo archivos: tambien las bitacoras JSONL
+        for n in ("bitacora_decisiones.jsonl", "bitacora_mcp.jsonl", "eventos.jsonl"):
+            ruta = os.path.join(DATOS, n)
+            if os.path.isfile(ruta):
+                os.remove(ruta)
+    for carpeta in destinos:
+        if not os.path.isdir(carpeta):
+            continue
+        for nombre in os.listdir(carpeta):
+            ruta = os.path.join(carpeta, nombre)
+            if carpeta == EJECUCIONES and ALMACEN is None and nombre.startswith("checkpoints"):
+                continue    # lo mantiene abierto SqliteSaver
+            try:
+                shutil.rmtree(ruta) if os.path.isdir(ruta) else os.remove(ruta)
+                resumen["carpetas"].append(os.path.relpath(ruta, DATOS).replace(os.sep, "/"))
+            except OSError:
+                pass        # archivo abierto por otro proceso: se deja
+    for carpeta in destinos + [os.path.join(EJECUCIONES, "_estado"), os.path.join(SALIDAS, "incidentes")]:
+        os.makedirs(carpeta, exist_ok=True)
+    with PROYECTOS._candado:
+        PROYECTOS._cache.clear()
+    asegurar_unsa()
+    return resumen
 
 
 def preparar():

@@ -161,6 +161,15 @@ def exportar_gestitel(proyecto="unsa", auditoria=None):
     return xg.exportar(nucleo.ALMACEN, auditoria=auditoria, proyecto=proyecto)
 
 
+def exportar_gestitel_documentos(proyecto="unsa"):
+    """Excel de documentos de GESTITEL (document_template.xlsx): una fila por evidencia del expediente."""
+    if nucleo.ALMACEN is None:
+        raise ErrorAgente("exportar_gestitel_documentos necesita PostgreSQL (PIMS_BACKEND=postgres)")
+    import exportar_gestitel as xg
+    _p(proyecto)
+    return xg.exportar_documentos(nucleo.ALMACEN, proyecto=proyecto)
+
+
 # ---------------------------------------------------------------- con IA local
 
 def clasificar(ruta_archivo, proyecto="unsa"):

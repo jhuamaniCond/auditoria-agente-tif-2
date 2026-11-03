@@ -80,14 +80,51 @@ def exportar(almacen, ruta=None, auditoria=None, proyecto="unsa", empresa="UNSA"
             "sin_codigo_gestitel": sin_codigo(filas)}
 
 
+COLUMNAS_DOCUMENTOS = ["code", "current_version", "name", "category", "status", "responsible", "approved_at"]
+
+
+def exportar_documentos(almacen, ruta=None, proyecto="unsa"):
+    """Excel de documentos con el formato de document_template.xlsx de GESTITEL (una fila por
+    evidencia del expediente). `status` sale como texto (vigente, obsoleta, retirada): el codigo
+    de una letra de GESTITEL para el estado de un documento no esta confirmado."""
+    with almacen._cx() as cur:
+        cur.execute("""SELECT codigo, version, titulo, tipo, estado, responsable
+                       FROM evidencias WHERE proyecto = %s ORDER BY codigo""", (proyecto,))
+        filas = cur.fetchall()
+    if not ruta:
+        os.makedirs(SALIDAS, exist_ok=True)
+        ruta = os.path.join(SALIDAS, "documents_gestitel_%s.xlsx" % dt.datetime.now().strftime("%Y%m%d_%H%M%S"))
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Plantilla"
+    ws.append(COLUMNAS_DOCUMENTOS)
+    for c in ws[1]:
+        c.font = Font(bold=True, color="FFFFFF")
+        c.fill = PatternFill("solid", fgColor="1F3A5F")
+    for f in filas:         # longitudes de core_document: code 45, name 100, category 50, responsible 100
+        ws.append([f["codigo"][:45], float(f["version"]), f["titulo"][:100], f["tipo"][:50],
+                   f["estado"], f["responsable"][:100], None])
+    for i, col in enumerate(COLUMNAS_DOCUMENTOS, 1):
+        ws.column_dimensions[get_column_letter(i)].width = max(14, min(60, max(
+            [len(col)] + [len(str(r[i - 1] or "")) for r in ws.iter_rows(min_row=2, values_only=True)]) + 2))
+    ws.freeze_panes = "A2"
+    wb.save(ruta)
+    return {"ruta": ruta, "filas": len(filas)}
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--auditoria", help="código de una auditoría (por defecto, todas)")
     ap.add_argument("--proyecto", default="unsa")
+    ap.add_argument("--documentos", action="store_true", help="exporta las evidencias como documentos (document_template)")
     ap.add_argument("--salida", help="ruta del .xlsx (por defecto Entregable-2/datos/salidas/)")
     args = ap.parse_args()
 
     from almacen_pg import AlmacenPG
+    if args.documentos:
+        r = exportar_documentos(AlmacenPG(), args.salida, args.proyecto)
+        print("Excel de documentos GESTITEL: %s (%d filas)" % (r["ruta"], r["filas"]))
+        return
     r = exportar(AlmacenPG(), args.salida, args.auditoria, args.proyecto)
     print("Excel GESTITEL: %s (%d filas, auditorías: %s)"
           % (r["ruta"], r["filas"], ", ".join(r["auditorias"]) or "ninguna"))

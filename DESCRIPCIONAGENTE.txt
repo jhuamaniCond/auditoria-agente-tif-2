@@ -1,0 +1,212 @@
+=====================================================================
+AGENTE DE EVIDENCIA Y AUDITORIA - PIMS (ISO/IEC 27701:2025)
+Descripcion de la pagina web y de cada menu
+Organizacion auditada: Universidad Nacional de San Agustin de Arequipa (UNSA)
+=====================================================================
+
+DIRECCION DE LA PAGINA
+  http://127.0.0.1:5000/agente      (http://127.0.0.1:5000/ redirige aqui)
+  Se levanta con:  cd Entregable-2/agente  y luego  python servidor_web.py
+  Requiere: Docker con PostgreSQL (carpeta BD/) y, para la IA, Ollama.
+
+QUE ES ESTE AGENTE
+  Es el Agente 4 del PIMS multiagente. Mantiene el expediente de evidencias
+  de la UNSA integro y trazable, y prepara la auditoria interna (clausula 9.2
+  de la norma, con 9.1 y el control A.3.14). El agente propone; toda
+  conclusion pasa por una persona (el auditor) antes de emitirse.
+
+  Los datos viven en PostgreSQL (base "pims_auditoria"). El texto de los
+  documentos oficiales esta guardado en las tablas "documentos" y
+  "documento_paginas" (los PDF escaneados ya fueron leidos con OCR), y el
+  agente lee el contenido desde la base, no desde los PDF.
+
+ESTRUCTURA DE LA PAGINA
+  Barra lateral izquierda con 7 menus, y arriba tres indicadores de estado:
+    - BD: si la base de datos PostgreSQL esta conectada.
+    - IA local: si Ollama esta encendido y cuantos modelos tiene.
+    - Expediente: si el expediente esta integro, con alerta o vacio.
+  En pantallas pequenas el menu se oculta y se abre con el boton de tres
+  rayas. Se adapta al modo oscuro del sistema.
+
+
+---------------------------------------------------------------------
+1. MENU "PANEL"  (pantalla de inicio)
+---------------------------------------------------------------------
+Es el resumen general y el lugar para lanzar acciones.
+
+Contiene:
+  a) Cuatro indicadores (KPI):
+     - Cobertura del PIMS: porcentaje de controles aplicables que estan
+       cubiertos con evidencia, con barra de avance.
+     - Evidencias: cuantas hay en el expediente.
+     - Integridad: "Integro" o "Alerta" segun la verificacion de hashes y
+       de la cadena de custodia.
+     - Auditorias: cuantas ejecuciones hay y cuantas estan abiertas.
+  b) Tarjeta "Nueva auditoria interna":
+     - Modo rapido: determinista, sin IA, tarda segundos.
+     - Con IA local: el modelo (Ollama, qwen2.5:3b) evalua pertinencia y
+       redacta los hallazgos mas prioritarios. Se puede fijar cuantos
+       hallazgos y cuantas pertinencias evalua con IA.
+     - Boton "Iniciar auditoria": lanza el flujo y lleva a Auditorias.
+  c) Tarjeta "Notificar incidente": se escribe la descripcion de un
+     incidente de privacidad (simula al Agente de Incidentes). El agente lo
+     registra como evidencia y pide la confirmacion del DPO.
+  d) Tarjeta "Bandeja de entrada": se arrastran o eligen archivos; el agente
+     los clasifica (controles, tipo, titulo) y los registra tras la
+     confirmacion humana. Muestra los ultimos archivos dejados.
+  e) "Controles por estado": cuantos controles estan Cubiertos, Parciales,
+     Desactualizados, Comprometidos o Sin evidencia.
+  f) "Actividad reciente": las ultimas 5 ejecuciones; al pulsar una se abre
+     en el menu Auditorias.
+
+
+---------------------------------------------------------------------
+2. MENU "AUDITORIAS"
+---------------------------------------------------------------------
+Lista de todas las ejecuciones del agente (auditorias, incidentes y
+bandeja) y detalle de la seleccionada. Un numero naranja junto al menu
+indica cuantas estan abiertas o interrumpidas.
+
+Columna izquierda: lista de ejecuciones con tipo, estado, identificador y
+fecha, y el boton "Actualizar".
+
+Columna derecha (detalle de la ejecucion):
+  - Linea de tiempo de los pasos del flujo, cada uno con su estado y
+    resumen. Pasos de la auditoria interna: planificar, verificar
+    integridad, alerta de integridad, matriz de cobertura, evaluar
+    pertinencia, priorizar, redactar hallazgos, aprobacion del auditor,
+    generar informe y plan de accion.
+  - Barra de acciones segun el estado:
+      * Pausar: detiene la ejecucion al terminar el paso en curso. El
+        avance queda guardado.
+      * Reanudar: continua desde el paso donde quedo, sin repetir lo hecho.
+        Tambien sirve si el programa se reinicio a mitad (estado
+        "Interrumpida").
+      * Reintentar: vuelve a correr una ejecucion que termino con error.
+      * Cancelar auditoria: la descarta; no genera informe ni plan de
+        accion y no se puede reanudar. Pide quien la cancela y un motivo.
+      * Exportar Excel GESTITEL: aparece cuando la auditoria esta
+        completada; descarga el Excel de Auditorias para importarlo en
+        GESTITEL.
+  - Aprobacion del auditor (puerta de decision humana): muestra los
+    hallazgos preliminares y las propuestas de pertinencia. El auditor
+    acepta o rechaza cada propuesta, escribe su nombre y un comentario, y
+    pulsa "Aprobar y generar informe" o "Rechazar".
+  - Resultado: plan de accion (accion, responsable, prioridad, plazo) e
+    informe de auditoria en pantalla.
+  - Avisos cuando la ejecucion fue pausada, interrumpida, cancelada o
+    termino con error.
+  - Toda accion humana queda registrada en la bitacora de decisiones.
+
+
+---------------------------------------------------------------------
+3. MENU "EXPEDIENTE"
+---------------------------------------------------------------------
+El expediente de evidencias de la UNSA.
+
+Contiene:
+  - Tabla de evidencias: codigo (EV-0001...), titulo y archivo, tipo,
+    controles que respalda, fecha del documento y huella SHA-256.
+  - Boton "Verificar integridad": recalcula el SHA-256 de cada archivo y
+    comprueba la cadena de custodia; avisa si algo fue alterado o falta.
+  - Boton "Registrar evidencia": abre un formulario para subir un archivo
+    con titulo, tipo, fecha, controles que respalda (se validan contra el
+    catalogo), fuente (URL) y quien lo registra. El agente calcula su
+    SHA-256, lo anota en la cadena de custodia y lo indexa para la
+    busqueda.
+  - Boton "Exportar Excel GESTITEL": descarga las evidencias como
+    documentos en el formato de document_template.xlsx de GESTITEL. El
+    estado del documento sale como texto porque el codigo de una letra de
+    GESTITEL para ese campo no esta confirmado.
+
+
+---------------------------------------------------------------------
+4. MENU "COBERTURA"
+---------------------------------------------------------------------
+Matriz de cobertura de controles de la norma.
+
+Contiene:
+  - Resumen: porcentaje de cobertura y cuantos controles aplican.
+  - Tabla con una fila por control: codigo, requisito, estado (Cubierto,
+    Parcial, Desactualizada, Comprometida, Sin evidencia), cantidad de
+    evidencias y nota con lo que se espera como evidencia.
+  - Filtro por estado.
+  Aplican 38 controles a la UNSA como responsable del tratamiento: 25
+  clausulas (4 a 10), 8 de A.1 y 5 de A.3. El grupo A.2 (3 controles) es
+  para encargados del tratamiento y no se muestra. Es una seleccion de la
+  norma, no los 142 controles de la SOA de GESTITEL.
+
+
+---------------------------------------------------------------------
+5. MENU "BITACORAS"
+---------------------------------------------------------------------
+Registros de trazabilidad, los ultimos 100 de cada tipo, con fecha, tipo y
+detalle. Tres pestanas:
+  - Decisiones: cada decision humana y del agente (inicio, pausa,
+    reanudacion, cancelacion, aprobacion, vaciado de la base).
+  - MCP: cada llamada al servidor MCP del agente (solo insercion, con
+    cadena de hashes).
+  - Eventos: mensajes entre agentes del PIMS (incidente detectado,
+    auditoria solicitada, aprobacion requerida...).
+
+
+---------------------------------------------------------------------
+6. MENU "HERRAMIENTAS"
+---------------------------------------------------------------------
+Lista de las herramientas del agente (herramientas.py): nombre, firma y
+descripcion, y si usan IA local o son deterministas. Son las mismas que
+publica el servidor MCP "evidencias-pims" y que encadena el orquestador:
+registrar evidencia, verificar integridad, matriz de cobertura, generar
+informe, exportar a GESTITEL, clasificar, buscar, evaluar pertinencia,
+redactar hallazgo, preguntar, entre otras.
+
+
+---------------------------------------------------------------------
+7. MENU "DATOS Y SISTEMA"
+---------------------------------------------------------------------
+Estado tecnico y gestion de los datos.
+
+Contiene:
+  - Servicios: PostgreSQL (con su direccion), Ollama (con los modelos
+    instalados) y el orquestador LangGraph, cada uno con luz verde o roja.
+  - Datos en la base: cuantas filas tiene cada tabla de datos y boton
+    "Actualizar".
+  - Zona de peligro "Vaciar la base de datos": borra todas las evidencias,
+    cadena de custodia, documentos y su texto, auditorias, hallazgos,
+    ejecuciones y bitacoras, y elimina los archivos del expediente,
+    informes y bandeja, para empezar de cero. Pide el nombre de quien lo
+    hace y escribir la palabra VACIAR. Se conserva el catalogo de la norma
+    y de GESTITEL y los documentos originales de la carpeta docs-unsa. La
+    accion queda registrada en la bitacora. Conviene hacer antes un
+    respaldo (carpeta BD/respaldos).
+
+
+---------------------------------------------------------------------
+CUADROS DE DIALOGO
+---------------------------------------------------------------------
+  - Registrar evidencia (menu Expediente).
+  - Pausar / Reanudar / Cancelar (piden quien lo hace y, en algunos casos,
+    un motivo).
+  - Vaciar la base de datos (confirmacion escribiendo VACIAR).
+
+
+---------------------------------------------------------------------
+QUE NO HACE TODAVIA
+---------------------------------------------------------------------
+  - No se pueden editar ni eliminar individualmente evidencias, hallazgos
+    ni acciones desde la pagina (solo agregar, cancelar y vaciar todo).
+  - La matriz de cobertura usa 38 controles, no los 142 de la SOA.
+  - Los documentos de docs-unsa sin controles asignados estan en la base
+    con su texto, pero no cuentan como evidencia hasta clasificarlos.
+  - El texto de los PDF escaneados viene de OCR y puede tener errores.
+  - El codigo de GESTITEL para el estado de un documento no esta
+    confirmado; sale como texto en el Excel.
+
+---------------------------------------------------------------------
+ESTADO ACTUAL DE LOS DATOS
+---------------------------------------------------------------------
+  - 14 evidencias registradas en el expediente de la UNSA.
+  - 51 documentos oficiales con texto en la base (614 paginas).
+  - Cobertura inicial: 7.9% (3 controles cubiertos, 11 desactualizados y 24
+    sin evidencia, de 38 aplicables).
+=====================================================================

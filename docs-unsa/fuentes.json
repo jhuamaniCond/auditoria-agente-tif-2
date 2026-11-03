@@ -1,0 +1,602 @@
+[
+ {
+  "archivo": "255_RCU_0748-2019.pdf",
+  "titulo": "RCU 0748-2019 Directiva de Transparencia y Acceso a la Información Pública, formato FUT",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/255/RCU_0748-2019.pdf?sequence=1&isAllowed=y",
+  "handle": 255,
+  "fecha_documento": "2019-08-26",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "ec211aa24439c943feb5194fbffe80e379a9dae70d63ca9f149be348a25bdf3e",
+  "bytes": 2254250,
+  "tipo": "procedimiento",
+  "controles": [
+   "4.2",
+   "7.4"
+  ],
+  "justificacion_controles": "Directiva aprobada y versionada. 4.2 (parcial): su base legal identifica requisitos externos aplicables, entre ellos la Ley 27806, la Ley 29733 y su reglamento, y el D.Leg. 1353; no es una matriz de partes interesadas. 7.4: regula que se comunica, quien lo hace y en que plazos hacia el exterior (Funcionario Responsable de Acceso a la Informacion, Portal de Transparencia Estandar, respuesta de las unidades en 3 dias habiles). Es de 2019; se espera estado Desactualizada. Escaneado en su mayor parte."
+ },
+ {
+  "archivo": "353_RCU-0309-2020.pdf",
+  "titulo": "RCU 0309-2020 Directiva No. 004-2020-ODO-SG \"Directiva de Transparencia y Acceso la Información Pública\". Formato de Solicitud de Acceso a la Información Pública",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/353/RCU-0309-2020.pdf?sequence=1&isAllowed=y",
+  "handle": 353,
+  "fecha_documento": "2020-05-12",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "9624a35748ee230a80237fc77cb4778e6080e90275db12c9dee3e7e90d3f106c",
+  "bytes": 3360564
+ },
+ {
+  "archivo": "353_RCU-0748-2019-FUT.pdf",
+  "titulo": "RCU 0309-2020 Directiva No. 004-2020-ODO-SG \"Directiva de Transparencia y Acceso la Información Pública\". Formato de Solicitud de Acceso a la Información Pública",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/353/RCU-0748-2019-FUT.pdf?sequence=2&isAllowed=y",
+  "handle": 353,
+  "fecha_documento": "2020-05-12",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "31a4f60e0e1ebfeee599018e02083fc24175d8aee0e5617234eace8008174379",
+  "bytes": 314840
+ },
+ {
+  "archivo": "375_RCU_0375-2020.pdf",
+  "titulo": "RCU 0375-2020  Ratificar a la Comisión Operativa encargada de realizar las gestiones para la adquisición de canastas de alimentos. Ratificar a la Comisión Supervisora encargada de verificar la calificación de \"vulnerable\".",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/375/RCU%200375-2020.pdf?sequence=1&isAllowed=y",
+  "handle": 375,
+  "fecha_documento": "2020-07-01",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "015e4ea7b36939a894add86d6a6016bfdd112509f7b18e2746aaadd99f302aaa",
+  "bytes": 3614164
+ },
+ {
+  "archivo": "526_RESUMENES_DE_LAS_SESIONES_DEL_08_19_22_27-08_y_03_11_y_24-09-2018.pdf",
+  "titulo": "Resumenes agosto - setiembre 2018",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/526/RESUMENES%20DE%20LAS%20SESIONES%20DEL%2008%2019%2022%2027-08%20y%2003%2011%20y%2024-09-2018.pdf?sequence=1&isAllowed=y",
+  "handle": 526,
+  "fecha_documento": "2018",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "ce2ecc3d543a64987361cef296cfcb3974dfe706f24021bc883ca9da88b6f38a",
+  "bytes": 252115
+ },
+ {
+  "archivo": "667_RCU-0350-2021.pdf",
+  "titulo": "RCU 0350-2021 Plan de Contingencias de Tecnologías de la Información de la Oficina Universitaria de Informática y Sistemas",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/667/RCU-0350-2021.pdf?sequence=1&isAllowed=y",
+  "handle": 667,
+  "fecha_documento": "2021-07-23",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "22cac167c4b361562b313bf494ed147f29c7003d7601d17fcdb5d1c02fa39978",
+  "bytes": 3420589,
+  "tipo": "procedimiento",
+  "controles": [
+   "A.3.11"
+  ],
+  "justificacion_controles": "Plan aprobado por Consejo Universitario (a raiz de recomendaciones de la sociedad auditora) para recuperar servicios informaticos ante desastre, incidencia o evento y prevenir la perdida o corrupcion de informacion digital; toma como base la NTP-ISO/IEC 27001 y la RM 028-2015-PCM. A.3.11 (parcial, preparacion ante incidentes). Es de 2021 y probablemente lo sustituye en parte el plan de 2026, por lo que se espera que figure como Desactualizada. La mayor parte esta escaneada."
+ },
+ {
+  "archivo": "801_RCU-1163-2021.pdf",
+  "titulo": "RCU 1163-2021 Directiva N° 010-2021-ODO-SDI, denominada: “Procedimientos técnicos administrativos de organización, protección, conservación y acceso a la información de documentos de la Subdirección de Infraestructura”",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/801/RCU-1163-2021.pdf?sequence=1&isAllowed=y",
+  "handle": 801,
+  "fecha_documento": "2021-12-30",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "33644c147b1867aafbb8112d5e2588ac1fd28a27c6908f98e557d5250f6cff7f",
+  "bytes": 1401263
+ },
+ {
+  "archivo": "857_RR-0004-2025.pdf",
+  "titulo": "RR 0338-2022 Comité de Gobierno y Transformación Digital. RR 0338-2022. RR 0383-2024 RECONFORMAR el Comité de Gobierno y Transformación DigitaI. RR 0004-2025 DESIGNAR al ABG. JHONY BRIAN SOTOMAYOR ZEBALLOS, como Coordinador de Gobierno y Transformación Digital. RR 1000-2025 RECONFORMAR el Comité de Gobierno y Transformación DigitaI (Total: 4 Resoluciones)",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/857/RR-0004-2025.pdf?sequence=4&isAllowed=y",
+  "handle": 857,
+  "fecha_documento": "2022-03-31",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "e1fcdde11e7a8907f46496e584d7ced1156ab0397a5b1af0713af4b61b2255a1",
+  "bytes": 2518590
+ },
+ {
+  "archivo": "857_RR-0338-2022.pdf",
+  "titulo": "RR 0338-2022 Comité de Gobierno y Transformación Digital. RR 0338-2022. RR 0383-2024 RECONFORMAR el Comité de Gobierno y Transformación DigitaI. RR 0004-2025 DESIGNAR al ABG. JHONY BRIAN SOTOMAYOR ZEBALLOS, como Coordinador de Gobierno y Transformación Digital. RR 1000-2025 RECONFORMAR el Comité de Gobierno y Transformación DigitaI (Total: 4 Resoluciones)",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/857/RR-0338-2022.pdf?sequence=1&isAllowed=y",
+  "handle": 857,
+  "fecha_documento": "2022-03-31",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "a0ef150a817e8896fe3e292c9131d7f77d0988faf42101cc3967a3454b6bd4e6",
+  "bytes": 655422
+ },
+ {
+  "archivo": "857_RR-0383-2024.pdf",
+  "titulo": "RR 0338-2022 Comité de Gobierno y Transformación Digital. RR 0338-2022. RR 0383-2024 RECONFORMAR el Comité de Gobierno y Transformación DigitaI. RR 0004-2025 DESIGNAR al ABG. JHONY BRIAN SOTOMAYOR ZEBALLOS, como Coordinador de Gobierno y Transformación Digital. RR 1000-2025 RECONFORMAR el Comité de Gobierno y Transformación DigitaI (Total: 4 Resoluciones)",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/857/RR-0383-2024.pdf?sequence=3&isAllowed=y",
+  "handle": 857,
+  "fecha_documento": "2022-03-31",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "fd933bc0e4e3dca054e85f22d0926fa6446dc545763b4d734006f6b1c0100caf",
+  "bytes": 232321
+ },
+ {
+  "archivo": "857_RR-1000-2025.pdf",
+  "titulo": "RR 0338-2022 Comité de Gobierno y Transformación Digital. RR 0338-2022. RR 0383-2024 RECONFORMAR el Comité de Gobierno y Transformación DigitaI. RR 0004-2025 DESIGNAR al ABG. JHONY BRIAN SOTOMAYOR ZEBALLOS, como Coordinador de Gobierno y Transformación Digital. RR 1000-2025 RECONFORMAR el Comité de Gobierno y Transformación DigitaI (Total: 4 Resoluciones)",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/857/RR-1000-2025.pdf?sequence=5&isAllowed=y",
+  "handle": 857,
+  "fecha_documento": "2022-03-31",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "6bfaef644106de6225b240a7e401ae5389e6efb20fb36e94224486be37f9e769",
+  "bytes": 519887,
+  "tipo": "acta",
+  "controles": [
+   "5.1",
+   "5.3"
+  ],
+  "justificacion_controles": "Resolucion rectoral firmada: el comite lo preside el Rector e integra al Oficial de Datos Personales, al Oficial de Seguridad y Confianza Digital, al Lider de Gobierno Digital y a jefes de oficinas. 5.1 (parcial): muestra compromiso de la alta direccion con la gobernanza digital y de datos, aunque no asigna recursos al PIMS de forma expresa. 5.3: fija la composicion del organo de gobierno con roles de privacidad y seguridad. PDF escaneado."
+ },
+ {
+  "archivo": "898_RR-0601-2022.pdf",
+  "titulo": "RR 0986-2025 DESIGNAR al Jefe de la Oficina de Tecnologías de la Información, como Líder de Gobierno y Transformación digital",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/898/RR-0601-2022.pdf?sequence=1&isAllowed=y",
+  "handle": 898,
+  "fecha_documento": "2022-06-14",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "688c257128306b0533481ed509bd95e24ac9b8d2fc07dc7c652a7c0ec757abc7",
+  "bytes": 563305
+ },
+ {
+  "archivo": "898_RR-0986-2025.pdf",
+  "titulo": "RR 0986-2025 DESIGNAR al Jefe de la Oficina de Tecnologías de la Información, como Líder de Gobierno y Transformación digital",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/898/RR-0986-2025.pdf?sequence=3&isAllowed=y",
+  "handle": 898,
+  "fecha_documento": "2022-06-14",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "fd251c4fe72df14a51401d37564f9916605205dbac76ac393edc0e6f1ec1e8fb",
+  "bytes": 287488
+ },
+ {
+  "archivo": "911_ORGANIGRAMA_2022_RCU-0306-2022.pdf",
+  "titulo": "RCU 0306-2022 Reglamento de Organización y Funciones (ROF) y Organigrama (contiene documentación integrante e historial)",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/911/ORGANIGRAMA_2022_RCU-0306-2022.pdf?sequence=6&isAllowed=y",
+  "handle": 911,
+  "fecha_documento": "2022-07-05",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "53b4849b1080277028ff32541097bf82622d4cd701de149643db6742df0a2f2e",
+  "bytes": 533448
+ },
+ {
+  "archivo": "911_RCU-0096-2023.pdf",
+  "titulo": "RCU 0306-2022 Reglamento de Organización y Funciones (ROF) y Organigrama (contiene documentación integrante e historial)",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/911/RCU-0096-2023.pdf?sequence=3&isAllowed=y",
+  "handle": 911,
+  "fecha_documento": "2022-07-05",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "7c1237dca43057bceaa1e1d8c397a32e2c9b2878464d34e0f79efd8a2b2fadc1",
+  "bytes": 7478613
+ },
+ {
+  "archivo": "911_RCU-0174-2023.pdf",
+  "titulo": "RCU 0306-2022 Reglamento de Organización y Funciones (ROF) y Organigrama (contiene documentación integrante e historial)",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/911/RCU-0174-2023.pdf?sequence=5&isAllowed=y",
+  "handle": 911,
+  "fecha_documento": "2022-07-05",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "4f97582c76ff6f858fd7bf32fa4a6557e5ce92b3e8d4bb18206155ea3c9dd4e3",
+  "bytes": 350973
+ },
+ {
+  "archivo": "911_RCU-0196-2025.pdf",
+  "titulo": "RCU 0306-2022 Reglamento de Organización y Funciones (ROF) y Organigrama (contiene documentación integrante e historial)",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/911/RCU-0196-2025.pdf?sequence=8&isAllowed=y",
+  "handle": 911,
+  "fecha_documento": "2022-07-05",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "3f54ec7e72f20d9d72794ef4ceb52ae58250474f734a0042a81a1f8c345e2008",
+  "bytes": 1281706
+ },
+ {
+  "archivo": "911_RCU-0306-2022-ROF-Organigrama.pdf",
+  "titulo": "RCU 0306-2022 Reglamento de Organización y Funciones (ROF) y Organigrama (contiene documentación integrante e historial)",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/911/RCU-0306-2022-ROF-Organigrama.pdf?sequence=7&isAllowed=y",
+  "handle": 911,
+  "fecha_documento": "2022-07-05",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "59951683c1f9fdc30677dbcd7625e2224457fc434299401fecc15ee042debac4",
+  "bytes": 7380077,
+  "tipo": "politica",
+  "controles": [
+   "5.3"
+  ],
+  "justificacion_controles": "ROF vigente (las RR 1244-2025 y 0503-2026 lo citan) que fija las funciones de las unidades organicas, entre ellas la Unidad de Sistemas de Informacion, Redes y Telecomunicaciones (art. 98: control de acceso y seguridad de la informacion), la OTI y la Asesoria Juridica. Respalda la asignacion de responsabilidades (5.3). El cuerpo esta escaneado. Lo modifican resoluciones posteriores (p. ej. RCU 0312-2026) que no se descargaron."
+ },
+ {
+  "archivo": "911_RCU-0312-2026.pdf",
+  "titulo": "RCU 0306-2022 Reglamento de Organización y Funciones (ROF) y Organigrama (contiene documentación integrante e historial)",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/911/RCU-0312-2026.pdf?sequence=9&isAllowed=y",
+  "handle": 911,
+  "fecha_documento": "2022-07-05",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "d2cf5611e6a59d2a848bc15c24eeaf19cc8eac8876a69cdbf0908a4e76fdbf66",
+  "bytes": 322594
+ },
+ {
+  "archivo": "911_RCU-0442-2022.pdf",
+  "titulo": "RCU 0306-2022 Reglamento de Organización y Funciones (ROF) y Organigrama (contiene documentación integrante e historial)",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/911/RCU-0442-2022.pdf?sequence=4&isAllowed=y",
+  "handle": 911,
+  "fecha_documento": "2022-07-05",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "30a5e860affc01f467639fe1e62ba4abe2c09c437211440cf0772325df2b9514",
+  "bytes": 266973
+ },
+ {
+  "archivo": "1075_RR-1138-2019.pdf",
+  "titulo": "RR No. 1138-2019 Designar al ING. ALVARO JAVIER MONTES DE OCA BELTRÁN, Jefe de la Oficina Universitaria de Informática y Sistemas, como Funcionario Responsable de la Elaboración y Actualización del Portal de Transparencia de la UNSA",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/1075/RR-1138-2019.pdf?sequence=1&isAllowed=y",
+  "handle": 1075,
+  "fecha_documento": "2019-08-12",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "a0287147cd230442f4a0a56776298b4d98ff5d066284de322e6b1156d2871869",
+  "bytes": 131378
+ },
+ {
+  "archivo": "1091_INF-178-2025-OTI-UNSA-PGD.pdf",
+  "titulo": "RCU 0152-2023 PLAN DE GOBIERNO DIGITAL – PGD DE LA UNIVERSIDAD NACIONAL DE SAN AGUSTÍN DE AREQUIPA. Informes de Ejecución",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/1091/INF-178-2025-OTI-UNSA-PGD.pdf?sequence=6&isAllowed=y",
+  "handle": 1091,
+  "fecha_documento": "2023-04-04",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "a9202dbdfcd330f87243bca478501756e10e6257f8502e5ca95a61efb88afc67",
+  "bytes": 340226,
+  "tipo": "informe",
+  "controles": [
+   "9.1"
+  ],
+  "justificacion_controles": "Informe del Jefe de la OTI al Rector con la medicion del indicador '% de iniciativas del PGD ejecutadas': 20 de 33 ejecutadas (60.6%), 8 en proceso y 5 pendientes, mas recomendaciones. 9.1 (parcial): es seguimiento y medicion con datos del periodo, pero sobre gobierno digital y no sobre indicadores del PIMS."
+ },
+ {
+  "archivo": "1091_INF2024-344-Ejecucion-del-PGD.pdf",
+  "titulo": "RCU 0152-2023 PLAN DE GOBIERNO DIGITAL – PGD DE LA UNIVERSIDAD NACIONAL DE SAN AGUSTÍN DE AREQUIPA. Informes de Ejecución",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/1091/INF2024-344-Ejecucion-del-PGD.pdf?sequence=5&isAllowed=y",
+  "handle": 1091,
+  "fecha_documento": "2023-04-04",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "7de0ab610b3f38f90589d6ab8340da318d60529162a95c86651880edd9b147b4",
+  "bytes": 321215
+ },
+ {
+  "archivo": "1091_INFORME-001-2024-AMB-Ejecucion-del-PGD.pdf",
+  "titulo": "RCU 0152-2023 PLAN DE GOBIERNO DIGITAL – PGD DE LA UNIVERSIDAD NACIONAL DE SAN AGUSTÍN DE AREQUIPA. Informes de Ejecución",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/1091/INFORME-001-2024-AMB-Ejecucion-del-PGD.pdf?sequence=4&isAllowed=y",
+  "handle": 1091,
+  "fecha_documento": "2023-04-04",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "bb7ceef5438c7cb341aae6e020097132484446a72071cd597c5e0b011ca6697c",
+  "bytes": 93482
+ },
+ {
+  "archivo": "1091_RCU-0152-2023.pdf",
+  "titulo": "RCU 0152-2023 PLAN DE GOBIERNO DIGITAL – PGD DE LA UNIVERSIDAD NACIONAL DE SAN AGUSTÍN DE AREQUIPA. Informes de Ejecución",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/1091/RCU-0152-2023.pdf?sequence=1&isAllowed=y",
+  "handle": 1091,
+  "fecha_documento": "2023-04-04",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "f335d4abbbde3d9f308cb3b1c40fb3fe874391ab8209ef84357dd91460943d1b",
+  "bytes": 2419598,
+  "tipo": "politica",
+  "controles": [
+   "6.2",
+   "7.1"
+  ],
+  "justificacion_controles": "Plan aprobado por Consejo Universitario. 6.2 (parcial): objetivos de gobierno digital con indicadores, formula y metas 2023-2025, y cartera de proyectos con responsable y periodo; no son objetivos de privacidad propiamente dichos. 7.1 (parcial): presupuesto TIC aprobado (S/ 2M en 2023, S/ 6M en 2024, S/ 3M en 2025) y cartera con montos; no asigna recursos al PIMS de forma especifica. Cuerpo del plan escaneado. Vigencia hasta 2025."
+ },
+ {
+  "archivo": "1346_RCU-0129-2022.pdf",
+  "titulo": "RCU 0306-2024 APROBAR el REGLAMENTO DEL REPOSITORIO INSTITUCIONAL (Versión 2)",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/1346/RCU-0129-2022.pdf?sequence=3&isAllowed=y",
+  "handle": 1346,
+  "fecha_documento": "2024-07-09",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "cd5446390878d2386e3a524b142e568cc1668e25ea8d74ea0d75264b3e7ad0bd",
+  "bytes": 1228641
+ },
+ {
+  "archivo": "1346_RCU-0306-2024.pdf",
+  "titulo": "RCU 0306-2024 APROBAR el REGLAMENTO DEL REPOSITORIO INSTITUCIONAL (Versión 2)",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/1346/RCU-0306-2024.pdf?sequence=1&isAllowed=y",
+  "handle": 1346,
+  "fecha_documento": "2024-07-09",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "2e9b9cf43d0679e46ca019f8ff5bda64a75196f30fc9c5390fc7f731edda63f9",
+  "bytes": 7770223
+ },
+ {
+  "archivo": "1347_RCU-0307-2024.pdf",
+  "titulo": "RCU 0307-2024 APROBAR la DIRECTIVA N° 004-2024-UM-UGINF-DI EMISIÓN DE INFORMES DE VIABILIDAD PARA PUBLICACIONES EN EL REPOSITORIO INSTITUCIONAL",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/1347/RCU-0307-2024.pdf?sequence=1&isAllowed=y",
+  "handle": 1347,
+  "fecha_documento": "2024-07-09",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "1c2762c0152bfb5ca539aaf7e29b76da0fb4307b2f7fbcd25e289fcd46c26e46",
+  "bytes": 2279060
+ },
+ {
+  "archivo": "1511_RCU-0153-2025.pdf",
+  "titulo": "RCU 0153-2025 APROBAR la \"DIRECTIVA Nº 003-2025-UM-OTI REGULACIÓN DEL ALMACENAMIENTO DE INFORMACIÓN DE AULAS VIRTUALES\"",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/1511/RCU-0153-2025.pdf?sequence=1&isAllowed=y",
+  "handle": 1511,
+  "fecha_documento": "2025-03-17",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "857b7b1d47f29e88e658a9f2d93663b87d583f1b3142847b5215c19889de024b",
+  "bytes": 567172
+ },
+ {
+  "archivo": "1593_RR-0808-2025.pdf",
+  "titulo": "RR 0808-2025 Ratificar, en vía de regularización, la designación del Abg. RICARDO ALEXIS QUISPE COAQUIRA, Servidor Administrativo de la Unidad de Secretaría Administrativa de Secretaría General de la UNSA, como Coordinador de la Ley de Transparencia y Acceso a la Información Pública de la Universidad",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/1593/RR-0808-2025.pdf?sequence=1&isAllowed=y",
+  "handle": 1593,
+  "fecha_documento": "2025-07-03",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "4d10c853c28c41b2f593b64ae0b6f1ac08961275a9f0d160185a31a426abf910",
+  "bytes": 238732
+ },
+ {
+  "archivo": "1593_RR-0859-2021.pdf",
+  "titulo": "RR 0808-2025 Ratificar, en vía de regularización, la designación del Abg. RICARDO ALEXIS QUISPE COAQUIRA, Servidor Administrativo de la Unidad de Secretaría Administrativa de Secretaría General de la UNSA, como Coordinador de la Ley de Transparencia y Acceso a la Información Pública de la Universidad",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/1593/RR-0859-2021.pdf?sequence=3&isAllowed=y",
+  "handle": 1593,
+  "fecha_documento": "2025-07-03",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "06b2f8e907de1433a1583a12d01fd877d9433e1fd2f6a6db1e223984cb3dc9c0",
+  "bytes": 157578
+ },
+ {
+  "archivo": "1627_RR-0987-2025.pdf",
+  "titulo": "RR 0987-2025 DESIGNAR al Jefe de la Oficina de Asesoría Jurídica, como OFICIAL DE DATOS PERSONALES, y DESIGNAR COORDINADOR DE DATOS PERSONALES",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/1627/RR-0987-2025.pdf?sequence=1&isAllowed=y",
+  "handle": 1627,
+  "fecha_documento": "2025-08-19",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "4b63e101420ec146aa3bee05ff3a58c75444d1b0728dc54e99832ab1ad0883ea",
+  "bytes": 564025,
+  "tipo": "acta",
+  "controles": [
+   "5.3"
+  ],
+  "justificacion_controles": "Resolucion rectoral firmada (Rector y Secretaria General) que designa al Jefe de la Oficina de Asesoria Juridica como Oficial de Datos Personales y a un Coordinador de Datos Personales, y ordena comunicarlo a la Autoridad Nacional de Proteccion de Datos Personales. Es la designacion formal del DPO que pide 5.3 (no incluye matriz RACI). PDF escaneado, sin capa de texto."
+ },
+ {
+  "archivo": "1759_RR-0106-2026.pdf",
+  "titulo": "RR 0106-2026 AUTORIZAR la convocatoria CADE Universitario 2026 (4 Resoluciones: RR 0106-2026. RR 0330-2026 VALIDAR la relación de los veinte (20) estudiantes agustinos ganadores de la convocatoria de movilidad académica CADE Universitario 2026. RR 0369-2026 AUTORIZAR la convocatoria CADE Universitario 2026, en la modalidad \"AUTOFINANCIADO\", para que cinco (05) estudiantes agustinos participen en representación de la Universidad Nacional de San Agustín de Arequipa en el CADE Universitario 2026. RR 0509-2026 VALIDAR la relación de los cinco (5) estudiantes agustinos ganadores de la convocatoria de movilidad académica CADE Universitario 2026, en la modalidad \"AUTOFINANCIADO\")",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/1759/RR-0106-2026.pdf?sequence=1&isAllowed=y",
+  "handle": 1759,
+  "fecha_documento": "2026-01-20",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "66ac68077b3ea23935b15b94ee7164dab9ea403e946f1eddf71f4d4fe1cb0cc8",
+  "bytes": 258053
+ },
+ {
+  "archivo": "1759_RR-0330-2026.pdf",
+  "titulo": "RR 0106-2026 AUTORIZAR la convocatoria CADE Universitario 2026 (4 Resoluciones: RR 0106-2026. RR 0330-2026 VALIDAR la relación de los veinte (20) estudiantes agustinos ganadores de la convocatoria de movilidad académica CADE Universitario 2026. RR 0369-2026 AUTORIZAR la convocatoria CADE Universitario 2026, en la modalidad \"AUTOFINANCIADO\", para que cinco (05) estudiantes agustinos participen en representación de la Universidad Nacional de San Agustín de Arequipa en el CADE Universitario 2026. RR 0509-2026 VALIDAR la relación de los cinco (5) estudiantes agustinos ganadores de la convocatoria de movilidad académica CADE Universitario 2026, en la modalidad \"AUTOFINANCIADO\")",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/1759/RR-0330-2026.pdf?sequence=3&isAllowed=y",
+  "handle": 1759,
+  "fecha_documento": "2026-01-20",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "5d41589e307af05d02271ca7290632761f0b734ff57d969e0e31962b021a9362",
+  "bytes": 360088
+ },
+ {
+  "archivo": "1759_RR-0369-2026.pdf",
+  "titulo": "RR 0106-2026 AUTORIZAR la convocatoria CADE Universitario 2026 (4 Resoluciones: RR 0106-2026. RR 0330-2026 VALIDAR la relación de los veinte (20) estudiantes agustinos ganadores de la convocatoria de movilidad académica CADE Universitario 2026. RR 0369-2026 AUTORIZAR la convocatoria CADE Universitario 2026, en la modalidad \"AUTOFINANCIADO\", para que cinco (05) estudiantes agustinos participen en representación de la Universidad Nacional de San Agustín de Arequipa en el CADE Universitario 2026. RR 0509-2026 VALIDAR la relación de los cinco (5) estudiantes agustinos ganadores de la convocatoria de movilidad académica CADE Universitario 2026, en la modalidad \"AUTOFINANCIADO\")",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/1759/RR-0369-2026.pdf?sequence=4&isAllowed=y",
+  "handle": 1759,
+  "fecha_documento": "2026-01-20",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "0086bcb6f0a07e21559c82d92dd27d4c501073adf49e26b65f218b8565d52954",
+  "bytes": 258716
+ },
+ {
+  "archivo": "1759_RR-0509-2026.pdf",
+  "titulo": "RR 0106-2026 AUTORIZAR la convocatoria CADE Universitario 2026 (4 Resoluciones: RR 0106-2026. RR 0330-2026 VALIDAR la relación de los veinte (20) estudiantes agustinos ganadores de la convocatoria de movilidad académica CADE Universitario 2026. RR 0369-2026 AUTORIZAR la convocatoria CADE Universitario 2026, en la modalidad \"AUTOFINANCIADO\", para que cinco (05) estudiantes agustinos participen en representación de la Universidad Nacional de San Agustín de Arequipa en el CADE Universitario 2026. RR 0509-2026 VALIDAR la relación de los cinco (5) estudiantes agustinos ganadores de la convocatoria de movilidad académica CADE Universitario 2026, en la modalidad \"AUTOFINANCIADO\")",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/1759/RR-0509-2026.pdf?sequence=5&isAllowed=y",
+  "handle": 1759,
+  "fecha_documento": "2026-01-20",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "a092c0fc4f8aba04b3d1ed165e263e80c3baaf25c4d1813d6d4987319fb29f61",
+  "bytes": 271744
+ },
+ {
+  "archivo": "1790_RR-0368-2026.pdf",
+  "titulo": "RR 0368-2026 AUTORIZAR y APROBAR el Cronograma de Postulación la convocatoria CADE Universitario 2026, en la modalidad \"AUSPICIO CERRO VERDE\", para que cinco (5) estudiantes agustinos participen en el CADE Universitario 2026 (3 Resoluciones: RR 0368-2026. RR 0475-2026 VALIDAR la relación de los cinco (5) estudiantes agustinos ganadores. RR 0545-2026 AMPLIAR la relación de ganadores contenida en la Resolución Rectoral Nº 0475-2026, incorporando a dos (2) estudiantes agustinos adicionales como ganadores de la convocatoria de movilidad académica CADE Universitario 2026, en la modalidad \"AUSPICIO CERRO VERDE\")",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/1790/RR-0368-2026.pdf?sequence=1&isAllowed=y",
+  "handle": 1790,
+  "fecha_documento": "2026-02-27",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "a0b344ba1f47edb337a11f81cbdcf841ca03569e4b4149d7bee142879c895c5d",
+  "bytes": 199262
+ },
+ {
+  "archivo": "1790_RR-0475-2026.pdf",
+  "titulo": "RR 0368-2026 AUTORIZAR y APROBAR el Cronograma de Postulación la convocatoria CADE Universitario 2026, en la modalidad \"AUSPICIO CERRO VERDE\", para que cinco (5) estudiantes agustinos participen en el CADE Universitario 2026 (3 Resoluciones: RR 0368-2026. RR 0475-2026 VALIDAR la relación de los cinco (5) estudiantes agustinos ganadores. RR 0545-2026 AMPLIAR la relación de ganadores contenida en la Resolución Rectoral Nº 0475-2026, incorporando a dos (2) estudiantes agustinos adicionales como ganadores de la convocatoria de movilidad académica CADE Universitario 2026, en la modalidad \"AUSPICIO CERRO VERDE\")",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/1790/RR-0475-2026.pdf?sequence=3&isAllowed=y",
+  "handle": 1790,
+  "fecha_documento": "2026-02-27",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "685824cd55e1798281d087fa1ebc8d0b948f7973f010de09b444529b73b5c41c",
+  "bytes": 261740
+ },
+ {
+  "archivo": "1790_RR-0545-2026.pdf",
+  "titulo": "RR 0368-2026 AUTORIZAR y APROBAR el Cronograma de Postulación la convocatoria CADE Universitario 2026, en la modalidad \"AUSPICIO CERRO VERDE\", para que cinco (5) estudiantes agustinos participen en el CADE Universitario 2026 (3 Resoluciones: RR 0368-2026. RR 0475-2026 VALIDAR la relación de los cinco (5) estudiantes agustinos ganadores. RR 0545-2026 AMPLIAR la relación de ganadores contenida en la Resolución Rectoral Nº 0475-2026, incorporando a dos (2) estudiantes agustinos adicionales como ganadores de la convocatoria de movilidad académica CADE Universitario 2026, en la modalidad \"AUSPICIO CERRO VERDE\")",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/1790/RR-0545-2026.pdf?sequence=4&isAllowed=y",
+  "handle": 1790,
+  "fecha_documento": "2026-02-27",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "560632574b14aeee3367a9a22f8a87a6dc10a5c31658e71da9b0ef7c51cf0aeb",
+  "bytes": 298509
+ },
+ {
+  "archivo": "1884_RR-1089-2026.pdf",
+  "titulo": "RR 1089-2026 AUTORIZAR la suspensión de los accesos a Clases Virtuales y Aulas Virtuales de Pregrado y Segundas Especialidades a partir de las 07:00 horas del día sábado 18 de julio de 2026 hasta las 15:00 horas del día domingo 19 de julio de 2026, por el Proceso de Admisión 2026-I Fase de la de Posgrado",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/1884/RR-1089-2026.pdf?sequence=1&isAllowed=y",
+  "handle": 1884,
+  "fecha_documento": "2026-07-15",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "7337e0ffd47610bb6d6d98db2c5ba6c2bf93d7a0c125ec46d2fcfdccc2f97ca5",
+  "bytes": 183102
+ },
+ {
+  "archivo": "1916_RR-1234-2026.pdf",
+  "titulo": "RR 1234-2026 Designar a la ING. KATTY BRENDA ZEBALLOS PAREDES, servidora administrativa adscrita a la Oficina de Tecnologías de la Información, como OFICIAL DE GOBIERNO DE DATOS (OGD)",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/1916/RR-1234-2026.pdf?sequence=1&isAllowed=y",
+  "handle": 1916,
+  "fecha_documento": "2026-08-19",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "b2ffb3544855a873d5ba1cd774671087a48b5f92c5492e0594ce5747d1af547f",
+  "bytes": 389763
+ },
+ {
+  "archivo": "1920_RCU-0422-2026.pdf",
+  "titulo": "RCU 0422-2026 APROBAR el PLAN DE CONTINGENCIA, PLAN DE ATENCIONES SLA PARA DATA CENTER",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/1920/RCU-0422-2026.pdf?sequence=1&isAllowed=y",
+  "handle": 1920,
+  "fecha_documento": "2026-08-27",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "c6782a6349993ad30b327f03253d43bd41f05dc4cc8f822cdc46a89c9840c796",
+  "bytes": 3269261,
+  "tipo": "procedimiento",
+  "controles": [
+   "A.3.11"
+  ],
+  "justificacion_controles": "Plan aprobado por Consejo Universitario con niveles de activacion N1-N3, organizacion para la contingencia, comunicaciones y escalamiento, bitacora obligatoria, indicadores, pruebas y control de cambios. A.3.11 (parcial): prepara la respuesta a incidentes de infraestructura del data center, pero excluye de forma expresa ciberseguridad y respaldo/recuperacion de datos, y no trata brechas de PII. Los anexos de ejemplo traen campos de aprobacion '[Completar]'. Fecha tomada del registro del portal de transparencia."
+ },
+ {
+  "archivo": "1932_RCU-0437-2026.pdf",
+  "titulo": "RCU 0437-2026 DESIGNAR al MAG. RICHARD SANTOS HUAMAN FLORES, como Secretario General y Fedatario de la Universidad Nacional de San Agustín de Arequipa. RR 1321-2026 DESIGNAR al M. SC. RICHARD SANTOS HUAMAN FLORES como Funcionario responsable de atender las solicitudes de acceso a la información (Total: 2 Resoluciones)",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/1932/RCU-0437-2026.pdf?sequence=1&isAllowed=y",
+  "handle": 1932,
+  "fecha_documento": "2026-09-07",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "5853168762e7df4a69edc354c9189e18ba8667849df4eef4b767bc5814c58a6e",
+  "bytes": 201517
+ },
+ {
+  "archivo": "1932_RR-1321-2026.pdf",
+  "titulo": "RCU 0437-2026 DESIGNAR al MAG. RICHARD SANTOS HUAMAN FLORES, como Secretario General y Fedatario de la Universidad Nacional de San Agustín de Arequipa. RR 1321-2026 DESIGNAR al M. SC. RICHARD SANTOS HUAMAN FLORES como Funcionario responsable de atender las solicitudes de acceso a la información (Total: 2 Resoluciones)",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/1932/RR-1321-2026.pdf?sequence=3&isAllowed=y",
+  "handle": 1932,
+  "fecha_documento": "2026-09-07",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "0e71f738a595dca74ea330e2412321d8c5ec26fdc94bf6af5b92e0095e5000b9",
+  "bytes": 158104
+ },
+ {
+  "archivo": "1933_RR-1321-2026.pdf",
+  "titulo": "RR 1321-2026 DESIGNAR al M. SC. RICHARD SANTOS HUAMAN FLORES, como Funcionario responsable de atender las solicitudes de acceso a la información de la Universidad Nacional de San Agustín de Arequipa",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/1933/RR-1321-2026.pdf?sequence=1&isAllowed=y",
+  "handle": 1933,
+  "fecha_documento": "2026-09-07",
+  "fecha_descarga": "2026-11-03",
+  "sha256": "0e71f738a595dca74ea330e2412321d8c5ec26fdc94bf6af5b92e0095e5000b9",
+  "bytes": 158104
+ },
+ {
+  "archivo": "politica_privacidad_unsa.txt",
+  "titulo": "Politica de Privacidad de la UNSA (Ley 29733)",
+  "url_origen": "https://www.unsa.edu.pe/servicios/politica-proteccion-datos.html",
+  "handle": null,
+  "fecha_documento": "2021-03-01",
+  "fecha_descarga": "2026-10-27",
+  "sha256": "23f2532b70a7fc3dc22b05d100572daa07fb6f8db1af2d879afecf2a9879f597",
+  "bytes": 21760,
+  "tipo": "politica",
+  "controles": [
+   "5.2",
+   "A.1.2.2",
+   "A.1.3.7"
+  ],
+  "justificacion_controles": "Politica publicada en la web institucional (texto copiado de unsa.txt de la raiz del repo; contenido verificado contra la URL). 5.2: es la politica de privacidad comunicada al publico. A.1.2.2: declara la finalidad del tratamiento por categoria de titular y banco de datos (Estudiantes, Postulantes, Recursos Humanos, Seguridad y Vigilancia, etc.). A.1.3.7: describe el ejercicio de derechos ARCO y los requisitos de la solicitud (art. 50 DS 003-2013-JUS). El documento solo indica 'Marzo, 2021' (se usa el dia 01); no muestra version ni aprobacion formal y cita el reglamento derogado DS 003-2013-JUS."
+ },
+ {
+  "archivo": "GUIA-PARA-REALIZAR-COPIAS-DE-SEGURIDAD-y-PROTOCOLO-DE-RESPALDO-DE-BASE-DE-DATOS.pdf",
+  "titulo": "Guia para realizar copias de seguridad del Repositorio Institucional de la UNSA y protocolo de respaldo de base de datos",
+  "url_origen": null,
+  "handle": null,
+  "fecha_documento": "2024-05-31",
+  "fecha_descarga": "2026-10-27",
+  "sha256": "38dc475e9d8a73b7ab34116f8265a10232bc385f94fa4098a0ec7abe335296da",
+  "bytes": 281055,
+  "tipo": "procedimiento",
+  "controles": [
+   "A.3.14"
+  ],
+  "justificacion_controles": "Archivo aportado por el grupo (raiz del repo). Origen web probable repositorio.unsa.edu.pe, pero no se pudo verificar: el sitio responde con una pagina anti-bot. Fecha tomada de los metadatos del PDF (CreationDate), el texto no trae fecha. A.3.14 (parcial): define responsables (Asistente Tecnico UGINF) y actividades para respaldar software, metadatos y documentos digitales del repositorio DSpace, lo que protege los registros contra perdida; no cubre retencion ni inmutabilidad de logs de acceso a PII."
+ },
+ {
+  "archivo": "rr_1244_2025_oficial_seguridad_confianza_digital.pdf",
+  "titulo": "RR 1244-2025 Designacion del Oficial de Seguridad y Confianza Digital (OSCD)",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/1702/RR-1244-2025.pdf?sequence=1&isAllowed=y",
+  "handle": null,
+  "fecha_documento": "2025-11-06",
+  "fecha_descarga": "2026-10-27",
+  "sha256": "8106161423240221337544701ea97bc18ad582ce7702f2c176bd8d3899fb0632",
+  "bytes": 356257,
+  "tipo": "acta",
+  "controles": [
+   "5.3"
+  ],
+  "justificacion_controles": "Resolucion rectoral firmada que designa al Jefe de la Unidad de Sistemas de Informacion, Redes y Telecomunicaciones como OSCD (Directiva 001-2023-PCM/SGTD), citando sus funciones de control de acceso y seguridad de la informacion del ROF (art. 97-98). Asigna un rol de seguridad complementario al DPO (5.3). PDF escaneado."
+ },
+ {
+  "archivo": "rr_0503_2026_csirt_unsa.pdf",
+  "titulo": "RR 0503-2026 Conformacion del Equipo de Respuestas ante Incidentes de Seguridad Digital - CSIRT UNSA",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/1814/RR-0503-2026.pdf?sequence=1&isAllowed=y",
+  "handle": null,
+  "fecha_documento": "2026-03-25",
+  "fecha_descarga": "2026-10-27",
+  "sha256": "409ca7690a3234963e5d81c2d004c2afbc2d72fd2047b9d1309856decc848340",
+  "bytes": 423805,
+  "tipo": "acta",
+  "controles": [
+   "A.3.11",
+   "5.3"
+  ],
+  "justificacion_controles": "Resolucion rectoral firmada que conforma el CSIRT UNSA con roles (Coordinador, OSCD, Gestor de incidentes, Gestor de redes, Gestor de infraestructura) y funciones (comunicar incidentes al Centro Nacional de Seguridad Digital, gestionar riesgos e incidentes, alertas tempranas, corregir vulnerabilidades). A.3.11 (parcial): es preparacion organizativa para la gestion de incidentes, pero no es un procedimiento de incidentes y brechas de PII. 5.3: asigna responsabilidades. PDF escaneado."
+ },
+ {
+  "archivo": "rcu_0085_2026_reglamento_admision_pregrado.pdf",
+  "titulo": "RCU 0085-2026 Reglamento del Proceso de Admision de Pregrado de la UNSA (version 5)",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/1795/RCU-0085-2026.pdf?sequence=1&isAllowed=y",
+  "handle": null,
+  "fecha_documento": "2026-03-06",
+  "fecha_descarga": "2026-10-27",
+  "sha256": "10e66ba6dda10c6911aeec1b884e5cb192dcbe4e2ae2453e41ffbb06a18864bc",
+  "bytes": 2585915,
+  "tipo": "procedimiento",
+  "controles": [
+   "8.1"
+  ],
+  "justificacion_controles": "Procedimiento operativo aprobado (version 5, con elaboracion, revision, validacion y aprobacion firmadas) que regula la inscripcion, la verificacion de identidad (DNI/CE) y las modalidades de los postulantes, incluidas categorias con datos sensibles (discapacidad - CONADIS, victimas del terrorismo). 8.1 (parcial): es un procedimiento operativo del tratamiento de PII de postulantes, pero su base legal (art. 3.1-3.12) no cita la Ley 29733 ni define controles de privacidad. PDF escaneado."
+ },
+ {
+  "archivo": "rcu_348_2011_reglamento_general_trabajo.pdf",
+  "titulo": "RCU 348-2011 Reglamento General de Trabajo de la UNSA",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/247/reglamentoweb.pdf?sequence=1&isAllowed=y",
+  "handle": null,
+  "fecha_documento": "2011-09-16",
+  "fecha_descarga": "2026-10-27",
+  "sha256": "bd76ef0e509d90436d93cbc70bc683c414eb2a6b68d7cf1a27ba8eddb0569037",
+  "bytes": 922738,
+  "tipo": "politica",
+  "controles": [
+   "A.3.18",
+   "8.1"
+  ],
+  "justificacion_controles": "A.3.18 (parcial): impone a docentes y administrativos el deber de 'guardar en absoluta reserva las gestiones y/o trabajos propios de la institucion' y tipifica como falta sacar documentos reservados sin autorizacion; no son acuerdos de confidencialidad firmados de forma individual. 8.1 (parcial): arts. 179-180 regulan el control y el acceso restringido a los legajos personales (PII del personal). Es de 2011 (la edicion impresa dice 2013); se espera estado Desactualizada."
+ },
+ {
+  "archivo": "plan_capacitacion_2026.pdf",
+  "titulo": "Plan de Capacitacion Docente 2026 (Direccion Universitaria de Desarrollo Docente, RV 107-2026-VR.AC)",
+  "url_origen": "https://transparencia.unsa.edu.pe/bitstream/handle/123456789/1820/PC-2026.pdf?sequence=1&isAllowed=y",
+  "handle": null,
+  "fecha_documento": "2026-02-10",
+  "fecha_descarga": "2026-10-27",
+  "sha256": "4724d1d015e9605275a4e39ab048dec6b3f7aff183fc30066dde51b6175f843c",
+  "bytes": 492506,
+  "tipo": "informe",
+  "controles": [],
+  "justificacion_controles": "NO REGISTRADO. Se reviso como posible evidencia de A.3.17 o 7.2, pero sus componentes (pedagogico, tecnologico, IA en docencia, etica e integridad, investigacion) no incluyen formacion en privacidad, proteccion de datos ni seguridad de la informacion. Que falte este contenido es en si un indicio para el hallazgo de A.3.17."
+ }
+]

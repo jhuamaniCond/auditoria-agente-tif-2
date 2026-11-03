@@ -18,7 +18,7 @@ import re
 import threading
 import uuid
 
-from flask import Blueprint, jsonify, render_template, request
+from flask import Blueprint, jsonify, redirect, render_template, request, send_file
 
 import nucleo
 import herramientas
@@ -416,12 +416,180 @@ def api_resumen():
                     "orquestador_real": ORQUESTADOR_REAL})
 
 
+
+# ------------------------------------------------ pausar, reanudar y gestion de datos
+def _accion_ejecucion(id_, nombre, *args):
+    if not orquestador.obtener(id_):
+        return _error("Ejecucion no encontrada", 404)
+    fn = getattr(orquestador, nombre, None)
+    if fn is None:
+        return _error("El orquestador no permite %s" % nombre)
+    try:
+        return jsonify(_publica(fn(id_, *args)))
+    except (nucleo.ErrorAgente, ValueError, KeyError) as ex:
+        return _error(str(ex))
+
+
+@bp.route("/api/agente/ejecuciones/<id_>/pausar", methods=["POST"])
+def api_pausar(id_):
+    d = _json()
+    return _accion_ejecucion(id_, "pausar", (d.get("actor") or "").strip(), (d.get("motivo") or "").strip())
+
+
+@bp.route("/api/agente/ejecuciones/<id_>/reanudar", methods=["POST"])
+def api_reanudar(id_):
+    return _accion_ejecucion(id_, "reanudar", (_json().get("actor") or "").strip())
+
+
+@bp.route("/api/agente/catalogo")
+def api_catalogo():
+    return jsonify({"tipos": list(nucleo.TIPOS), "controles": [
+        {"ref": c["ref"], "titulo": c["titulo"], "grupo": c["grupo"]} for c in nucleo.CATALOGO]})
+
+
+@bp.route("/api/agente/expediente")
+def api_expediente():
+    try:
+        return jsonify(herramientas.estado_expediente("unsa"))
+    except (nucleo.ErrorAgente, ValueError, KeyError) as ex:
+        return _error(str(ex), 500)
+
+
+@bp.route("/api/agente/expediente", methods=["POST"])
+def api_registrar_evidencia():
+    """Registra una evidencia en el expediente (SHA-256, cadena de custodia e indexado)."""
+    archivo = request.files.get("archivo")
+    if not archivo or not archivo.filename:
+        return _error("Adjunta el archivo de la evidencia")
+    nombre = _nombre_seguro(archivo.filename)
+    if os.path.splitext(nombre)[1].lower() not in EXTENSIONES:
+        return _error("Formato no admitido (usa %s)" % ", ".join(sorted(EXTENSIONES)))
+    titulo = (request.form.get("titulo") or "").strip()
+    tipo = (request.form.get("tipo") or "").strip()
+    responsable = (request.form.get("responsable") or "").strip()
+    controles = [c.strip() for c in (request.form.get("controles") or "").split(",") if c.strip()]
+    if not titulo or not responsable:
+        return _error("Indica el titulo y quien registra la evidencia")
+    validos = {c["ref"] for c in nucleo.CATALOGO}
+    malos = [c for c in controles if c not in validos]
+    if malos:
+        return _error("Controles que no existen en el catalogo: %s" % ", ".join(malos))
+    carpeta = os.path.join(nucleo.BANDEJA, "_subidas")
+    os.makedirs(carpeta, exist_ok=True)
+    temporal = os.path.join(carpeta, "%s_%s" % (uuid.uuid4().hex[:8], nombre))
+    archivo.save(temporal)
+    try:
+        ev = herramientas.registrar(temporal, controles, tipo, titulo, "unsa", responsable,
+                                    (request.form.get("fuente") or "").strip(),
+                                    (request.form.get("fecha_documento") or "").strip() or None)
+    except (nucleo.ErrorAgente, nucleo.ErrorEvidencia, ValueError, KeyError) as ex:
+        return _error(str(ex))
+    finally:
+        try:
+            os.remove(temporal)
+        except OSError:
+            pass
+    return jsonify(ev), 201
+
+
+@bp.route("/api/agente/expediente/verificar", methods=["POST"])
+def api_verificar():
+    try:
+        return jsonify(herramientas.verificar_integridad("unsa"))
+    except (nucleo.ErrorAgente, ValueError, KeyError) as ex:
+        return _error(str(ex))
+
+
+@bp.route("/api/agente/cobertura")
+def api_cobertura():
+    try:
+        return jsonify(herramientas.matriz_cobertura("unsa"))
+    except (nucleo.ErrorAgente, ValueError, KeyError) as ex:
+        return _error(str(ex), 500)
+
+
+@bp.route("/api/agente/gestitel/exportar")
+def api_exportar_gestitel():
+    try:
+        r = herramientas.exportar_gestitel("unsa", request.args.get("auditoria") or None)
+    except (nucleo.ErrorAgente, ValueError, KeyError) as ex:
+        return _error(str(ex))
+    if not r["filas"]:
+        return _error("Todavia no hay auditorias completadas para exportar", 404)
+    return send_file(r["ruta"], as_attachment=True, download_name=os.path.basename(r["ruta"]))
+
+
+@bp.route("/api/agente/gestitel/documentos")
+def api_exportar_documentos():
+    try:
+        r = herramientas.exportar_gestitel_documentos("unsa")
+    except (nucleo.ErrorAgente, ValueError, KeyError) as ex:
+        return _error(str(ex))
+    if not r["filas"]:
+        return _error("El expediente no tiene evidencias para exportar", 404)
+    return send_file(r["ruta"], as_attachment=True, download_name=os.path.basename(r["ruta"]))
+
+
+@bp.route("/api/agente/sistema")
+def api_sistema():
+    """Estado de los servicios de los que depende el agente."""
+    salida = {"base_datos": {"ok": False, "detalle": "sin conexion"},
+              "ollama": {"ok": False, "modelos": []},
+              "backend": nucleo.BACKEND, "orquestador_real": ORQUESTADOR_REAL}
+    if nucleo.ALMACEN is not None:
+        try:
+            salida["base_datos"] = {"ok": True, "detalle": nucleo.ALMACEN.descripcion(),
+                                    "filas": nucleo.ALMACEN.contar_datos()}
+        except Exception as ex:  # noqa: BLE001
+            salida["base_datos"]["detalle"] = str(ex)
+    else:
+        salida["base_datos"] = {"ok": True, "detalle": "archivos JSON (PIMS_BACKEND=archivos)", "filas": {}}
+    try:
+        import requests
+        r = requests.get("http://127.0.0.1:11434/api/tags", timeout=2)
+        salida["ollama"] = {"ok": r.ok, "modelos": [m["name"] for m in r.json().get("models", [])]}
+    except Exception:  # noqa: BLE001
+        pass
+    return jsonify(salida)
+
+
+@bp.route("/api/agente/base/vaciar", methods=["POST"])
+def api_vaciar_base():
+    """Vacia todos los datos del agente para empezar de cero (el catalogo de la norma se conserva)."""
+    d = _json()
+    if d.get("confirmar") != "VACIAR":
+        return _error("Escribe VACIAR para confirmar")
+    actor = (d.get("actor") or "").strip()
+    if not actor:
+        return _error("Indica quien vacia la base")
+    activas = [e["id"] for e in orquestador.listar() if e["estado"] == "en_curso"]
+    if activas:
+        return _error("Hay ejecuciones en curso (%s). Pausalas o cancelalas antes de vaciar." % ", ".join(activas), 409)
+    try:
+        resumen = nucleo.vaciar_datos()
+    except Exception as ex:  # noqa: BLE001
+        return _error("No se pudo vaciar: %s" % ex, 500)
+    if hasattr(orquestador, "registrar_decision"):
+        orquestador.registrar_decision(None, "base_de_datos", "base vaciada", actor=actor, humano=True,
+                                       detalle={"filas_borradas": resumen["filas"],
+                                                "carpetas_borradas": len(resumen["carpetas"])})
+    return jsonify(resumen)
+
+
 # ------------------------------------------------- enlace al panel desde la portada
 BOTON_AGENTE = (
     '<a href="/agente" id="enlace-agente-autonomo" style="position:fixed;right:20px;bottom:20px;'
     'z-index:50;background:#1f4e5f;color:#fff;padding:10px 16px;border-radius:99px;'
     'font:600 14px/1.2 \'Segoe UI\',system-ui,sans-serif;text-decoration:none;'
     'box-shadow:0 6px 18px rgba(0,0,0,.22)">Agente aut&oacute;nomo &rarr;</a>')
+
+
+@bp.before_app_request
+def _portada_al_panel():
+    """El Entregable 2 es el producto: la portada lleva directo al panel del agente."""
+    if request.path == "/" and request.method == "GET":
+        return redirect("/agente")
+    return None
 
 
 @bp.after_app_request
@@ -441,6 +609,9 @@ app = nucleo.app_e1.app
 
 if __name__ == "__main__":
     nucleo.preparar()
+    if ORQUESTADOR_REAL and hasattr(orquestador, "recuperar_huerfanas"):
+        for _id in orquestador.recuperar_huerfanas():
+            print("Ejecucion interrumpida por el reinicio (se puede reanudar):", _id)
     if bandeja is not None and hasattr(bandeja, "iniciar_automatizacion"):
         bandeja.iniciar_automatizacion()
     if not ORQUESTADOR_REAL:

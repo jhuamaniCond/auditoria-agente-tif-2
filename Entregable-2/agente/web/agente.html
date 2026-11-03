@@ -3,121 +3,221 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AUDITA-PIMS · Agente autónomo</title>
-  <!-- Mismo estilo que el Entregable 1 (se reutiliza su hoja) + ajustes del panel -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='estilos.css') }}">
+  <title>Agente de Evidencia y Auditoría · UNSA</title>
   <link rel="stylesheet" href="{{ url_for('agente.static', filename='agente.css') }}">
 </head>
 <body>
-  <header class="barra">
+<div class="app">
+  <aside class="lateral" id="lateral">
     <div class="marca">
-      <span class="sello">A</span>
-      <div>
-        <h1>AUDITA-PIMS · Agente autónomo — UNSA</h1>
-        <p>Agente de Evidencia y Auditoría · ISO/IEC 27701:2025</p>
-      </div>
+      <span class="sello" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6l8-3z"/><path d="M8.5 12l2.5 2.5L15.5 10"/></svg>
+      </span>
+      <div><strong>Agente de Evidencia</strong><small>y Auditoría · PIMS</small></div>
     </div>
-    <div class="estado">
-      {% if not real %}<span class="pastilla mal" title="orquestador.py aún no disponible">Orquestador provisional</span>{% endif %}
-      <span class="pastilla" id="p-integridad">Integridad…</span>
-      <a class="boton-barra" href="/">← Aplicación AUDITA-PIMS</a>
+    <nav class="menu" aria-label="Secciones">
+      <button class="item activa" data-vista="panel"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>Panel</button>
+      <button class="item" data-vista="auditorias"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>Auditorías<span class="contador" id="c-abiertas" hidden></span></button>
+      <button class="item" data-vista="expediente"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>Expediente</button>
+      <button class="item" data-vista="cobertura"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>Cobertura</button>
+      <button class="item" data-vista="bitacoras"><svg viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h8"/></svg>Bitácoras</button>
+      <button class="item" data-vista="herramientas"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 00-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 005.4-5.4l-2.5 2.5-2.5-.5-.5-2.5 2.5-2.5z"/></svg>Herramientas</button>
+      <button class="item" data-vista="sistema"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>Datos y sistema</button>
+    </nav>
+    <div class="pie-lateral">
+      <div class="org"><small>Organización auditada</small><strong>Universidad Nacional de San Agustín de Arequipa</strong></div>
+      <small>ISO/IEC 27701:2025 · cl. 9.1, 9.2 y A.3.14</small>
     </div>
-  </header>
+  </aside>
 
-  <nav class="pestanas" role="tablist">
-    <button class="pestana activa" data-vista="ejecuciones" role="tab">Ejecuciones</button>
-    <button class="pestana" data-vista="bitacoras" role="tab">Bitácoras</button>
-    <button class="pestana" data-vista="herramientas" role="tab">Herramientas del agente</button>
-  </nav>
-
-  <main>
-    <!-- ======================================================== EJECUCIONES -->
-    <section class="vista activa" id="vista-ejecuciones">
-      <div class="kpis kpis-agente" id="kpis">
-        <div class="kpi principal"><div class="cifra" id="k-cobertura">–</div><div class="rotulo">Cobertura del PIMS</div><div class="barra-cob"><span id="k-barra" style="width:0"></span></div></div>
-        <div class="kpi"><div class="cifra" id="k-evidencias">–</div><div class="rotulo">Evidencias en el expediente</div></div>
-        <div class="kpi"><div class="cifra" id="k-integridad">–</div><div class="rotulo">Integridad</div></div>
-        <div class="kpi kpi-estados"><div class="rotulo">Controles por estado</div><div class="estados-lista" id="k-estados"></div></div>
+  <div class="contenido">
+    <header class="barra">
+      <button class="boton-menu" id="btn-menu" aria-label="Abrir menú"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+      <h1 id="titulo-vista">Panel</h1>
+      <div class="estado-servicios">
+        <span class="pastilla" id="p-bd" title="Base de datos">BD…</span>
+        <span class="pastilla" id="p-ia" title="Modelos locales (Ollama)">IA…</span>
+        <span class="pastilla" id="p-integridad" title="Integridad del expediente">Integridad…</span>
       </div>
+    </header>
 
-      <div class="rejilla-3">
-        <div class="tarjeta">
-          <h2>Auditoría interna (cláusula 9.2)</h2>
-          <p class="nota">El agente verifica la integridad, calcula la cobertura, prepara hallazgos y se detiene para que el auditor valide.</p>
-          <fieldset class="opciones">
-            <label class="radio"><input type="radio" name="modo" value="rapido" checked> Modo rápido (sin IA, determinista)</label>
-            <label class="radio"><input type="radio" name="modo" value="ia"> Con IA local (Ollama)</label>
-          </fieldset>
-          <div class="fila-campos">
-            <label>Máx. hallazgos con IA<input type="number" id="max-hallazgos" min="0" max="50" value="3" disabled></label>
-            <label>Máx. evaluaciones de pertinencia<input type="number" id="max-pertinencia" min="0" max="50" value="2" disabled></label>
+    <main>
+      <!-- ================================================================ PANEL -->
+      <section class="vista activa" id="vista-panel">
+        <div class="kpis">
+          <div class="kpi destacado"><span class="rotulo">Cobertura del PIMS</span><span class="cifra" id="k-cobertura">–</span><div class="progreso"><span id="k-barra"></span></div><small id="k-cobertura-nota"></small></div>
+          <div class="kpi"><span class="rotulo">Evidencias</span><span class="cifra" id="k-evidencias">–</span><small>en el expediente</small></div>
+          <div class="kpi"><span class="rotulo">Integridad</span><span class="cifra" id="k-integridad">–</span><small id="k-integridad-nota"></small></div>
+          <div class="kpi"><span class="rotulo">Auditorías</span><span class="cifra" id="k-auditorias">–</span><small id="k-auditorias-nota"></small></div>
+        </div>
+
+        <div class="rejilla-3">
+          <article class="tarjeta">
+            <h2>Nueva auditoría interna</h2>
+            <p class="nota">Cláusula 9.2. El agente verifica la integridad, calcula la cobertura y redacta hallazgos; se detiene para que el auditor valide. Puedes pausarla y reanudarla.</p>
+            <div class="opciones">
+              <label class="opcion"><input type="radio" name="modo" value="rapido" checked><span><b>Modo rápido</b><small>Determinista, sin IA</small></span></label>
+              <label class="opcion"><input type="radio" name="modo" value="ia"><span><b>Con IA local</b><small>Ollama · más lento</small></span></label>
+            </div>
+            <div class="fila-campos">
+              <label>Hallazgos con IA<input type="number" id="max-hallazgos" min="0" max="50" value="3" disabled></label>
+              <label>Pertinencias con IA<input type="number" id="max-pertinencia" min="0" max="50" value="2" disabled></label>
+            </div>
+            <button class="boton primario ancho" id="btn-auditoria" type="button">Iniciar auditoría</button>
+          </article>
+
+          <article class="tarjeta">
+            <h2>Notificar incidente</h2>
+            <p class="nota">Simula al Agente de Incidentes: el agente registra el reporte como evidencia y pide confirmación al DPO.</p>
+            <label for="incidente">Descripción</label>
+            <textarea id="incidente" rows="4" placeholder="Ej.: acceso no autorizado a la base de postulantes del examen de admisión…"></textarea>
+            <button class="boton ancho" id="btn-incidente" type="button">Enviar incidente</button>
+          </article>
+
+          <article class="tarjeta">
+            <h2>Bandeja de entrada</h2>
+            <p class="nota">Los archivos que dejes aquí los clasifica el agente y los registra tras tu confirmación.</p>
+            <label class="zona-archivo" id="zona-bandeja"><input type="file" id="archivo-bandeja" multiple><span>Arrastra archivos o haz clic</span></label>
+            <div id="estado-bandeja" class="nota"></div>
+            <ul class="lista-simple" id="lista-bandeja"></ul>
+          </article>
+        </div>
+
+        <article class="tarjeta">
+          <div class="tarjeta-cab"><h2>Controles por estado</h2><small id="k-estados-nota"></small></div>
+          <div class="chips" id="k-estados"></div>
+        </article>
+
+        <article class="tarjeta">
+          <div class="tarjeta-cab"><h2>Actividad reciente</h2><button class="boton mini" data-ir="auditorias" type="button">Ver todas</button></div>
+          <ul class="lista-ejecuciones" id="lista-reciente"></ul>
+        </article>
+      </section>
+
+      <!-- ============================================================ AUDITORIAS -->
+      <section class="vista" id="vista-auditorias">
+        <div class="dos-columnas">
+          <article class="tarjeta columna-lista">
+            <div class="tarjeta-cab"><h2>Ejecuciones</h2><button class="boton mini" id="btn-refrescar" type="button">Actualizar</button></div>
+            <ul class="lista-ejecuciones" id="lista-ejecuciones"></ul>
+          </article>
+          <article class="tarjeta columna-detalle" id="detalle"><p class="nota">Selecciona una ejecución para ver su avance y las acciones disponibles.</p></article>
+        </div>
+      </section>
+
+      <!-- ============================================================ EXPEDIENTE -->
+      <section class="vista" id="vista-expediente">
+        <article class="tarjeta">
+          <div class="tarjeta-cab">
+            <h2>Expediente de evidencias <small id="exp-nota"></small></h2>
+            <div class="acciones-cab">
+              <a class="boton" href="/api/agente/gestitel/documentos" download>Exportar Excel GESTITEL</a>
+              <button class="boton" id="btn-verificar" type="button">Verificar integridad</button>
+              <button class="boton primario" id="btn-nueva-evidencia" type="button">Registrar evidencia</button>
+            </div>
           </div>
-          <div class="acciones"><button class="boton" id="btn-auditoria" type="button">Iniciar auditoría interna</button></div>
+          <div class="tabla-envoltura"><table class="tabla" id="tabla-expediente">
+            <thead><tr><th>Código</th><th>Evidencia</th><th>Tipo</th><th>Controles</th><th>Fecha doc.</th><th>SHA-256</th></tr></thead><tbody></tbody></table></div>
+        </article>
+      </section>
+
+      <!-- ============================================================= COBERTURA -->
+      <section class="vista" id="vista-cobertura">
+        <article class="tarjeta">
+          <div class="tarjeta-cab"><h2>Matriz de cobertura <small id="cob-nota"></small></h2>
+            <select id="filtro-cobertura" aria-label="Filtrar por estado"><option value="">Todos los estados</option></select></div>
+          <div class="tabla-envoltura"><table class="tabla" id="tabla-cobertura">
+            <thead><tr><th>Control</th><th>Requisito</th><th>Estado</th><th>Evidencias</th><th>Nota</th></tr></thead><tbody></tbody></table></div>
+        </article>
+      </section>
+
+      <!-- ============================================================ BITACORAS -->
+      <section class="vista" id="vista-bitacoras">
+        <article class="tarjeta">
+          <div class="tarjeta-cab"><h2>Bitácoras <small>(últimos 100 registros)</small></h2>
+            <div class="segmentos" id="subpestanas">
+              <button class="activa" data-bitacora="decisiones" type="button">Decisiones</button>
+              <button data-bitacora="mcp" type="button">MCP</button>
+              <button data-bitacora="eventos" type="button">Eventos</button>
+            </div></div>
+          <div class="tabla-envoltura"><table class="tabla" id="tabla-bitacora"><thead></thead><tbody></tbody></table></div>
+        </article>
+      </section>
+
+      <!-- ========================================================== HERRAMIENTAS -->
+      <section class="vista" id="vista-herramientas">
+        <article class="tarjeta">
+          <h2>Herramientas del agente</h2>
+          <p class="nota">Contrato común (<span class="mono">herramientas.py</span>): las publica el servidor MCP, las encadena el orquestador y se listan aquí.</p>
+          <div class="tabla-envoltura"><table class="tabla" id="tabla-herramientas">
+            <thead><tr><th>Herramienta</th><th>Tipo</th><th>Descripción</th></tr></thead><tbody></tbody></table></div>
+        </article>
+      </section>
+
+      <!-- ============================================================== SISTEMA -->
+      <section class="vista" id="vista-sistema">
+        <div class="rejilla-2">
+          <article class="tarjeta">
+            <h2>Servicios</h2>
+            <ul class="servicios" id="lista-servicios"></ul>
+          </article>
+          <article class="tarjeta">
+            <div class="tarjeta-cab"><h2>Datos en la base</h2><button class="boton mini" id="btn-refrescar-sistema" type="button">Actualizar</button></div>
+            <div class="tabla-envoltura"><table class="tabla compacta" id="tabla-filas"><tbody></tbody></table></div>
+          </article>
         </div>
+        <article class="tarjeta zona-peligro">
+          <h2>Vaciar la base de datos</h2>
+          <p>Borra todas las evidencias, la cadena de custodia, las auditorías, los hallazgos, las ejecuciones y las bitácoras, y elimina los archivos del expediente, los informes y la bandeja. Sirve para empezar de nuevo con datos actualizados.</p>
+          <p class="nota">Se conserva el catálogo de la norma y de GESTITEL, los documentos originales descargados (<span class="mono">datos/documentos_unsa</span>) y el código. Haz antes un respaldo si quieres poder volver atrás.</p>
+          <button class="boton peligro" id="btn-vaciar" type="button">Vaciar base de datos…</button>
+        </article>
+      </section>
+    </main>
+  </div>
+</div>
 
-        <div class="tarjeta">
-          <h2>Simular incidente (Agente de Incidentes)</h2>
-          <p class="nota">Otro agente notifica un incidente de privacidad; este agente lo recibe por coordinación y reacciona.</p>
-          <label for="incidente">Descripción del incidente</label>
-          <textarea id="incidente" rows="4" placeholder="Ej.: Se detectó acceso no autorizado a la base de datos de postulantes del examen de admisión…"></textarea>
-          <div class="acciones"><button class="boton" id="btn-incidente" type="button">Simular incidente</button></div>
-        </div>
+<!-- ============================================================== modales -->
+<dialog id="dlg-evidencia">
+  <form method="dialog" id="form-evidencia" class="formulario">
+    <h2>Registrar evidencia</h2>
+    <p class="nota">Se calcula su SHA-256, se anota en la cadena de custodia y se indexa para la búsqueda.</p>
+    <label>Archivo<input type="file" name="archivo" required accept=".pdf,.txt,.md,.csv,.json,.docx,.xlsx,.png,.jpg,.jpeg"></label>
+    <label>Título<input type="text" name="titulo" required placeholder="Ej.: RR 0987-2025 Designación del Oficial de Datos Personales"></label>
+    <div class="fila-campos">
+      <label>Tipo<select name="tipo" id="ev-tipo" required></select></label>
+      <label>Fecha del documento<input type="date" name="fecha_documento"></label>
+    </div>
+    <label>Controles que respalda <small>(separados por coma, p. ej. 5.3, A.3.11)</small><input type="text" name="controles" id="ev-controles" list="lista-controles" placeholder="5.3, A.3.11"></label>
+    <datalist id="lista-controles"></datalist>
+    <label>Fuente (URL)<input type="url" name="fuente" placeholder="https://transparencia.unsa.edu.pe/…"></label>
+    <label>Registrado por<input type="text" name="responsable" required placeholder="Nombre del auditor" autocomplete="name"></label>
+    <div class="pie-dialogo"><button class="boton" value="cancel" formnovalidate>Cancelar</button><button class="boton primario" id="ev-enviar" value="ok">Registrar</button></div>
+  </form>
+</dialog>
 
-        <div class="tarjeta">
-          <h2>Bandeja de entrada</h2>
-          <p class="nota">Los archivos que se dejan aquí los procesa la automatización del agente (clasificar y registrar).</p>
-          <label class="zona-archivo" id="zona-bandeja">
-            <input type="file" id="archivo-bandeja" multiple>
-            <span>Arrastra y suelta archivos aquí o haz clic para elegirlos</span>
-          </label>
-          <div id="estado-bandeja" class="nota"></div>
-          <div class="tabla-envoltura lista-bandeja"><table class="tabla" id="tabla-bandeja"><tbody></tbody></table></div>
-        </div>
-      </div>
+<dialog id="dlg-vaciar">
+  <form method="dialog" class="formulario" id="form-vaciar">
+    <h2 class="peligro-texto">Vaciar la base de datos</h2>
+    <p>Esta acción <b>no se puede deshacer</b>. Se borrará:</p>
+    <ul id="vaciar-resumen" class="lista-borrado"></ul>
+    <label>Quién lo hace<input type="text" id="vaciar-actor" required placeholder="Nombre del auditor" autocomplete="name"></label>
+    <label>Escribe <b>VACIAR</b> para confirmar<input type="text" id="vaciar-confirma" autocomplete="off" placeholder="VACIAR"></label>
+    <div class="pie-dialogo"><button class="boton" value="cancel" formnovalidate>Cancelar</button><button class="boton peligro" id="vaciar-enviar" value="ok" disabled>Vaciar todo</button></div>
+  </form>
+</dialog>
 
-      <div class="tarjeta">
-        <div class="tarjeta-cab"><h2>Flujo del grafo <span class="mono">auditoria_interna</span></h2><small id="flujo-nota"></small></div>
-        <div class="flujo" id="flujo" aria-label="Diagrama del flujo de la auditoría interna"></div>
-      </div>
+<dialog id="dlg-motivo">
+  <form method="dialog" class="formulario" id="form-motivo">
+    <h2 id="motivo-titulo">Confirmar</h2>
+    <p class="nota" id="motivo-texto"></p>
+    <label>Quién lo hace<input type="text" id="motivo-actor" required placeholder="Nombre del auditor" autocomplete="name"></label>
+    <label id="motivo-fila">Motivo (opcional)<input type="text" id="motivo-motivo"></label>
+    <div class="pie-dialogo"><button class="boton" value="cancel" formnovalidate>Volver</button><button class="boton primario" id="motivo-enviar" value="ok">Confirmar</button></div>
+  </form>
+</dialog>
 
-      <div class="rejilla-2">
-        <div class="tarjeta" id="detalle">
-          <p class="nota">Selecciona o inicia una ejecución para ver su avance.</p>
-        </div>
-        <div class="tarjeta">
-          <div class="tarjeta-cab"><h2>Ejecuciones</h2><button class="boton mini secundario" id="btn-refrescar" type="button">Actualizar</button></div>
-          <ul class="lista-ejecuciones" id="lista-ejecuciones"></ul>
-        </div>
-      </div>
-    </section>
-
-    <!-- ========================================================= BITACORAS -->
-    <section class="vista" id="vista-bitacoras">
-      <div class="tarjeta">
-        <div class="tarjeta-cab">
-          <h2>Bitácoras del agente <small>(últimos 100 registros)</small></h2>
-          <div class="subpestanas" id="subpestanas">
-            <button class="chip-tab activa" data-bitacora="decisiones" type="button">Decisiones</button>
-            <button class="chip-tab" data-bitacora="mcp" type="button">MCP</button>
-            <button class="chip-tab" data-bitacora="eventos" type="button">Eventos</button>
-          </div>
-        </div>
-        <div class="tabla-envoltura"><table class="tabla" id="tabla-bitacora"><thead></thead><tbody></tbody></table></div>
-      </div>
-    </section>
-
-    <!-- ====================================================== HERRAMIENTAS -->
-    <section class="vista" id="vista-herramientas">
-      <div class="tarjeta">
-        <h2>Herramientas del agente</h2>
-        <p class="nota">Contrato común (herramientas.py): las publica el servidor MCP, las encadena el orquestador y se muestran aquí.</p>
-        <div class="tabla-envoltura"><table class="tabla" id="tabla-herramientas">
-          <thead><tr><th>Herramienta</th><th>Tipo</th><th>Descripción</th></tr></thead><tbody></tbody>
-        </table></div>
-      </div>
-    </section>
-  </main>
-
-  <script src="{{ url_for('agente.static', filename='agente.js') }}"></script>
+<div id="avisos" class="avisos" aria-live="polite"></div>
+<script src="{{ url_for('agente.static', filename='agente.js') }}"></script>
 </body>
 </html>

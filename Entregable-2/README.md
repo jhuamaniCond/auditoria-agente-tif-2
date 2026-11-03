@@ -55,6 +55,19 @@ Trazabilidad: `datos/bitacora_mcp.jsonl` (llamadas MCP),
 `datos/bitacora_decisiones.jsonl` (decisiones humanas), `datos/eventos.jsonl`
 (eventos entre agentes) y la cadena de custodia del expediente.
 
+## Panel del agente (http://127.0.0.1:5000/agente)
+
+Secciones: Panel, Auditorías, Expediente, Cobertura, Bitácoras, Herramientas y Datos y sistema.
+
+- **Pausar y reanudar** una auditoría: se detiene al terminar el paso en curso y continúa desde el último
+  checkpoint (PostgreSQL), sin repetir lo hecho. Si el programa se reinicia a mitad de una ejecución,
+  queda *interrumpida* y se reanuda igual. También se puede reintentar una ejecución con error o cancelarla.
+- **Registrar evidencia** desde el panel (SHA-256, cadena de custodia, indexado) y **verificar integridad**.
+- **Exportar Excel GESTITEL** de las auditorías completadas.
+- **Vaciar la base de datos** (Datos y sistema): borra todos los datos del agente y los archivos del
+  expediente, informes y bandeja; conserva el catálogo de la norma y GESTITEL y `datos/documentos_unsa/`.
+  Pide escribir VACIAR y registra la acción. Haz antes un respaldo con `pg_dump` (carpeta `BD/respaldos/`).
+
 ## Puesta en marcha
 
 **Forma rápida (Windows):** un solo script levanta Docker (PostgreSQL + pgAdmin),
