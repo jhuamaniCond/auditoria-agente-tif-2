@@ -207,3 +207,8 @@ dialog::backdrop { background: rgba(8, 17, 29, .55); backdrop-filter: blur(2px);
 }
 @media (max-width: 560px) { .kpis { grid-template-columns: 1fr; } .estado-servicios { display: none; } }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+/* Cerrar sesion (login del despliegue) */
+.pie-lateral .salir { display: block; margin-top: 12px; padding: 7px 10px; border: 1px solid rgba(255,255,255,.18); border-radius: 8px; color: var(--lateral-texto); text-decoration: none; font-size: .85rem; text-align: center; }
+.pie-lateral .salir:hover { background: rgba(255,255,255,.08); }
+.pie-lateral .salir[hidden] { display: none; }

@@ -22,6 +22,7 @@ from flask import Blueprint, jsonify, redirect, render_template, request, send_f
 
 import nucleo
 import herramientas
+import autenticacion
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
 WEB = os.path.join(AQUI, "web")
@@ -603,6 +604,7 @@ def _inyectar_enlace(resp):
     return resp
 
 
+autenticacion.instalar(nucleo.app_e1.app)   # login: antes que el resto de rutas
 nucleo.app_e1.app.register_blueprint(bp)
 app = nucleo.app_e1.app
 

@@ -19,6 +19,7 @@ function esc(t) { return String(t ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&am
 async function api(ruta, op = {}) {
   const r = await fetch(ruta, op);
   const d = await r.json().catch(() => ({}));
+  if (r.status === 401 && d.login) { location.href = "/login?siguiente=" + encodeURIComponent(location.pathname); throw new Error(d.error); }
   if (!r.ok) throw new Error(d.error || `Error ${r.status}`);
   return d;
 }
@@ -459,3 +460,6 @@ cargarPanel().then(() => {
   if (abierta) { irA("auditorias"); return seleccionar(abierta.id, true); }
 }).catch(error);
 setInterval(() => { if (!document.hidden) { cargarEjecuciones().catch(() => {}); cargarServicios().catch(() => {}); } }, 10000);
+
+// Sesion: muestra "Cerrar sesion" si el login esta activo
+fetch("/api/sesion").then((r) => r.json()).then((d) => { const a = document.getElementById("salir"); if (a && d.login && d.usuario) { a.hidden = false; a.textContent = "Cerrar sesión (" + d.usuario + ")"; } }).catch(() => {});

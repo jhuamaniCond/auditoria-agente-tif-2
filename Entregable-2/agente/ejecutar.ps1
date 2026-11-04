@@ -241,7 +241,12 @@ if (Web-Responde $url) {
 }
 
 $env:PORT = "$Puerto"
-$web = Start-Process -FilePath "python" -ArgumentList "servidor_web.py" -WorkingDirectory $Agente -NoNewWindow -PassThru
+if (-not $env:AGENTE_CLAVE_HASH -and -not $env:AGENTE_CLAVE -and -not $env:AGENTE_LOGIN) {
+    # En la PC local (solo 127.0.0.1) el login es opcional; en la VPS se define AGENTE_CLAVE_HASH.
+    $env:AGENTE_LOGIN = "0"
+    Aviso "Login desactivado en local (defina AGENTE_CLAVE o AGENTE_CLAVE_HASH para activarlo)."
+}
+$web =Start-Process -FilePath "python" -ArgumentList "servidor_web.py" -WorkingDirectory $Agente -NoNewWindow -PassThru
 try {
     $lista = Esperar "la web" 240 { (Web-Responde $url) -or $web.HasExited }
     if ($web.HasExited) { Detener "La web se cerro al arrancar (vea los mensajes de arriba)." }
