@@ -114,7 +114,7 @@ main { padding: 28px 36px 64px; max-width: 1360px; width: 100%; }
 .boton.mini { min-height: 30px; padding: 4px 10px; font-size: .85rem; }
 .boton.ancho { width: 100%; }
 label { display: block; font-size: .88rem; font-weight: 550; color: var(--tinta-2); margin: 12px 0 6px; }
-input[type=text], input[type=search], input[type=number], input[type=date], input[type=url], input:not([type]), select, textarea {
+input[type=text], input[type=search], input[type=number], input[type=date], input[type=url], input[type=password], input[type=email], input:not([type]), select, textarea {
   width: 100%; padding: 9px 11px; border: 1px solid var(--filete-fuerte); border-radius: var(--radio);
   background: var(--hoja); color: var(--tinta); font: inherit; font-size: .93rem; }
 textarea { resize: vertical; min-height: 88px; }
