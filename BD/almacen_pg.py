@@ -143,7 +143,7 @@ class AlmacenPG(object):
 
     # Datos del agente (todo lo que genera o recibe). El catalogo de la norma y de GESTITEL
     # (expedientes, requisitos, requisitos_brecha, gestitel_codigos...) no se toca.
-    TABLAS_DATOS = ("documento_paginas", "documentos", "ejecucion_instantaneas", "ejecuciones", "hallazgo_evidencia", "acciones",
+    TABLAS_DATOS = ("documentos_pims", "documento_paginas", "documentos", "ejecucion_instantaneas", "ejecuciones", "hallazgo_evidencia", "acciones",
                     "hallazgos", "checklist_items", "auditorias", "revisiones_pertinencia",
                     "evidencia_requisito", "cadena_custodia", "evidencias", "soa_evaluaciones",
                     "decisiones_humanas", "eventos_agentes", "bitacora_mcp", "proyectos")
@@ -181,8 +181,8 @@ class AlmacenPG(object):
         antes = self.contar_datos()
         cx = self.conexion()
         with cx.transaction(), cx.cursor() as cur:
-            tablas = list(self.TABLAS_DATOS)
-            for t in self.TABLAS_CHECKPOINT:
+            tablas = []
+            for t in self.TABLAS_DATOS + self.TABLAS_CHECKPOINT:
                 cur.execute("SELECT to_regclass(%s) AS t", (t,))
                 if cur.fetchone()["t"]:
                     tablas.append(t)

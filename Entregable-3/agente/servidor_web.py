@@ -1,0 +1,851 @@
+# -*- coding: utf-8 -*-
+"""
+Servidor web del Agente de Evidencia y Auditoria (Entregable 3).
+
+    python servidor_web.py          # http://127.0.0.1:5000  (PORT para cambiarlo)
+
+Sirve en un solo proceso la aplicacion del Entregable 1 (en /) y el panel del
+agente autonomo (en /agente) con su API JSON (/api/agente/...). No modifica
+ningun archivo del Entregable 1: registra un Blueprint sobre su Flask
+(nucleo.app_e1.app) e inyecta en la portada un enlace flotante al panel.
+"""
+
+import datetime as dt
+import inspect
+import json
+import os
+import re
+import threading
+import uuid
+
+from flask import Blueprint, Response, jsonify, redirect, render_template, request, send_file, stream_with_context
+
+import nucleo
+import herramientas
+import autenticacion
+
+AQUI = os.path.dirname(os.path.abspath(__file__))
+WEB = os.path.join(AQUI, "web")
+BITACORAS = {
+    "decisiones": os.path.join(nucleo.DATOS, "bitacora_decisiones.jsonl"),
+    "mcp": os.path.join(nucleo.DATOS, "bitacora_mcp.jsonl"),
+    "eventos": os.path.join(nucleo.DATOS, "eventos.jsonl"),
+}
+TIPOS_EJECUCION = ("auditoria_interna", "incidente", "bandeja")
+EXTENSIONES = nucleo.app_e1.EXTENSIONES
+CON_IA = {"clasificar", "buscar", "evaluar_pertinencia", "redactar_hallazgo", "preguntar"}
+
+
+# ----------------------------------------------------------------------------
+# Modulos del orquestador (los escribe otro componente del Entregable 2). Si aun
+# no existen se usa un sustituto en memoria SOLO para poder probar el panel.
+try:
+    import orquestador
+    ORQUESTADOR_REAL = True
+except ImportError:
+    ORQUESTADOR_REAL = False
+
+    class _OrquestadorProvisional:
+        """Sustituto temporal del orquestador: mismo contrato, estado en memoria."""
+
+        NODOS = [("integridad", "Verificar integridad del expediente"),
+                 ("cobertura", "Calcular matriz de cobertura"),
+                 ("hallazgos", "Redactar hallazgos preliminares"),
+                 ("pertinencia", "Evaluar pertinencia de evidencias"),
+                 ("aprobacion", "Aprobacion del auditor (HITL)"),
+                 ("informe", "Generar informe de auditoria"),
+                 ("plan_accion", "Plan de accion")]
+
+        def __init__(self):
+            self._ej = {}
+            self._lock = threading.Lock()
+
+        @staticmethod
+        def _ahora():
+            return dt.datetime.now().astimezone().isoformat(timespec="seconds")
+
+        def iniciar(self, tipo, proyecto="unsa", parametros=None):
+            if tipo not in TIPOS_EJECUCION:
+                raise ValueError("Tipo de ejecucion no valido: %s" % tipo)
+            nodos = self.NODOS if tipo == "auditoria_interna" else [
+                ("recibir", "Recibir notificacion"), ("analizar", "Analizar impacto en el PIMS"),
+                ("registrar", "Registrar en bitacora")]
+            e = {"id": uuid.uuid4().hex[:12], "tipo": tipo, "proyecto": proyecto,
+                 "parametros": parametros or {}, "estado": "en_curso", "creado": self._ahora(),
+                 "actualizado": self._ahora(), "paso_actual": nodos[0][0],
+                 "pasos": [{"nodo": n, "titulo": t, "estado": "pendiente", "inicio": None,
+                            "fin": None, "resumen": ""} for n, t in nodos],
+                 "aprobacion": None, "resultado": None, "error": None}
+            self._ej[e["id"]] = e
+            threading.Thread(target=self._correr, args=(e,), daemon=True).start()
+            return json.loads(json.dumps(e))
+
+        def _paso(self, e, nodo, estado, resumen=""):
+            p = next(x for x in e["pasos"] if x["nodo"] == nodo)
+            p["estado"] = estado
+            if estado == "en_curso":
+                p["inicio"] = self._ahora()
+                e["paso_actual"] = nodo
+            else:
+                p["fin"] = self._ahora()
+            if resumen:
+                p["resumen"] = resumen
+            e["actualizado"] = self._ahora()
+
+        def _correr(self, e):
+            try:
+                if e["tipo"] != "auditoria_interna":
+                    for p in e["pasos"]:
+                        self._paso(e, p["nodo"], "en_curso")
+                        self._paso(e, p["nodo"], "ok", "Simulado (orquestador provisional)")
+                    e["estado"], e["resultado"] = "completada", {"informe": None, "plan_accion": []}
+                    return
+                par = e["parametros"]
+                rapido = bool(par.get("modo_rapido", True))
+                self._paso(e, "integridad", "en_curso")
+                est = herramientas.estado_expediente(e["proyecto"])
+                integ = est["integridad"]
+                self._paso(e, "integridad", "ok", "%s evidencias, %s" % (
+                    integ["total"], "integro" if integ["integro"] else "CON FALLOS"))
+                self._paso(e, "cobertura", "en_curso")
+                cob = herramientas.matriz_cobertura(e["proyecto"], par.get("rol"),
+                                                    int(par.get("vigencia_dias", 365)))
+                self._paso(e, "cobertura", "ok", "Cobertura %s%%" % cob["porcentaje_cobertura"])
+                self._paso(e, "hallazgos", "en_curso")
+                pend = [f for f in cob["controles"] if f["estado"] not in ("Cubierto", "No aplica")]
+                hall = []
+                for i, f in enumerate(pend):
+                    texto = f.get("nota") or "Control %s en estado %s." % (f["ref"], f["estado"])
+                    if not rapido and i < int(par.get("max_hallazgos", 3)):
+                        try:
+                            texto = herramientas.redactar_hallazgo(f["ref"], e["proyecto"])["hallazgo"]
+                        except Exception as ex:  # noqa: BLE001
+                            texto += " (IA no disponible: %s)" % ex
+                    hall.append({"ref": f["ref"], "estado": f["estado"], "texto": texto})
+                self._paso(e, "hallazgos", "ok", "%d hallazgos" % len(hall))
+                self._paso(e, "pertinencia", "en_curso")
+                props = []
+                if rapido:
+                    self._paso(e, "pertinencia", "omitido", "Modo rapido: sin IA")
+                else:
+                    evals = [f for f in cob["controles"] if f["estado"] in ("Cubierto", "Parcial")]
+                    for f in evals[:int(par.get("max_pertinencia", 2))]:
+                        try:
+                            r = herramientas.evaluar_pertinencia(f["ref"], e["proyecto"])
+                            props.append({"ref": f["ref"], "veredicto": r.get("veredicto"),
+                                          "justificacion": r.get("justificacion", "")})
+                        except Exception:  # noqa: BLE001
+                            pass
+                    self._paso(e, "pertinencia", "ok", "%d propuestas" % len(props))
+                self._paso(e, "aprobacion", "en_curso")
+                e["aprobacion"] = {"pendiente": True, "pregunta": "Revisa los hallazgos y "
+                                   "propuestas preliminares y aprueba o rechaza el informe.",
+                                   "hallazgos": hall, "propuestas": props}
+                e["estado"] = "esperando_aprobacion"
+                e["actualizado"] = self._ahora()
+            except Exception as ex:  # noqa: BLE001
+                e["estado"], e["error"] = "error", str(ex)
+
+        def obtener(self, id_):
+            e = self._ej.get(id_)
+            return json.loads(json.dumps(e)) if e else None
+
+        def listar(self, proyecto=None):
+            return sorted((self.obtener(i) for i, e in self._ej.items()
+                           if proyecto in (None, e["proyecto"])),
+                          key=lambda x: x["creado"], reverse=True)
+
+        def aprobar(self, id_, decision, auditor, comentario="", decisiones_controles=None):
+            with self._lock:
+                e = self._ej.get(id_)
+                if not e or e["estado"] != "esperando_aprobacion":
+                    raise ValueError("La ejecucion no espera aprobacion")
+                e["aprobacion"]["pendiente"] = False
+                if decision == "rechazada":
+                    self._paso(e, "aprobacion", "error", "Rechazada por %s" % auditor)
+                    e["estado"] = "rechazada"
+                    return self.obtener(id_)
+                self._paso(e, "aprobacion", "ok", "Aprobada por %s" % auditor)
+                self._paso(e, "informe", "en_curso")
+                hall = {h["ref"]: h["texto"] for h in e["aprobacion"]["hallazgos"]}
+                inf = herramientas.generar_informe(e["proyecto"], hall, auditor, comentario)
+                self._paso(e, "informe", "ok", os.path.basename(inf["ruta"]))
+                self._paso(e, "plan_accion", "en_curso")
+                plan = [{"ref": h["ref"], "accion": "Subsanar: " + h["estado"],
+                         "responsable": "Responsable del PIMS", "prioridad":
+                         "Alta" if h["estado"] in ("Sin evidencia", "Comprometida") else "Media",
+                         "plazo_dias": 30} for h in e["aprobacion"]["hallazgos"]]
+                self._paso(e, "plan_accion", "ok", "%d acciones" % len(plan))
+                e["resultado"] = {"informe": inf, "plan_accion": plan}
+                e["estado"] = "completada"
+                return self.obtener(id_)
+
+    orquestador = _OrquestadorProvisional()
+
+try:
+    import coordinacion
+except ImportError:
+    coordinacion = None
+
+try:
+    import bandeja
+except ImportError:
+    bandeja = None
+
+
+# ----------------------------------------------------------------------------
+bp = Blueprint("agente", __name__, template_folder=WEB, static_folder=WEB,
+               static_url_path="/agente/static")
+
+
+def _error(mensaje, codigo=400):
+    return jsonify({"error": mensaje}), codigo
+
+
+def _json():
+    return request.get_json(silent=True) or {}
+
+
+def _publica(e):
+    """Anade a la ejecucion el nombre del informe (para pedirlo con /api/agente/informe)."""
+    if not e:
+        return e
+    inf = (e.get("resultado") or {}).get("informe")
+    ruta = inf.get("ruta") if isinstance(inf, dict) else inf
+    if isinstance(ruta, str) and ruta.lower().endswith(".md"):
+        e["informe_nombre"] = os.path.basename(ruta)
+    return e
+
+
+@bp.route("/agente")
+def panel():
+    return render_template("agente.html", real=ORQUESTADOR_REAL)
+
+
+@bp.route("/api/agente/ejecuciones")
+def api_listar():
+    return jsonify([_publica(e) for e in orquestador.listar(request.args.get("proyecto"))])
+
+
+@bp.route("/api/agente/ejecuciones", methods=["POST"])
+def api_iniciar():
+    d = _json()
+    tipo = d.get("tipo")
+    if tipo not in TIPOS_EJECUCION:
+        return _error("Tipo no valido (usa %s)" % ", ".join(TIPOS_EJECUCION))
+    parametros = d.get("parametros") or {}
+    if not isinstance(parametros, dict):
+        return _error("parametros debe ser un objeto")
+    try:
+        e = orquestador.iniciar(tipo, d.get("proyecto") or "unsa", parametros)
+    except (nucleo.ErrorAgente, ValueError, KeyError) as ex:
+        return _error(str(ex))
+    return jsonify(_publica(e)), 202
+
+
+@bp.route("/api/agente/ejecuciones/<id_>")
+def api_obtener(id_):
+    e = orquestador.obtener(id_)
+    return jsonify(_publica(e)) if e else _error("Ejecucion no encontrada", 404)
+
+
+@bp.route("/api/agente/ejecuciones/<id_>/aprobar", methods=["POST"])
+def api_aprobar(id_):
+    d = _json()
+    if d.get("decision") not in ("aprobada", "rechazada"):
+        return _error("La decision debe ser 'aprobada' o 'rechazada'")
+    auditor = (d.get("auditor") or "").strip()
+    if not auditor:
+        return _error("Indica el nombre del auditor que valida")
+    dc = d.get("decisiones_controles") or {}
+    if not isinstance(dc, dict) or any(v not in ("aceptada", "rechazada") for v in dc.values()):
+        return _error("decisiones_controles: {ref: 'aceptada'|'rechazada'}")
+    if not orquestador.obtener(id_):
+        return _error("Ejecucion no encontrada", 404)
+    try:
+        e = orquestador.aprobar(id_, d["decision"], auditor, (d.get("comentario") or "").strip(),
+                                decisiones_controles=dc)
+    except (nucleo.ErrorAgente, ValueError, KeyError) as ex:
+        return _error(str(ex))
+    return jsonify(_publica(e))
+
+
+@bp.route("/api/agente/ejecuciones/<id_>/cancelar", methods=["POST"])
+def api_cancelar(id_):
+    d = _json()
+    actor = (d.get("actor") or "").strip()
+    if not actor:
+        return _error("Indica quien cancela la ejecucion")
+    if not orquestador.obtener(id_):
+        return _error("Ejecucion no encontrada", 404)
+    if not hasattr(orquestador, "cancelar"):
+        return _error("El orquestador no permite cancelar ejecuciones")
+    try:
+        e = orquestador.cancelar(id_, actor, (d.get("motivo") or "").strip())
+    except (nucleo.ErrorAgente, ValueError, KeyError) as ex:
+        return _error(str(ex))
+    return jsonify(_publica(e))
+
+
+@bp.route("/api/agente/incidente", methods=["POST"])
+def api_incidente():
+    descripcion = (_json().get("descripcion") or "").strip()
+    if not descripcion:
+        return _error("Describe el incidente")
+    try:
+        if coordinacion is not None:
+            r = coordinacion.simular_agente_incidentes(descripcion)
+        else:   # sin coordinacion.py: se lanza directamente el flujo de incidente
+            r = orquestador.iniciar("incidente", "unsa", {"descripcion": descripcion})
+    except (nucleo.ErrorAgente, ValueError, KeyError) as ex:
+        return _error(str(ex))
+    return jsonify(_publica(r) if isinstance(r, dict) and "pasos" in r else r), 202
+
+
+def _nombre_seguro(nombre):
+    nombre = os.path.basename((nombre or "").replace("\\", "/")).strip()
+    nombre = re.sub(r'[<>:"/\\|?*\x00-\x1f]', "_", nombre)
+    return nombre.lstrip(".")
+
+
+@bp.route("/api/agente/bandeja", methods=["POST"])
+def api_subir_bandeja():
+    archivos = request.files.getlist("archivo")
+    if not archivos or not any(a.filename for a in archivos):
+        return _error("Adjunta un archivo")
+    guardados = []
+    for a in archivos:
+        nombre = _nombre_seguro(a.filename)
+        base, ext = os.path.splitext(nombre)
+        if not base or ext.lower() not in EXTENSIONES:
+            return _error("Formato no admitido: %s (usa %s)" % (
+                nombre or a.filename, ", ".join(sorted(EXTENSIONES))))
+        destino = os.path.join(nucleo.BANDEJA, nombre)
+        if os.path.exists(destino):
+            nombre = "%s_%s%s" % (base, dt.datetime.now().strftime("%Y%m%d%H%M%S"), ext)
+            destino = os.path.join(nucleo.BANDEJA, nombre)
+        a.save(destino)
+        guardados.append(nombre)
+    return jsonify({"guardados": guardados, "carpeta": nucleo.BANDEJA})
+
+
+@bp.route("/api/agente/bandeja")
+def api_listar_bandeja():
+    raiz = nucleo.BANDEJA
+    filas = []
+    for actual, carpetas, archivos in os.walk(raiz):
+        rel = os.path.relpath(actual, raiz)
+        if rel.count(os.sep) >= 1 and rel != ".":
+            carpetas[:] = []
+        for n in archivos:
+            ruta = os.path.join(actual, n)
+            st = os.stat(ruta)
+            filas.append({"nombre": n, "carpeta": "" if rel == "." else rel.replace(os.sep, "/"),
+                          "bytes": st.st_size, "modificado": dt.datetime.fromtimestamp(
+                              st.st_mtime).astimezone().isoformat(timespec="seconds")})
+    filas.sort(key=lambda f: f["modificado"], reverse=True)
+    return jsonify({"carpeta": raiz, "archivos": filas,
+                    "automatizacion": bandeja is not None})
+
+
+def _ultimas_lineas(ruta, n=100):
+    if not os.path.isfile(ruta):
+        return []
+    with open(ruta, encoding="utf-8", errors="replace") as f:
+        lineas = [x for x in f.read().splitlines() if x.strip()][-n:]
+    salida = []
+    for x in lineas:
+        try:
+            salida.append(json.loads(x))
+        except ValueError:
+            salida.append({"linea": x})
+    return salida[::-1]     # lo mas reciente primero
+
+
+@bp.route("/api/agente/bitacora")
+def api_bitacora():
+    tipo = request.args.get("tipo", "decisiones")
+    if tipo not in BITACORAS:
+        return _error("tipo: decisiones | mcp | eventos")
+    almacen = nucleo.ALMACEN
+    if almacen is not None:     # PostgreSQL: lo mas reciente primero, como _ultimas_lineas
+        registros = {"decisiones": lambda: almacen.leer_decisiones(n=100)[::-1],
+                     "mcp": lambda: almacen.leer_mcp(100)[::-1],
+                     "eventos": lambda: almacen.leer_eventos(100)}[tipo]()
+        return jsonify({"tipo": tipo, "registros": registros, "origen": almacen.descripcion()})
+    return jsonify({"tipo": tipo, "registros": _ultimas_lineas(BITACORAS[tipo])})
+
+
+@bp.route("/api/agente/informe/<nombre>")
+def api_informe(nombre):
+    if nombre != os.path.basename(nombre) or not nombre.lower().endswith(".md"):
+        return _error("Nombre de informe no valido", 404)
+    raiz = os.path.realpath(nucleo.SALIDAS)
+    ruta = os.path.realpath(os.path.join(raiz, nombre))
+    if not ruta.startswith(raiz + os.sep) or not os.path.isfile(ruta):
+        return _error("Informe no encontrado", 404)
+    with open(ruta, encoding="utf-8", errors="replace") as f:
+        return jsonify({"nombre": nombre, "contenido": f.read()})
+
+
+@bp.route("/api/agente/herramientas")
+def api_herramientas():
+    salida = []
+    for nombre, fn in herramientas.HERRAMIENTAS.items():
+        try:
+            firma = str(inspect.signature(fn))
+        except (TypeError, ValueError):
+            firma = "(...)"
+        salida.append({"nombre": nombre, "firma": firma, "doc": inspect.getdoc(fn) or "",
+                       "ia": nombre in CON_IA})
+    return jsonify(salida)
+
+
+@bp.route("/api/agente/resumen")
+def api_resumen():
+    try:
+        p = nucleo.proyecto("unsa")
+        cob = herramientas.matriz_cobertura("unsa")
+        integ = nucleo.app_e1._integridad_sin_registrar(p)
+        n_ev = len(nucleo.leer_indice(p.expediente)["evidencias"])
+    except (nucleo.ErrorAgente, ValueError, KeyError) as ex:
+        return _error(str(ex), 500)
+    return jsonify({"proyecto": p.publico(), "porcentaje_cobertura": cob["porcentaje_cobertura"],
+                    "controles_aplicables": cob["controles_aplicables"],
+                    "conteo_estados": cob["conteo_estados"], "rol": cob["rol"],
+                    "fecha_corte": cob["fecha_corte"], "integridad": integ, "evidencias": n_ev,
+                    "orquestador_real": ORQUESTADOR_REAL})
+
+
+
+# ------------------------------------------------ pausar, reanudar y gestion de datos
+def _accion_ejecucion(id_, nombre, *args):
+    if not orquestador.obtener(id_):
+        return _error("Ejecucion no encontrada", 404)
+    fn = getattr(orquestador, nombre, None)
+    if fn is None:
+        return _error("El orquestador no permite %s" % nombre)
+    try:
+        return jsonify(_publica(fn(id_, *args)))
+    except (nucleo.ErrorAgente, ValueError, KeyError) as ex:
+        return _error(str(ex))
+
+
+@bp.route("/api/agente/ejecuciones/<id_>/pausar", methods=["POST"])
+def api_pausar(id_):
+    d = _json()
+    return _accion_ejecucion(id_, "pausar", (d.get("actor") or "").strip(), (d.get("motivo") or "").strip())
+
+
+@bp.route("/api/agente/ejecuciones/<id_>/reanudar", methods=["POST"])
+def api_reanudar(id_):
+    return _accion_ejecucion(id_, "reanudar", (_json().get("actor") or "").strip())
+
+
+@bp.route("/api/agente/catalogo")
+def api_catalogo():
+    return jsonify({"tipos": list(nucleo.TIPOS), "controles": [
+        {"ref": c["ref"], "titulo": c["titulo"], "grupo": c["grupo"]} for c in nucleo.CATALOGO]})
+
+
+@bp.route("/api/agente/expediente")
+def api_expediente():
+    try:
+        return jsonify(herramientas.estado_expediente("unsa"))
+    except (nucleo.ErrorAgente, ValueError, KeyError) as ex:
+        return _error(str(ex), 500)
+
+
+@bp.route("/api/agente/expediente", methods=["POST"])
+def api_registrar_evidencia():
+    """Registra una evidencia en el expediente (SHA-256, cadena de custodia e indexado)."""
+    archivo = request.files.get("archivo")
+    if not archivo or not archivo.filename:
+        return _error("Adjunta el archivo de la evidencia")
+    nombre = _nombre_seguro(archivo.filename)
+    if os.path.splitext(nombre)[1].lower() not in EXTENSIONES:
+        return _error("Formato no admitido (usa %s)" % ", ".join(sorted(EXTENSIONES)))
+    titulo = (request.form.get("titulo") or "").strip()
+    tipo = (request.form.get("tipo") or "").strip()
+    responsable = (request.form.get("responsable") or "").strip()
+    controles = [c.strip() for c in (request.form.get("controles") or "").split(",") if c.strip()]
+    if not titulo or not responsable:
+        return _error("Indica el titulo y quien registra la evidencia")
+    validos = {c["ref"] for c in nucleo.CATALOGO}
+    malos = [c for c in controles if c not in validos]
+    if malos:
+        return _error("Controles que no existen en el catalogo: %s" % ", ".join(malos))
+    carpeta = os.path.join(nucleo.BANDEJA, "_subidas")
+    os.makedirs(carpeta, exist_ok=True)
+    temporal = os.path.join(carpeta, "%s_%s" % (uuid.uuid4().hex[:8], nombre))
+    archivo.save(temporal)
+    try:
+        ev = herramientas.registrar(temporal, controles, tipo, titulo, "unsa", responsable,
+                                    (request.form.get("fuente") or "").strip(),
+                                    (request.form.get("fecha_documento") or "").strip() or None)
+    except (nucleo.ErrorAgente, nucleo.ErrorEvidencia, ValueError, KeyError) as ex:
+        return _error(str(ex))
+    finally:
+        try:
+            os.remove(temporal)
+        except OSError:
+            pass
+    return jsonify(ev), 201
+
+
+@bp.route("/api/agente/expediente/verificar", methods=["POST"])
+def api_verificar():
+    try:
+        return jsonify(herramientas.verificar_integridad("unsa"))
+    except (nucleo.ErrorAgente, ValueError, KeyError) as ex:
+        return _error(str(ex))
+
+
+@bp.route("/api/agente/cobertura")
+def api_cobertura():
+    try:
+        return jsonify(herramientas.matriz_cobertura("unsa"))
+    except (nucleo.ErrorAgente, ValueError, KeyError) as ex:
+        return _error(str(ex), 500)
+
+
+@bp.route("/api/agente/gestitel/exportar")
+def api_exportar_gestitel():
+    try:
+        r = herramientas.exportar_gestitel("unsa", request.args.get("auditoria") or None)
+    except (nucleo.ErrorAgente, ValueError, KeyError) as ex:
+        return _error(str(ex))
+    if not r["filas"]:
+        return _error("Todavia no hay auditorias completadas para exportar", 404)
+    return send_file(r["ruta"], as_attachment=True, download_name=os.path.basename(r["ruta"]))
+
+
+@bp.route("/api/agente/gestitel/documentos")
+def api_exportar_documentos():
+    try:
+        r = herramientas.exportar_gestitel_documentos("unsa")
+    except (nucleo.ErrorAgente, ValueError, KeyError) as ex:
+        return _error(str(ex))
+    if not r["filas"]:
+        return _error("El expediente no tiene evidencias para exportar", 404)
+    return send_file(r["ruta"], as_attachment=True, download_name=os.path.basename(r["ruta"]))
+
+
+@bp.route("/api/agente/sistema")
+def api_sistema():
+    """Estado de los servicios de los que depende el agente."""
+    salida = {"base_datos": {"ok": False, "detalle": "sin conexion"},
+              "ollama": {"ok": False, "modelos": []},
+              "backend": nucleo.BACKEND, "orquestador_real": ORQUESTADOR_REAL,
+              "indices": dict(nucleo.PREPARACION)}
+    if nucleo.ALMACEN is not None:
+        try:
+            salida["base_datos"] = {"ok": True, "detalle": nucleo.ALMACEN.descripcion(),
+                                    "filas": nucleo.ALMACEN.contar_datos()}
+        except Exception as ex:  # noqa: BLE001
+            salida["base_datos"]["detalle"] = str(ex)
+    else:
+        salida["base_datos"] = {"ok": True, "detalle": "archivos JSON (PIMS_BACKEND=archivos)", "filas": {}}
+    try:
+        import requests
+        r = requests.get("http://127.0.0.1:11434/api/tags", timeout=2)
+        salida["ollama"] = {"ok": r.ok, "modelos": [m["name"] for m in r.json().get("models", [])]}
+    except Exception:  # noqa: BLE001
+        pass
+    return jsonify(salida)
+
+
+@bp.route("/api/agente/chat", methods=["POST"])
+def api_chat():
+    """Chat con la IA local sobre el proyecto. Responde en NDJSON a medida que genera."""
+    import chat_proyecto
+    d = _json()
+    historial = d.get("historial") if isinstance(d.get("historial"), list) else []
+
+    def eventos():
+        for ev in chat_proyecto.conversar(d.get("mensaje"), historial, str(d.get("vista") or "")):
+            yield json.dumps(ev, ensure_ascii=False) + "\n"
+
+    return Response(stream_with_context(eventos()), mimetype="application/x-ndjson",
+                    headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+
+@bp.route("/api/agente/base/vaciar", methods=["POST"])
+def api_vaciar_base():
+    """Vacia todos los datos del agente para empezar de cero (el catalogo de la norma se conserva)."""
+    d = _json()
+    if d.get("confirmar") != "VACIAR":
+        return _error("Escribe VACIAR para confirmar")
+    actor = (d.get("actor") or "").strip()
+    if not actor:
+        return _error("Indica quien vacia la base")
+    activas = [e["id"] for e in orquestador.listar() if e["estado"] == "en_curso"]
+    if activas:
+        return _error("Hay ejecuciones en curso (%s). Pausalas o cancelalas antes de vaciar." % ", ".join(activas), 409)
+    try:
+        resumen = nucleo.vaciar_datos()
+    except Exception as ex:  # noqa: BLE001
+        return _error("No se pudo vaciar: %s" % ex, 500)
+    if hasattr(orquestador, "registrar_decision"):
+        orquestador.registrar_decision(None, "base_de_datos", "base vaciada", actor=actor, humano=True,
+                                       detalle={"filas_borradas": resumen["filas"],
+                                                "carpetas_borradas": len(resumen["carpetas"])})
+    return jsonify(resumen)
+
+
+# ------------------------------------------------- documentos PIMS (Entregable 3)
+try:
+    import documentos_pims
+except Exception:  # noqa: BLE001  (sin PostgreSQL)
+    documentos_pims = None
+
+
+def _sin_documentos():
+    return _error("Los documentos PIMS necesitan PostgreSQL (PIMS_BACKEND=postgres)", 503)
+
+
+def _guardar_subida(archivo):
+    nombre = _nombre_seguro(archivo.filename)
+    if os.path.splitext(nombre)[1].lower() != ".docx":
+        raise nucleo.ErrorAgente("Los documentos PIMS se suben en .docx (formato de la plantilla PIMS).")
+    carpeta = os.path.join(nucleo.BANDEJA, "_subidas")
+    os.makedirs(carpeta, exist_ok=True)
+    temporal = os.path.join(carpeta, "%s_%s" % (uuid.uuid4().hex[:8], nombre))
+    archivo.save(temporal)
+    return temporal, nombre
+
+
+@bp.route("/api/agente/documentos-pims")
+def api_documentos_pims():
+    if documentos_pims is None:
+        return _sin_documentos()
+    try:
+        maestra = documentos_pims.lista_maestra("unsa")
+        docs = documentos_pims.listar("unsa")
+    except (nucleo.ErrorAgente, ValueError, KeyError) as ex:
+        return _error(str(ex), 500)
+    conteo = {}
+    for f in maestra:
+        conteo[f["situacion"]] = conteo.get(f["situacion"], 0) + 1
+    return jsonify({"lista_maestra": maestra, "documentos": docs, "conteo": conteo,
+                    "total": len(maestra)})
+
+
+@bp.route("/api/agente/documentos-pims/<int:id_>")
+def api_documento_pims(id_):
+    if documentos_pims is None:
+        return _sin_documentos()
+    try:
+        return jsonify(documentos_pims.obtener(id_))
+    except nucleo.ErrorAgente as ex:
+        return _error(str(ex), 404)
+
+
+@bp.route("/api/agente/documentos-pims/<int:id_>/archivo")
+def api_documento_pims_archivo(id_):
+    if documentos_pims is None:
+        return _sin_documentos()
+    try:
+        d = documentos_pims.obtener(id_)
+    except nucleo.ErrorAgente as ex:
+        return _error(str(ex), 404)
+    p = nucleo.proyecto("unsa")
+    ev = next((e for e in nucleo.leer_indice(p.expediente)["evidencias"] if e["sha256"] == d["sha256"]), None)
+    ruta = os.path.join(p.expediente, ev["archivo"]) if ev else None
+    if not ruta or not os.path.isfile(ruta):
+        return _error("El archivo no está en el expediente de este equipo", 404)
+    return send_file(ruta, as_attachment=True, download_name=d["archivo"])
+
+
+@bp.route("/api/agente/documentos-pims/previsualizar", methods=["POST"])
+def api_previsualizar_documento():
+    if documentos_pims is None:
+        return _sin_documentos()
+    archivo = request.files.get("archivo")
+    if not archivo or not archivo.filename:
+        return _error("Adjunta el documento .docx")
+    temporal = None
+    try:
+        temporal, nombre = _guardar_subida(archivo)
+        r = documentos_pims.previsualizar(temporal)
+        r["archivo"] = nombre
+        return jsonify(r)
+    except Exception as ex:  # noqa: BLE001  (docx danado, etc.)
+        return _error("No se pudo leer el documento: %s" % ex)
+    finally:
+        if temporal:
+            try:
+                os.remove(temporal)
+            except OSError:
+                pass
+
+
+@bp.route("/api/agente/documentos-pims", methods=["POST"])
+def api_registrar_documento():
+    if documentos_pims is None:
+        return _sin_documentos()
+    archivo = request.files.get("archivo")
+    if not archivo or not archivo.filename:
+        return _error("Adjunta el documento .docx")
+    por = (request.form.get("registrado_por") or "").strip()
+    if not por:
+        return _error("Indica quién registra el documento")
+    requisitos = [c.strip() for c in (request.form.get("requisitos") or "").split(",") if c.strip()]
+    temporal = None
+    try:
+        temporal, nombre = _guardar_subida(archivo)
+        destino = os.path.join(os.path.dirname(temporal), nombre)
+        if os.path.exists(destino):
+            os.remove(destino)
+        os.replace(temporal, destino)          # el expediente guarda el nombre original
+        temporal = destino
+        d = documentos_pims.registrar(temporal, por, requisitos or None,
+                                      (request.form.get("agente_autor") or "").strip() or None)
+    except (nucleo.ErrorAgente, nucleo.ErrorEvidencia, ValueError, KeyError) as ex:
+        return _error(str(ex))
+    finally:
+        if temporal:
+            try:
+                os.remove(temporal)
+            except OSError:
+                pass
+    return jsonify(d), (200 if d.get("ya_registrado") else 201)
+
+
+@bp.route("/api/agente/documentos-pims/verificar", methods=["POST"])
+def api_verificar_documentos():
+    if documentos_pims is None:
+        return _sin_documentos()
+    try:
+        return jsonify({"resultados": documentos_pims.reverificar("unsa")})
+    except (nucleo.ErrorAgente, ValueError, KeyError) as ex:
+        return _error(str(ex))
+
+
+@bp.route("/api/agente/salidas/<nombre>")
+def api_salida(nombre):
+    """Descarga un documento generado por el agente (PIMS-FO-01 .docx, Excel GESTITEL)."""
+    if nombre != os.path.basename(nombre) or not nombre.lower().endswith((".docx", ".xlsx")):
+        return _error("Nombre no valido", 404)
+    raiz = os.path.realpath(nucleo.SALIDAS)
+    ruta = os.path.realpath(os.path.join(raiz, nombre))
+    if not ruta.startswith(raiz + os.sep) or not os.path.isfile(ruta):
+        return _error("Archivo no encontrado", 404)
+    return send_file(ruta, as_attachment=True, download_name=nombre)
+
+
+@bp.route("/api/agente/custodia")
+def api_custodia():
+    """Ultimos eslabones de la cadena de custodia (para dibujar la cadena en el panel)."""
+    p = nucleo.proyecto("unsa")
+    try:
+        n = max(1, min(30, int(request.args.get("n", 8))))
+    except ValueError:
+        n = 8
+    lineas = []
+    if nucleo.ALMACEN is not None:
+        lineas = nucleo.ALMACEN.leer_cadena(p.expediente)[-n:]
+    else:
+        ruta = os.path.join(p.expediente, "cadena_custodia.log")
+        if os.path.isfile(ruta):
+            with open(ruta, encoding="utf-8") as f:
+                lineas = [x for x in f.read().splitlines() if x.strip()][-n:]
+    salida = []
+    for x in lineas:
+        try:
+            salida.append(json.loads(x) if isinstance(x, str) else x)
+        except ValueError:
+            salida.append({"linea": x})
+    return jsonify({"eslabones": salida})
+
+
+# ------------------------------------------------- grafo de conocimiento
+@bp.route("/api/agente/grafo")
+def api_grafo_agente():
+    """Grafo de conocimiento del Entregable 1 (grafo.py: fuentes del RAG, grupos, controles,
+    remisiones de la norma, semejanza FAISS, evidencias) ampliado con los documentos PIMS
+    del Grupo 6, enlazados a los controles que documentan y a su evidencia."""
+    import grafo                                    # Entregable-1/04-aplicacion/grafo.py
+    p = nucleo.proyecto("unsa")
+    try:
+        cob = herramientas.matriz_cobertura("unsa")
+        integridad = {}
+        for clave, ids in nucleo.app_e1._integridad_sin_registrar(p)["resultados"].items():
+            for i in ids:
+                integridad[i] = clave
+        g = grafo.construir(nucleo.CATALOGO, nucleo.CONOCIMIENTO_RAG, p, cob,
+                            nucleo.leer_indice(p.expediente)["evidencias"], integridad)
+    except (nucleo.ErrorAgente, ValueError, KeyError) as ex:
+        return _error(str(ex), 500)
+    for n in g["nodos"]:
+        if n["tipo"] == "agente":
+            n["etiqueta"] = "Agente de Evidencia y Auditoría"
+            n["detalle"] = ("Responde con lo que recupera de FAISS (norma, skill y expediente) y "
+                            "audita con los documentos PIMS guardados en la base de datos.")
+    if documentos_pims is not None:
+        try:
+            maestra = documentos_pims.lista_maestra("unsa")
+        except Exception:  # noqa: BLE001
+            maestra = []
+        ids = {n["id"] for n in g["nodos"]}
+        for f in maestra:
+            d = f.get("documento") or {}
+            did = "doc:" + f["codigo"]
+            g["nodos"].append({"id": did, "tipo": "documento", "etiqueta": f["codigo"], "titulo": f["titulo"],
+                               "situacion": f["situacion"], "version": d.get("version"),
+                               "control": (d.get("control") or {}).get("resultado"),
+                               "requisitos": f["requisitos"], "expedientes": f["expedientes"],
+                               "doc_id": d.get("id"), "evidencia": d.get("evidencia")})
+            g["aristas"].append({"origen": "agente", "destino": did, "tipo": "elabora"})
+            for r in f["requisitos"]:
+                if "ctl:" + r in ids:
+                    g["aristas"].append({"origen": did, "destino": "ctl:" + r, "tipo": "documenta"})
+            if d.get("evidencia") and "ev:" + d["evidencia"] in ids:
+                g["aristas"].append({"origen": did, "destino": "ev:" + d["evidencia"], "tipo": "registrado"})
+        g["resumen"]["documentos_pims"] = len(maestra)
+        g["resumen"]["documentos_vigentes"] = sum(1 for f in maestra if f["situacion"] == "Vigente")
+    return jsonify(g)
+
+
+# ------------------------------------------------- enlace al panel desde la portada
+BOTON_AGENTE = (
+    '<a href="/agente" id="enlace-agente-autonomo" style="position:fixed;right:20px;bottom:20px;'
+    'z-index:50;background:#1f4e5f;color:#fff;padding:10px 16px;border-radius:99px;'
+    'font:600 14px/1.2 \'Segoe UI\',system-ui,sans-serif;text-decoration:none;'
+    'box-shadow:0 6px 18px rgba(0,0,0,.22)">Agente aut&oacute;nomo &rarr;</a>')
+
+
+@bp.before_app_request
+def _portada_al_panel():
+    """El Entregable 3 es el producto: la portada lleva directo al panel del agente."""
+    if request.path == "/" and request.method == "GET":
+        return redirect("/agente")
+    return None
+
+
+@bp.after_app_request
+def _inyectar_enlace(resp):
+    if (request.path == "/" and request.method == "GET" and resp.status_code == 200
+            and resp.mimetype == "text/html" and not resp.direct_passthrough):
+        html = resp.get_data(as_text=True)
+        i = html.lower().rfind("</body>")
+        if i != -1 and "enlace-agente-autonomo" not in html:
+            resp.set_data(html[:i] + BOTON_AGENTE + html[i:])
+    return resp
+
+
+autenticacion.instalar(nucleo.app_e1.app)   # login: antes que el resto de rutas
+nucleo.app_e1.app.register_blueprint(bp)
+app = nucleo.app_e1.app
+
+
+if __name__ == "__main__":
+    nucleo.preparar_en_segundo_plano()      # la web responde enseguida; los indices se hacen detras
+    if ORQUESTADOR_REAL and hasattr(orquestador, "recuperar_huerfanas"):
+        for _id in orquestador.recuperar_huerfanas():
+            print("Ejecucion interrumpida por el reinicio (se puede reanudar):", _id)
+    if bandeja is not None and hasattr(bandeja, "iniciar_automatizacion"):
+        bandeja.iniciar_automatizacion()
+    if not ORQUESTADOR_REAL:
+        print("AVISO: orquestador.py no encontrado; se usa un sustituto provisional en memoria")
+    app.run(host="127.0.0.1", port=int(os.environ.get("PORT", 5000)), debug=False, threaded=True)

@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agente de Evidencia · UNSA</title>
+  <script>
+    /* Tema guardado (claro u oscuro); sin preferencia se sigue al sistema. Va antes del CSS para no parpadear. */
+    try { var t = localStorage.getItem("agente.tema"); if (t === "claro" || t === "oscuro") document.documentElement.dataset.theme = t === "oscuro" ? "dark" : "light"; } catch (e) {}
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="{{ url_for('agente.static', filename='agente.css', v='4.1') }}">
+</head>
+<body>
+<div class="app">
+  <aside class="riel" id="riel">
+    <div class="marca">
+      <span class="sello-mini" aria-hidden="true"><svg class="i" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6l8-3z"/><path d="M8.5 12l2.5 2.5L15.5 10"/></svg></span>
+      <div><strong>Agente de Evidencia y Auditoría</strong><small>PIMS de la UNSA</small></div>
+    </div>
+    <nav aria-label="Secciones"><span class="indicador" id="indicador" aria-hidden="true"></span>
+      <div class="grupo-menu"><span>Auditar</span>
+        <button class="item activa" data-vista="panel"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg>Panel</button>
+        <button class="item" data-vista="auditorias"><svg class="i" viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 01-2 2H6a2 2 0 01-2-2V5a2 2 0 012-2h10"/></svg>Auditorías<span class="contador" id="c-abiertas" hidden></span></button>
+      </div>
+      <div class="grupo-menu"><span>Evidencia</span>
+        <button class="item" data-vista="documentos"><svg class="i" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>Documentos PIMS</button>
+        <button class="item" data-vista="expediente"><svg class="i" viewBox="0 0 24 24"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>Expediente</button>
+        <button class="item" data-vista="cobertura"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 17h6M17 14v6"/></svg>Cobertura</button>
+        <button class="item" data-vista="grafo"><svg class="i" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="7" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M8.3 7.2l7.4.5M7.4 8.2l3.6 7.6M16.9 9.3l-3.8 6.5"/></svg>Grafo de conocimiento</button>
+      </div>
+      <div class="grupo-menu"><span>Trazabilidad</span>
+        <button class="item" data-vista="bitacoras"><svg class="i" viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>Bitácoras</button>
+      </div>
+      <div class="grupo-menu"><span>Sistema</span>
+        <button class="item" data-vista="herramientas"><svg class="i" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 00-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 005.4-5.4l-2.5 2.5-2.5-.5-.5-2.5z"/></svg>Herramientas</button>
+        <button class="item" data-vista="sistema"><svg class="i" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>Datos y sistema</button>
+      </div>
+    </nav>
+    <div class="pie-riel">
+      <strong>Universidad Nacional de San Agustín de Arequipa</strong>
+      ISO/IEC 27701:2025, cláusulas 9.1 y 9.2, control A.3.14
+      <br><a href="/logout" id="salir" hidden>Cerrar sesión</a>
+    </div>
+  </aside>
+
+  <div class="contenido">
+    <header class="barra">
+      <button class="boton-menu" id="btn-menu" aria-label="Abrir menú"><svg class="i" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+      <div class="titulos"><h1 id="titulo-vista">Panel</h1><p id="bajada-vista"></p></div>
+      <div class="servicios-barra">
+        <span class="senal" id="p-bd">Base de datos</span>
+        <span class="senal" id="p-ia">IA local</span>
+        <span class="senal" id="p-integridad">Expediente</span>
+        <button class="boton-tema" id="btn-tema" type="button" aria-label="Cambiar a modo oscuro" title="Cambiar a modo oscuro">
+          <svg class="i sol" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+          <svg class="i luna" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 019.5 4a8 8 0 1010.5 10.5z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <!-- ================================================================ PANEL -->
+      <section class="vista activa" id="vista-panel">
+        <div class="dictamen">
+          <article class="hoja sello-panel">
+            <div class="sello" id="sello" role="img" aria-label="Sello de cobertura de controles"></div>
+            <div class="lectura">
+              <h2 id="dictamen-titulo" class="leyendo">Leyendo el expediente…</h2>
+              <p class="nota" id="dictamen-texto"><span class="esqueleto"></span><span class="esqueleto" style="width:70%"></span></p>
+              <ul class="leyenda" id="leyenda"></ul>
+              <div class="pie-dictamen"><span id="dictamen-corte"></span><span id="dictamen-rol"></span><button class="boton mini" data-ir="cobertura" type="button">Ver la matriz completa</button></div>
+            </div>
+          </article>
+
+          <article class="hoja lanzador">
+            <h2>Auditoría interna</h2>
+            <p class="nota">El agente verifica la integridad, mide la cobertura, revisa los documentos PIMS según PIMS-PR-01 y redacta hallazgos. Se detiene para que el auditor decida.</p>
+            <div class="modos">
+              <label class="modo"><input type="radio" name="modo" value="rapido" checked><span><b>Rápida</b><small>Sin IA, en segundos</small></span></label>
+              <label class="modo"><input type="radio" name="modo" value="ia"><span><b>Con IA local</b><small>Redacta y juzga la pertinencia con Ollama</small></span></label>
+            </div>
+            <div class="campos" id="opciones-ia" hidden>
+              <label>Hallazgos con IA<input type="number" id="max-hallazgos" min="0" max="50" value="3"></label>
+              <label>Pertinencias con IA<input type="number" id="max-pertinencia" min="0" max="50" value="2"></label>
+            </div>
+            <button class="boton firma ancho" id="btn-auditoria" type="button">Iniciar auditoría</button>
+            <div class="ultima" id="ultima-auditoria"></div>
+          </article>
+        </div>
+
+        <div class="franja">
+          <article class="hoja">
+            <div class="cab"><h2>Integridad del expediente</h2><button class="boton mini" id="btn-verificar-panel" type="button">Verificar ahora</button></div>
+            <div class="estado-integridad"><span class="cifra-grande" id="integ-cifra">–</span><span class="nota" id="integ-nota"></span></div>
+            <ol class="cadena" id="cadena"></ol>
+            <small>Últimos eslabones de la cadena de custodia. Cada uno sella el anterior con SHA-256.</small>
+          </article>
+          <article class="hoja">
+            <div class="cab"><h2>Documentos PIMS</h2><button class="boton mini" data-ir="documentos" type="button">Ver documentos</button></div>
+            <p class="nota" id="maestra-texto"></p>
+            <ul class="docs-panel" id="docs-panel"></ul>
+          </article>
+        </div>
+
+        <div class="dos-tercios">
+          <article class="hoja">
+            <div class="cab"><h2>Actividad reciente</h2><button class="boton mini" data-ir="auditorias" type="button">Ver todas</button></div>
+            <ul class="ejecuciones" id="lista-reciente"></ul>
+          </article>
+          <article class="hoja">
+            <h2>Bandeja de entrada</h2>
+            <p class="nota">El agente clasifica lo que dejes aquí y lo registra cuando lo confirmes.</p>
+            <label class="zona-archivo" id="zona-bandeja"><input type="file" id="archivo-bandeja" multiple><span>Arrastra archivos o elige</span></label>
+            <div id="estado-bandeja" class="tenue"></div>
+            <ul class="lista-simple" id="lista-bandeja"></ul>
+          </article>
+        </div>
+      </section>
+
+      <!-- ============================================================ AUDITORIAS -->
+      <section class="vista" id="vista-auditorias">
+        <div class="dos">
+          <article class="hoja">
+            <div class="cab"><h2>Ejecuciones</h2><button class="boton mini" id="btn-refrescar" type="button">Actualizar</button></div>
+            <ul class="ejecuciones" id="lista-ejecuciones"></ul>
+          </article>
+          <article class="hoja" id="detalle"><p class="vacio">Elige una ejecución para ver sus pasos, decidir sobre los hallazgos y descargar el informe.</p></article>
+        </div>
+      </section>
+
+      <!-- ====================================================== DOCUMENTOS PIMS -->
+      <section class="vista" id="vista-documentos">
+        <div class="resumen-maestra" id="resumen-maestra"></div>
+        <article class="hoja">
+          <div class="cab">
+            <h2>Información documentada de Evidencia y Auditoría</h2>
+            <div class="acciones">
+              <button class="boton" id="btn-reverificar" type="button">Volver a verificar</button>
+              <button class="boton primario" id="btn-subir-doc" type="button">Subir documento PIMS</button>
+            </div>
+          </div>
+          <p class="nota">Lista maestra PIMS-RG-01: la información documentada que exige ISO/IEC 27701:2025, con sus cláusulas y controles y el equipo del PIMS que la elabora. Cada documento se guarda en la base de datos con su texto, su huella y los datos de su portada. El agente comprueba las reglas de PIMS-PR-01: código, versión aprobada, aprobador, confidencialidad, historial, validez y que no queden restos de la plantilla 27001.</p>
+          <div class="envoltura"><table class="tabla" id="tabla-maestra">
+            <thead><tr><th>Código</th><th>Documento</th><th>Elabora / exp.</th><th>Requisitos</th><th>Situación</th><th>Control PR-01</th></tr></thead><tbody></tbody></table></div>
+        </article>
+      </section>
+
+      <!-- ============================================================ EXPEDIENTE -->
+      <section class="vista" id="vista-expediente">
+        <article class="hoja">
+          <div class="cab">
+            <h2>Evidencias <small id="exp-nota"></small></h2>
+            <div class="acciones">
+              <a class="boton" href="/api/agente/gestitel/documentos" download>Exportar a GESTITEL</a>
+              <button class="boton" id="btn-verificar" type="button">Verificar integridad</button>
+              <button class="boton primario" id="btn-nueva-evidencia" type="button">Registrar evidencia</button>
+            </div>
+          </div>
+          <div class="envoltura"><table class="tabla" id="tabla-expediente">
+            <thead><tr><th>Código</th><th>Evidencia</th><th>Tipo</th><th>Controles</th><th>Fecha</th><th>Huella SHA-256</th></tr></thead><tbody></tbody></table></div>
+        </article>
+      </section>
+
+      <!-- ============================================================= COBERTURA -->
+      <section class="vista" id="vista-cobertura">
+        <article class="hoja">
+          <div class="cab"><h2>Matriz de cobertura <small id="cob-nota"></small></h2><div class="filtros" id="filtro-cobertura"></div></div>
+          <div class="envoltura"><table class="tabla" id="tabla-cobertura">
+            <thead><tr><th>Control</th><th>Requisito</th><th>Estado</th><th class="num">Evid.</th><th>Qué falta</th></tr></thead><tbody></tbody></table></div>
+        </article>
+      </section>
+
+      <!-- ================================================================ GRAFO -->
+      <section class="vista" id="vista-grafo">
+        <div class="grafo-rejilla">
+          <article class="hoja grafo-lienzo">
+            <div class="cab">
+              <h2>Qué sabe el agente y cómo lo relaciona</h2>
+              <div class="acciones">
+                <input type="search" id="grafo-buscar" placeholder="Buscar control, documento, evidencia…" aria-label="Buscar en el grafo">
+                <button class="boton" id="btn-grafo-encuadrar" type="button">Encuadrar</button>
+                <button class="boton" id="btn-grafo-recargar" type="button">Actualizar</button>
+              </div>
+            </div>
+            <div class="filtros-grafo" id="grafo-filtros">
+              <label><input type="checkbox" data-filtro="documentos" checked><i class="l-documenta"></i>Documentos PIMS</label>
+              <label><input type="checkbox" data-filtro="evidencia" checked><i class="l-respalda"></i>Evidencias del expediente</label>
+              <label><input type="checkbox" data-filtro="semejanza" checked><i class="l-semejanza"></i>Semejanza semántica (FAISS)</label>
+              <label><input type="checkbox" data-filtro="remite" checked><i class="l-remite"></i>Remisión en la norma</label>
+              <label><input type="checkbox" data-filtro="estructura" checked><i class="l-estructura"></i>Estructura</label>
+            </div>
+            <div class="grafo-contenedor">
+              <svg id="grafo-svg" role="img" aria-label="Grafo de conocimiento del agente"></svg>
+              <p class="grafo-vacio" id="grafo-vacio" hidden></p>
+            </div>
+            <p class="tenue">Arrastra un nodo para moverlo, usa la rueda para acercar, arrastra el fondo para desplazarte y pulsa un nodo para ver su detalle.</p>
+          </article>
+          <aside class="hoja grafo-lateral">
+            <div id="grafo-resumen"></div>
+            <div id="grafo-detalle"></div>
+            <h3>Leyenda</h3>
+            <ul class="grafo-leyenda">
+              <li><svg width="18" height="18"><circle cx="9" cy="9" r="8" class="n-agente"/></svg>Este agente</li>
+              <li><svg width="18" height="18"><rect x="3" y="3" width="12" height="12" rx="3" class="n-fuente"/></svg>Fuente de conocimiento (RAG)</li>
+              <li><svg width="18" height="18"><rect x="4" y="4" width="10" height="10" transform="rotate(45 9 9)" class="n-grupo"/></svg>Grupo de controles</li>
+              <li><svg width="18" height="18"><circle cx="9" cy="9" r="6" class="n-control est-cubierto"/></svg>Control, color según cobertura</li>
+              <li><svg width="18" height="18"><path d="M4 2h7l4 4v10H4z" class="n-documento s-vigente"/></svg>Documento PIMS vigente</li>
+              <li><svg width="18" height="18"><path d="M4 2h7l4 4v10H4z" class="n-documento s-pendiente"/></svg>Documento PIMS pendiente</li>
+              <li><svg width="18" height="18"><rect x="4" y="4" width="10" height="10" rx="1.5" class="n-evidencia int-ok"/></svg>Evidencia, color según integridad</li>
+            </ul>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ============================================================ BITACORAS -->
+      <section class="vista" id="vista-bitacoras">
+        <article class="hoja">
+          <div class="cab"><h2>Registros <small>últimos 100</small></h2>
+            <div class="filtros" id="subpestanas">
+              <button class="activa" data-bitacora="decisiones" type="button">Decisiones</button>
+              <button data-bitacora="mcp" type="button">Llamadas MCP</button>
+              <button data-bitacora="eventos" type="button">Eventos</button>
+            </div></div>
+          <div class="envoltura"><table class="tabla" id="tabla-bitacora"><thead></thead><tbody></tbody></table></div>
+        </article>
+      </section>
+
+      <!-- ========================================================== HERRAMIENTAS -->
+      <section class="vista" id="vista-herramientas">
+        <article class="hoja">
+          <p class="nota">Las mismas funciones las publica el servidor MCP «evidencias-pims» y las encadena el orquestador LangGraph.</p>
+          <div class="envoltura"><table class="tabla" id="tabla-herramientas">
+            <thead><tr><th>Herramienta</th><th>Tipo</th><th>Qué hace</th></tr></thead><tbody></tbody></table></div>
+        </article>
+      </section>
+
+      <!-- ============================================================== SISTEMA -->
+      <section class="vista" id="vista-sistema">
+        <div class="franja">
+          <article class="hoja"><h2>Servicios</h2><ul class="servicios" id="lista-servicios"></ul></article>
+          <article class="hoja">
+            <div class="cab"><h2>Filas por tabla</h2><button class="boton mini" id="btn-refrescar-sistema" type="button">Actualizar</button></div>
+            <div class="envoltura"><table class="tabla" id="tabla-filas"><tbody></tbody></table></div>
+          </article>
+        </div>
+        <article class="hoja zona-peligro">
+          <h2>Vaciar la base de datos</h2>
+          <p class="nota">Borra evidencias, cadena de custodia, documentos PIMS, auditorías, hallazgos, ejecuciones y bitácoras, y elimina los archivos del expediente, los informes y la bandeja. Se conservan el catálogo de la norma y de GESTITEL y los documentos originales. Haz antes un respaldo.</p>
+          <button class="boton peligro" id="btn-vaciar" type="button">Vaciar la base de datos…</button>
+        </article>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- ================================================================ diálogos -->
+<dialog id="dlg-documento">
+  <form method="dialog" class="formulario" id="form-documento">
+    <h2>Subir documento PIMS</h2>
+    <p class="nota">Usa la plantilla PIMS (.docx). El agente lee su portada y aplica las reglas de PIMS-PR-01 antes de registrarlo.</p>
+    <label class="zona-archivo" id="zona-doc"><input type="file" id="doc-archivo" accept=".docx"><span id="doc-archivo-nombre">Arrastra el .docx o elige</span></label>
+    <div id="doc-previa"></div>
+    <div id="doc-campos" hidden>
+      <label>Requisitos que respalda <small>separados por coma</small><input type="text" id="doc-requisitos" list="lista-controles" placeholder="7.5, A.3.14"></label>
+      <label>Registrado por<input type="text" id="doc-por" placeholder="Nombre de quien lo registra" autocomplete="name"></label>
+    </div>
+    <div class="pie-dialogo"><button class="boton" value="cancel" formnovalidate>Cancelar</button><button class="boton primario" id="doc-enviar" value="ok" disabled>Registrar documento</button></div>
+  </form>
+</dialog>
+
+<dialog id="dlg-ficha" class="lateral">
+  <div class="formulario" id="ficha"></div>
+</dialog>
+
+<dialog id="dlg-evidencia">
+  <form method="dialog" id="form-evidencia" class="formulario">
+    <h2>Registrar evidencia</h2>
+    <p class="nota">Se calcula su SHA-256, se anota en la cadena de custodia y se indexa para la búsqueda.</p>
+    <label>Archivo<input type="file" name="archivo" required accept=".pdf,.txt,.md,.csv,.json,.docx,.xlsx,.png,.jpg,.jpeg"></label>
+    <label>Título<input type="text" name="titulo" required placeholder="RR 0987-2025 Designación del Oficial de Datos Personales"></label>
+    <div class="campos">
+      <label>Tipo<select name="tipo" id="ev-tipo" required></select></label>
+      <label>Fecha del documento<input type="date" name="fecha_documento"></label>
+    </div>
+    <label>Controles que respalda <small>separados por coma</small><input type="text" name="controles" id="ev-controles" list="lista-controles" placeholder="5.3, A.3.11"></label>
+    <datalist id="lista-controles"></datalist>
+    <label>Fuente (URL)<input type="url" name="fuente" placeholder="https://transparencia.unsa.edu.pe/…"></label>
+    <label>Registrado por<input type="text" name="responsable" required placeholder="Nombre del auditor" autocomplete="name"></label>
+    <div class="pie-dialogo"><button class="boton" value="cancel" formnovalidate>Cancelar</button><button class="boton primario" value="ok">Registrar</button></div>
+  </form>
+</dialog>
+
+<dialog id="dlg-vaciar">
+  <form method="dialog" class="formulario" id="form-vaciar">
+    <h2 style="color:var(--rojo)">Vaciar la base de datos</h2>
+    <p>Esta acción no se puede deshacer. Se borrará:</p>
+    <ul id="vaciar-resumen" class="lista-borrado"></ul>
+    <label>Quién lo hace<input type="text" id="vaciar-actor" required placeholder="Nombre del auditor" autocomplete="name"></label>
+    <label>Escribe VACIAR para confirmar<input type="text" id="vaciar-confirma" autocomplete="off" placeholder="VACIAR"></label>
+    <div class="pie-dialogo"><button class="boton" value="cancel" formnovalidate>Cancelar</button><button class="boton peligro lleno" id="vaciar-enviar" value="ok" disabled>Vaciar todo</button></div>
+  </form>
+</dialog>
+
+<dialog id="dlg-motivo">
+  <form method="dialog" class="formulario" id="form-motivo">
+    <h2 id="motivo-titulo">Confirmar</h2>
+    <p class="nota" id="motivo-texto"></p>
+    <label>Quién lo hace<input type="text" id="motivo-actor" required placeholder="Nombre del auditor" autocomplete="name"></label>
+    <label id="motivo-fila">Motivo <small>opcional</small><input type="text" id="motivo-motivo"></label>
+    <div class="pie-dialogo"><button class="boton" value="cancel" formnovalidate>Volver</button><button class="boton primario" id="motivo-enviar" value="ok">Confirmar</button></div>
+  </form>
+</dialog>
+
+<!-- ============================================================ chat con la IA local -->
+<button class="chat-fab" id="chat-fab" type="button" aria-controls="chat" aria-expanded="false" title="Chat con la IA local (Ctrl + /)">
+  <svg class="i" viewBox="0 0 24 24"><path d="M20 12.5c0 4-3.6 7-8 7-1.2 0-2.3-.2-3.3-.6L4 20l1.2-3.6C4.4 15.3 4 14 4 12.5 4 8.4 7.6 5.5 12 5.5s8 2.9 8 7z"/><path d="M12 9.5l.8 1.9 1.9.8-1.9.8-.8 1.9-.8-1.9-1.9-.8 1.9-.8z"/></svg>
+  <span>Preguntar a la IA</span>
+</button>
+<aside class="chat" id="chat" aria-label="Chat con la IA local" inert>
+  <header class="chat-cab">
+    <span class="chat-avatar" aria-hidden="true"><svg class="i" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6l8-3z"/><path d="M8.5 12l2.5 2.5L15.5 10"/></svg></span>
+    <div class="chat-titulo"><strong>AUDITA-PIMS</strong><small id="chat-modelo">IA local con Ollama</small></div>
+    <button class="chat-icono" id="chat-nuevo" type="button" title="Nueva conversación" aria-label="Nueva conversación"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+    <button class="chat-icono" id="chat-cerrar" type="button" title="Cerrar (Esc)" aria-label="Cerrar el chat"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </header>
+  <div class="chat-mensajes" id="chat-mensajes" aria-live="polite"></div>
+  <form class="chat-entrada" id="chat-form">
+    <textarea id="chat-texto" rows="1" placeholder="Pregunta sobre el expediente, la auditoría o la norma" aria-label="Tu pregunta"></textarea>
+    <button class="chat-enviar" id="chat-enviar" type="submit" aria-label="Enviar">
+      <svg class="i enviar" viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+      <svg class="i detener" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="1.5"/></svg>
+    </button>
+  </form>
+  <p class="chat-pie">Responde el modelo local con el expediente y la norma como contexto. Revisa las referencias antes de citarlo en un informe.</p>
+</aside>
+
+<div class="globo" id="globo" hidden></div>
+<div id="avisos" class="avisos" aria-live="polite"></div>
+<script src="{{ url_for('agente.static', filename='agente.js', v='4.1') }}"></script>
+</body>
+</html>

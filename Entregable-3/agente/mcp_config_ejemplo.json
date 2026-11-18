@@ -1,0 +1,27 @@
+{
+  "_comentario": [
+    "Servidor MCP 'evidencias-pims' del Agente de Evidencia y Auditoria (PIMS ISO/IEC 27701:2025, UNSA).",
+    "Claude Desktop: copiar el bloque mcpServers en %APPDATA%/Claude/claude_desktop_config.json y reiniciar.",
+    "Claude Code: guardar como .mcp.json en la raiz del repo, o ejecutar:",
+    "  claude mcp add evidencias-pims -- python C:/Users/lenovo/Desktop/AUDITORIA/auditoria-agente-tif-2/Entregable-2/agente/servidor_mcp.py",
+    "Si 'python' no esta en el PATH del host, usar la ruta absoluta del interprete (p. ej. C:/Python314/python.exe).",
+    "Las tools con IA requieren Ollama en localhost:11434 (qwen2.5:3b y nomic-embed-text); las deterministas no.",
+    "Entrada evidencias-pims-http: arrancar antes 'python servidor_mcp.py --http' (streamable HTTP, puerto 8765)."
+  ],
+  "mcpServers": {
+    "evidencias-pims": {
+      "command": "python",
+      "args": [
+        "C:/Users/lenovo/Desktop/AUDITORIA/auditoria-agente-tif-2/Entregable-2/agente/servidor_mcp.py"
+      ],
+      "env": {
+        "PYTHONIOENCODING": "utf-8",
+        "OLLAMA_URL": "http://localhost:11434"
+      }
+    },
+    "evidencias-pims-http": {
+      "type": "http",
+      "url": "http://127.0.0.1:8765/mcp"
+    }
+  }
+}

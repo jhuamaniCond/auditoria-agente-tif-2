@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Iniciar sesión · Agente de Evidencia</title>
+  <script>try { var t = localStorage.getItem("agente.tema"); if (t === "claro" || t === "oscuro") document.documentElement.dataset.theme = t === "oscuro" ? "dark" : "light"; } catch (e) {}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..800&family=IBM+Plex+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="{{ url_for('agente.static', filename='agente.css', v='4.1') }}">
+  <style>
+    body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, 460px); min-height: 100vh; }
+    .portadilla { background: var(--riel); color: var(--riel-texto); padding: 48px; display: flex; flex-direction: column; justify-content: space-between; }
+    .portadilla .sello-grande { position: relative; width: 150px; height: 150px; display: grid; place-items: center; color: #f1d7db; }
+    .sello-grande .marcas { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .sello-grande .marcas line { stroke: var(--guinda-2); stroke-width: 3; stroke-linecap: round; animation: marcaEntra .35s cubic-bezier(.3, 1.4, .5, 1) backwards; animation-delay: calc(var(--i) * 22ms + 500ms); transform-origin: 75px 75px; }
+    .sello-grande .marcas circle { fill: none; stroke: color-mix(in srgb, var(--guinda-2) 45%, transparent); stroke-width: 1; }
+    .sello-grande .marcas .giro { transform-origin: 75px 75px; animation: girar 240s linear infinite; }
+    .sello-grande .escudo { width: 58px; height: 58px; }
+    .sello-grande .escudo path { stroke-dasharray: 1; stroke-dashoffset: 1; animation: dibujar 1s cubic-bezier(.6, 0, .3, 1) forwards; }
+    .sello-grande .escudo path + path { animation-delay: .8s; animation-duration: .5s; }
+    @keyframes dibujar { to { stroke-dashoffset: 0; } }
+    @keyframes marcaEntra { from { opacity: 0; transform: scale(.7); } }
+    .portadilla h1, .portadilla p, .acceso > * { animation: vistaEntra .6s cubic-bezier(.2, .8, .2, 1) backwards; }
+    .portadilla h1 { animation-delay: .25s; } .portadilla p { animation-delay: .4s; }
+    .acceso > :nth-child(1) { animation-delay: .35s; } .acceso > :nth-child(2) { animation-delay: .45s; } .acceso > :nth-child(3) { animation-delay: .55s; }
+    .huellas { font-family: var(--mono); font-size: .72rem; color: color-mix(in srgb, var(--riel-tenue) 55%, transparent); overflow: hidden; white-space: nowrap; margin-top: 28px; }
+    .huellas span { display: block; overflow: hidden; width: 0; animation: teclear 2.2s steps(71, end) forwards; }
+    .huellas span:nth-child(2) { animation-delay: 1.2s; } .huellas span:nth-child(3) { animation-delay: 2.4s; }
+    @keyframes teclear { to { width: 71ch; } }
+    .error { animation: sacudida .45s ease-in-out; }
+    .portadilla h1 { color: #fff; font-size: 2.3rem; font-stretch: 120%; max-width: 15ch; margin: 28px 0 12px; }
+    .portadilla p { max-width: 44ch; color: var(--riel-tenue); }
+    .acceso { display: grid; align-content: center; padding: 40px 36px; background: var(--hoja); }
+    .acceso h2 { font-size: 1.4rem; font-stretch: 112%; margin-bottom: 4px; }
+    .acceso button { margin-top: 22px; }
+    .error { margin-top: 14px; padding: 10px 12px; border-radius: var(--radio); background: var(--rojo-suave); color: var(--rojo); font-size: .9rem; border-left: 3px solid var(--rojo); }
+    @media (max-width: 760px) { body { grid-template-columns: 1fr; } .portadilla { padding: 28px 16px; } .portadilla h1 { font-size: 1.7rem; } .acceso { padding: 28px 16px; } }
+  </style>
+</head>
+<body>
+  <section class="portadilla">
+    <div>
+      <span class="sello-grande" aria-hidden="true"><svg class="marcas" viewBox="0 0 150 150"><circle cx="75" cy="75" r="60"/><g class="giro"><line style="--i:0" x1="75.0" y1="9.0" x2="75.0" y2="3.0"/><line style="--i:1" x1="85.9" y1="9.9" x2="86.9" y2="4.0"/><line style="--i:2" x1="96.4" y1="12.6" x2="98.4" y2="6.9"/><line style="--i:3" x1="106.4" y1="17.0" x2="109.3" y2="11.7"/><line style="--i:4" x1="115.5" y1="22.9" x2="119.2" y2="18.2"/><line style="--i:5" x1="123.6" y1="30.3" x2="128.0" y2="26.2"/><line style="--i:6" x1="130.3" y1="38.9" x2="135.3" y2="35.6"/><line style="--i:7" x1="135.4" y1="48.5" x2="140.9" y2="46.1"/><line style="--i:8" x1="139.0" y1="58.8" x2="144.8" y2="57.3"/><line style="--i:9" x1="140.8" y1="69.5" x2="146.8" y2="69.1"/><line style="--i:10" x1="140.8" y1="80.5" x2="146.8" y2="80.9"/><line style="--i:11" x1="139.0" y1="91.2" x2="144.8" y2="92.7"/><line style="--i:12" x1="135.4" y1="101.5" x2="140.9" y2="103.9"/><line style="--i:13" x1="130.3" y1="111.1" x2="135.3" y2="114.4"/><line style="--i:14" x1="123.6" y1="119.7" x2="128.0" y2="123.8"/><line style="--i:15" x1="115.5" y1="127.1" x2="119.2" y2="131.8"/><line style="--i:16" x1="106.4" y1="133.0" x2="109.3" y2="138.3"/><line style="--i:17" x1="96.4" y1="137.4" x2="98.4" y2="143.1"/><line style="--i:18" x1="85.9" y1="140.1" x2="86.9" y2="146.0"/><line style="--i:19" x1="75.0" y1="141.0" x2="75.0" y2="147.0"/><line style="--i:20" x1="64.1" y1="140.1" x2="63.1" y2="146.0"/><line style="--i:21" x1="53.6" y1="137.4" x2="51.6" y2="143.1"/><line style="--i:22" x1="43.6" y1="133.0" x2="40.7" y2="138.3"/><line style="--i:23" x1="34.5" y1="127.1" x2="30.8" y2="131.8"/><line style="--i:24" x1="26.4" y1="119.7" x2="22.0" y2="123.8"/><line style="--i:25" x1="19.7" y1="111.1" x2="14.7" y2="114.4"/><line style="--i:26" x1="14.6" y1="101.5" x2="9.1" y2="103.9"/><line style="--i:27" x1="11.0" y1="91.2" x2="5.2" y2="92.7"/><line style="--i:28" x1="9.2" y1="80.5" x2="3.2" y2="80.9"/><line style="--i:29" x1="9.2" y1="69.5" x2="3.2" y2="69.1"/><line style="--i:30" x1="11.0" y1="58.8" x2="5.2" y2="57.3"/><line style="--i:31" x1="14.6" y1="48.5" x2="9.1" y2="46.1"/><line style="--i:32" x1="19.7" y1="38.9" x2="14.7" y2="35.6"/><line style="--i:33" x1="26.4" y1="30.3" x2="22.0" y2="26.2"/><line style="--i:34" x1="34.5" y1="22.9" x2="30.8" y2="18.2"/><line style="--i:35" x1="43.6" y1="17.0" x2="40.7" y2="11.7"/><line style="--i:36" x1="53.6" y1="12.6" x2="51.6" y2="6.9"/><line style="--i:37" x1="64.1" y1="9.9" x2="63.1" y2="4.0"/></g></svg><svg class="i escudo" viewBox="0 0 24 24"><path pathLength="1" d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6l8-3z"/><path pathLength="1" d="M8.5 12l2.5 2.5L15.5 10"/></svg></span>
+      <h1>Agente de Evidencia y Auditoría</h1>
+      <p>Expediente de evidencias, documentos del PIMS y auditoría interna de la Universidad Nacional de San Agustín de Arequipa, según ISO/IEC 27701:2025.</p>
+      <div class="huellas" aria-hidden="true"><span>sha256 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</span><span>sha256 9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08</span><span>sha256 2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae</span></div>
+    </div>
+    <small style="color:var(--riel-tenue)">Grupo 6, TIF de Auditoría de Sistemas. Implementación simulada con fines académicos.</small>
+  </section>
+  <main class="acceso">
+    <h2>Iniciar sesión</h2>
+    <p class="nota">Acceso para el equipo auditor.</p>
+    <form method="post" action="{{ url_for('autenticacion.login') }}" autocomplete="on">
+      <input type="hidden" name="siguiente" value="{{ siguiente }}">
+      <label for="usuario">Usuario</label>
+      <input id="usuario" name="usuario" autocomplete="username" required autofocus>
+      <label for="clave">Contraseña</label>
+      <input id="clave" name="clave" type="password" autocomplete="current-password" required>
+      {% if error %}<div class="error" role="alert">{{ error }}</div>{% endif %}
+      <button class="boton primario ancho" type="submit">Entrar</button>
+    </form>
+  </main>
+</body>
+</html>
